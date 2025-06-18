@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Vazir";
+  src: url("./assets/fonts/Vazirmatn-Light.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+body {
+  font-family: "Vazir", sans-serif;
+}
+.test {
+  background-color: rgb(42, 42, 129);
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: bold;
+  text-align: center;
+  transition: background-color 0.3s ease;
+}
+.test:hover {
+  background-color: blue;
+}
