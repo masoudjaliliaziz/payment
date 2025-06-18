@@ -23,7 +23,7 @@ function PaymentDiv({ paymentList }: Props) {
   return (
     <div
       className="p-4
-    flex flex-col items-center justify-center min-h-screen bg-orange-400 gap-3 transition-colors duration-500 w-full"
+    flex flex-col items-center justify-center min-h-screen  gap-3 transition-colors duration-500 w-full"
     >
       {paymentList.length === 0 &&
         fakeData.map((p, i) => <PaymentCard key={i} payment={p} />)}

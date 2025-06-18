@@ -1,15 +1,20 @@
 import type { PaymentType } from "../../api/getData";
 import ChecksPreviewItem from "./ChecksPreviewItem";
 
+import Modal from "./Modal";
+
 type Props = { payment: PaymentType };
 
 function PaymentCard({ payment }: Props) {
   return (
-    <div className="bg-white p-4 flex flex-col items-center  min-h-screen gap-3 transition-colors duration-500 w-full">
-      <div className=" shadow rounded-md p-3 border border-gray-200 mb-3 w-full bg-red-100 flex flex-col justify-center items-end gap-3">
+    <div className=" p-4 flex flex-col items-center  min-h-screen gap-3 transition-colors duration-500 w-full">
+      <div className=" shadow rounded-md py-5 px-4  border-primary border-2 mb-3 w-full  flex flex-col justify-center items-end gap-3 bg-base-300">
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
             title={{ slag: "مبلغ", data: payment?.price || "—" }}
+          />
+          <ChecksPreviewItem
+            title={{ slag: "تاریخ سر رسید", data: payment?.dueDate || "—" }}
           />
 
           <div className=" flex gap-3 flex-row-reverse">
@@ -22,27 +27,27 @@ function PaymentCard({ payment }: Props) {
           </div>
         </div>
         <div className="flex justify-between items-center w-full flex-row-reverse">
-          {" "}
-          <ChecksPreviewItem
-            title={{ slag: "تاریخ سر رسید", data: payment?.dueDate || "—" }}
-          />
+          <div className=" flex justify-end items-center gap-3 ">
+            <Modal
+              id="agent-description-modal"
+              title={{
+                slag: "توضیحات کارشناس",
+                data: payment?.agentDescription || "توضیحاتی درج نشده",
+              }}
+            />
+            <Modal
+              id="treasury-confirm-description-modal"
+              title={{
+                slag: "توضیحات خزانه‌داری",
+                data:
+                  payment?.treasuryConfirmDescription || "توضیحاتی درج نشده",
+              }}
+            />
+          </div>{" "}
           <ChecksPreviewItem
             title={{ slag: "وضعیت", data: payment?.status || "—" }}
           />
         </div>
-
-        <p>📝 توضیحات: {payment?.agentDescription || "—"}</p>
-        <p>
-          ❗ دلیل عدم تایید توسط عامل: {payment?.agentUnconfirmReason || "—"}
-        </p>
-        <p>
-          ✅ توضیحات تایید خزانه‌داری:{" "}
-          {payment?.treasuryConfirmDescription || "—"}
-        </p>
-        <p>
-          ❌ دلیل عدم تایید خزانه‌داری:{" "}
-          {payment?.treasuryUnconfirmReason || "—"}
-        </p>
       </div>
     </div>
   );

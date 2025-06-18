@@ -19,7 +19,7 @@ function Payment({ parentGUID }: Props) {
   });
 
   return (
-    <div className="bg-pink-400 p-4 flex flex-col items-center justify-center min-h-screen gap-3 transition-colors duration-500 w-full">
+    <div className="bg-base-100 p-4 flex flex-col items-center justify-center min-h-screen gap-3 transition-colors duration-500 w-full">
       {isLoading && (
         <span className="loading loading-infinity loading-lg"></span>
       )}

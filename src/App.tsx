@@ -89,7 +89,7 @@ function App() {
         </div>
       </div>
 
-      <div className="mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-blue-200  gap-3 transition-colors duration-500 w-full">
+      <div className="mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-base-100 gap-3 transition-colors duration-500 w-full">
         <Routes>
           <Route
             path="/"
