@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { FileUploader } from "./FileUploader";
 import type { FileUploaderHandle } from "./FileUploader";
 import DatePicker, { DateObject } from "react-multi-date-picker";
@@ -7,6 +8,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import uuidv4 from "../../utils/createGuid";
 import type { uploadCheckoutProps } from "./UploadTypes";
 import { handleAddItem } from "../../api/addData";
+import { toast } from "react-toastify";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
@@ -22,31 +24,41 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
     setItem_GUID(uuidv4());
   }, []);
 
-  const onEventAdd = async () => {
-    const data = {
-      price,
-      dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
-      serial,
-      seri,
-      parentGUID: props.parent_GUID,
-    };
-    console.log(data);
+  const mutation = useMutation({
+    mutationFn: async () => {
+      const data = {
+        price,
+        dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
+        serial,
+        seri,
+        parentGUID: props.parent_GUID,
+      };
 
-    try {
       await handleAddItem(data);
-
       if (checkConfirmPic.current) await checkConfirmPic.current.uploadFile();
       if (checkPic.current) await checkPic.current.uploadFile();
-
+    },
+    onSuccess: () => {
       if (checkConfirmPic.current) checkConfirmPic.current.clearFile();
       if (checkPic.current) checkPic.current.clearFile();
-    } catch (error) {
-      console.error("خطا در ذخیره رویداد یا آپلود فایل:", error);
-    }
-  };
+
+      setPrice("");
+      setDueDate(null);
+      setSerial("");
+      setSeri("");
+
+      // اختیاری: نوتیفیکیشن یا toast موفقیت
+
+      toast.success("اطلاعات با موفقیت ذخیره شد.");
+    },
+    onError: (error) => {
+      console.error("خطا در ذخیره یا آپلود:", error);
+      // اختیاری: نوتیفیکیشن یا toast خطا
+    },
+  });
 
   return (
-    <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto bg-base-100">
+    <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto  border-2 border-primary bg-base-300 ">
       {/* ورودی سری و سریال */}
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full justify-start">
         <div className="flex flex-col items-start gap-1 flex-shrink-0">
@@ -55,7 +67,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             type="text"
             value={seri}
             onChange={(e) => setSeri(e.currentTarget.value)}
-            className="w-full sm:w-20 px-2 py-1 border-2 border-gray-700 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-gray-600"
+            className="sm:w-20 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
           />
         </div>
         <div className="flex flex-col items-start gap-1 flex-grow">
@@ -64,7 +76,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             type="text"
             value={serial}
             onChange={(e) => setSerial(e.currentTarget.value)}
-            className="w-full sm:w-auto px-2 py-1 border-2 border-gray-700 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-gray-600"
+            className="w-auto px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
           />
         </div>
       </div>
@@ -78,7 +90,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             locale={persian_fa}
             value={dueDate}
             onChange={(date) => setDueDate(date)}
-            inputClass="w-full sm:w-48 px-2 py-1 border-2 border-gray-700 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-gray-600"
+            inputClass="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
             placeholder="تاریخ را انتخاب کنید"
             format="YYYY/MM/DD"
           />
@@ -89,7 +101,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             type="text"
             value={price}
             onChange={(e) => setPrice(e.currentTarget.value)}
-            className="w-full sm:w-48 px-2 py-1 border-2 border-gray-700 rounded-md font-semibold focus:outline-none focus:ring-2 focus:ring-gray-600"
+            className="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
           />
         </div>
       </div>
@@ -114,10 +126,15 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
         <button
           type="button"
-          onClick={onEventAdd}
-          className="bg-gray-800 border-2 text-white font-bold px-5 py-2 rounded-md hover:bg-white hover:text-gray-800 hover:border-2 hover:border-gray-800 transition-colors duration-300 flex-shrink-0"
+          onClick={() => mutation.mutate()}
+          className={`border-2 font-bold px-5 py-2 rounded-md transition-colors duration-300 flex-shrink-0 ${
+            mutation.isPending
+              ? "bg-gray-400 text-white cursor-not-allowed"
+              : "border-primary hover:bg-white hover:text-gray-800 hover:border-gray-800"
+          }`}
+          disabled={mutation.isPending}
         >
-          ذخیره
+          {mutation.isPending ? "در حال ذخیره..." : "ذخیره"}
         </button>
       </div>
     </div>

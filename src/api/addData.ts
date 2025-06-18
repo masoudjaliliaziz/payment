@@ -38,11 +38,11 @@ export async function handleAddItem(
         dueDate: data.dueDate,
         serial: data.serial,
         seri: data.seri,
-        status: "0",
+        status: "1",
         parentGUID: data.parentGUID,
       }),
     });
-    alert("ok");
+
     // setState({ message: `آیتم جدید (${title}) به لیست چک‌ها اضافه شد.`, title: "" });
     // onReload();
   } catch (err) {

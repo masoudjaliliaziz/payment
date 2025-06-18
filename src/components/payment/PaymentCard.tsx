@@ -7,7 +7,7 @@ type Props = { payment: PaymentType };
 
 function PaymentCard({ payment }: Props) {
   return (
-    <div className=" p-4 flex flex-col items-center  min-h-screen gap-3 transition-colors duration-500 w-full">
+    <div className=" p-4 flex flex-col items-center   gap-3 transition-colors duration-500 w-full">
       <div className=" shadow rounded-md py-5 px-4  border-primary border-2 mb-3 w-full  flex flex-col justify-center items-end gap-3 bg-base-300">
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem

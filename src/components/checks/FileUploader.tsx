@@ -86,7 +86,7 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
           );
 
           if (uploadRes.ok) {
-            toast.success("فایل با موفقیت آپلود شد");
+            toast.success(`فایل ${selectedFile.name} با موفقیت آپلود شد`);
             setUploadStatus("فایل با موفقیت آپلود شد");
             setUploadProgress(100);
           } else {
@@ -105,7 +105,7 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
       <div
         className="
           flex justify-between items-center gap-5 px-4 py-1.5
-           border-2 border-gray-800 rounded-md
+           border-2 border-primary rounded-md
           "
       >
         <label
@@ -136,10 +136,8 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
         />
 
         {selectedFile ? (
-          <div className="flex items-center justify-center">
-            <p className="text-sm font-bold text-gray-700">
-              {selectedFile.name}
-            </p>
+          <div className="flex items-center justify-between gap-3 ">
+            <p className="text-sm font-bold ">{selectedFile.name}</p>
             <button
               type="button"
               onClick={() => {
@@ -150,22 +148,18 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
               }}
               aria-label="پاک کردن فایل"
               className="
-                ml-2
-              w-[30px] h-[30px]
-              max-w-[30px] max-h-[30px]
-                bg-red-600 text-white rounded-md px-[6.5px] py-0 
-                text-lg font-bold cursor-pointer transition-colors duration-300
-                hover:bg-white hover:text-red-600
-                flex justify-center items-center
-              "
+    w-[30px] h-[30px]
+    flex items-center justify-center
+    bg-red-600 text-white rounded-md 
+    text-lg font-bold cursor-pointer transition-colors duration-300
+    hover:bg-white hover:text-red-600
+  "
             >
               ×
             </button>
           </div>
         ) : (
-          <p className="text-sm font-bold text-gray-600">
-            هنوز فایلی انتخاب نشده
-          </p>
+          <p className="text-sm  ">هنوز فایلی انتخاب نشده</p>
         )}
 
         {uploadStatus && (

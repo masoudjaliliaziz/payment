@@ -26,7 +26,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div className="navbar bg-base-100  shadow-sm">
+      <div className="navbar bg-base-100  shadow-sm sticky top-3">
         <div className="navbar-start">
           <div className="dropdown">
             <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
@@ -50,13 +50,13 @@ function App() {
               className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
               <li>
-                <Link to="/">ثبت پرداخت</Link>
+                <Link to="/SitePages/develop1.aspx/">ثبت پرداخت</Link>
               </li>
               <li>
-                <Link to="/payment">پرداخت ها</Link>
+                <Link to="/SitePages/develop1.aspx/payment">پرداخت ها</Link>
               </li>
               <li>
-                <Link to="/debt">بدهی ها</Link>
+                <Link to="/SitePages/develop1.aspx/debt">بدهی ها</Link>
               </li>
             </ul>
           </div>
@@ -66,13 +66,13 @@ function App() {
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1 ">
             <li>
-              <Link to="/">ثبت پرداخت</Link>
+              <Link to="/SitePages/develop1.aspx/">ثبت پرداخت</Link>
             </li>
             <li>
-              <Link to="/payment">پرداخت ها</Link>
+              <Link to="/SitePages/develop1.aspx/payment">پرداخت ها</Link>
             </li>
             <li>
-              <Link to="/debt">بدهی ها</Link>
+              <Link to="/SitePages/develop1.aspx/debt">بدهی ها</Link>
             </li>
           </ul>
         </div>
@@ -92,15 +92,15 @@ function App() {
       <div className="mx-auto p-4 flex flex-col items-center justify-center min-h-screen bg-base-100 gap-3 transition-colors duration-500 w-full">
         <Routes>
           <Route
-            path="/"
+            path="/SitePages/develop1.aspx/"
             element={<UploadCheckout parent_GUID={parent_GUID} />}
           />
           <Route
-            path="/payment"
+            path="/SitePages/develop1.aspx/payment"
             element={<Payment parentGUID={parent_GUID} />}
           />
           <Route
-            path="/debt"
+            path="/SitePages/develop1.aspx/debt"
             element={<div className="text-center text-2xl ">بدهی ها</div>}
           />
         </Routes>
