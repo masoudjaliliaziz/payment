@@ -4,13 +4,15 @@ import { createSlice } from "@reduxjs/toolkit";
 interface SomeState {
   value: number;
   payment: PaymentType[];
-  totalPaidPrice: number;
+  totalFinal: number;
+  totalPending: number;
 }
 
 const initialState: SomeState = {
   payment: [],
   value: 0,
-  totalPaidPrice: 0,
+  totalFinal: 0,
+  totalPending: 0,
 };
 
 const someSlice = createSlice({
@@ -29,11 +31,18 @@ const someSlice = createSlice({
     setPayments(state, action) {
       state.payment = action.payload;
 
-      const total = action.payload
-        .filter((p: PaymentType) => p.status === String(1))
+      const totalFinal = action.payload
+        .filter((p: PaymentType) => p.status === String(4))
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
 
-      state.totalPaidPrice = total;
+      const totalPending = action.payload
+        .filter(
+          (p: PaymentType) => p.status === String(0) || p.status === String(1)
+        )
+        .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
+      state.totalFinal = totalFinal;
+
+      state.totalPending = totalPending;
     },
   },
 });

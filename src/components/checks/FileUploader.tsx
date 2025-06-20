@@ -159,7 +159,9 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
             </button>
           </div>
         ) : (
-          <p className="text-sm  ">هنوز فایلی انتخاب نشده</p>
+          <p className="text-sm font-semibold text-base-content  ">
+            هنوز فایلی انتخاب نشده
+          </p>
         )}
 
         {uploadStatus && (

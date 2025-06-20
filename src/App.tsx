@@ -60,18 +60,18 @@ function App() {
               </li>
             </ul>
           </div>
-          <a className="btn btn-ghost text-xl ">زرسیم</a>
+          <a className="btn btn-ghost text-xl text-base-content ">زرسیم</a>
         </div>
 
         <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1 ">
-            <li>
+            <li className="font-semibold text-base-content text-md">
               <Link to="/SitePages/develop1.aspx/">ثبت پرداخت</Link>
             </li>
-            <li>
+            <li className="font-semibold text-base-content text-md">
               <Link to="/SitePages/develop1.aspx/payment">پرداخت ها</Link>
             </li>
-            <li>
+            <li className="font-semibold text-base-content text-md">
               <Link to="/SitePages/develop1.aspx/debt">بدهی ها</Link>
             </li>
           </ul>
@@ -81,7 +81,7 @@ function App() {
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="btn btn-outline btn-sm "
+            className="btn btn-outline btn-sm border-base-content text-base-content "
             aria-label="تغییر حالت تاریک / روشن"
           >
             {isDarkMode ? "🌞 لایت" : "🌙 دارک"}

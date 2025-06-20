@@ -11,7 +11,7 @@ const fakeData: PaymentType[] = [
     seri: "A123",
     parentGUID: "fake-guid-123",
     Title: "پرداخت اول",
-    status: " حالت انتظار تایید کارشناس",
+    status: "0",
     agentDescription: "توضیحات کارشناس",
     agentUnconfirmReason: "عدم تطابق اطلاعات",
     treasuryConfirmDescription: "تایید خزانه‌داری",
@@ -24,7 +24,7 @@ const fakeData: PaymentType[] = [
     seri: "A123",
     parentGUID: "fake-guid-123",
     Title: "پرداخت اول",
-    status: " حالت انتظار تایید کارشناس",
+    status: "0",
     agentDescription: "توضیحات کارشناس",
     agentUnconfirmReason: "عدم تطابق اطلاعات",
     treasuryConfirmDescription: "تایید خزانه‌داری",
@@ -36,7 +36,7 @@ function PaymentDiv({ paymentList }: Props) {
   return (
     <div
       className="p-4
-    flex flex-col items-center  min-h-screen  gap-3 transition-colors duration-500 w-full"
+    flex flex-row items-start justify-start min-h-screen  gap-3 transition-colors duration-500 w-full"
     >
       {paymentList.length === 0 &&
         fakeData.map((p, i) => <PaymentCard key={i} payment={p} />)}

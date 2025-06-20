@@ -27,8 +27,8 @@ function Modal({ id, title }: Props) {
 
       <dialog id={id} className="modal">
         <div className="modal-box flex flex-col items-end justify-center">
-          <h3 className="font-bold text-lg">{slag}</h3>
-          <p className="py-4">{data}</p>
+          <span className="font-bold text-lg text-base-content">{slag}</span>
+          <span className="py-4 text-base-content">{data}</span>
           <div className="modal-action">
             <form method="dialog">
               <button type="button" className="btn" onClick={closeModal}>

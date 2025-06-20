@@ -27,8 +27,11 @@ function Payment({ parentGUID }: Props) {
       dispatch(setPayments(paymentList));
     }
   }, [paymentList, dispatch]);
-  const totalPaid = useSelector(
-    (state: RootState) => state.someFeature.totalPaidPrice
+  const totalFinal = useSelector(
+    (state: RootState) => state.someFeature.totalFinal
+  );
+  const totalPending = useSelector(
+    (state: RootState) => state.someFeature.totalPending
   );
   return (
     <div className="bg-base-100 p-4 flex flex-col items-center justify-center min-h-screen gap-3 transition-colors duration-500 w-full">
@@ -44,9 +47,15 @@ function Payment({ parentGUID }: Props) {
           )}
         />
       )}
-      <p className="text-green-600 font-bold sticky bottom-3">
-        جمع پرداخت‌شده‌ها: {totalPaid.toLocaleString()} تومان
-      </p>
+      <div className="sticky bottom-3 flex w-full items-center justify-center gap-5">
+        <p className="text-accent font-bold ">
+          جمع پرداخت شده های تایدد شده : {totalFinal.toLocaleString()} تومان
+        </p>
+        <p className="text-orange-500 font-bold ">
+          جمع پرداخت شده های در حالت انتظار {totalPending.toLocaleString()}{" "}
+          تومان
+        </p>
+      </div>
     </div>
   );
 }
