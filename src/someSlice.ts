@@ -1,11 +1,14 @@
 import type { PaymentType } from "./api/getData";
 import { createSlice } from "@reduxjs/toolkit";
+import type { Debt } from "./types/apiTypes";
 
 interface SomeState {
   value: number;
   payment: PaymentType[];
   totalFinal: number;
   totalPending: number;
+  Debt: Debt[];
+  totalDebt: number;
 }
 
 const initialState: SomeState = {
@@ -13,6 +16,8 @@ const initialState: SomeState = {
   value: 0,
   totalFinal: 0,
   totalPending: 0,
+  Debt: [],
+  totalDebt: 0,
 };
 
 const someSlice = createSlice({
@@ -44,10 +49,20 @@ const someSlice = createSlice({
 
       state.totalPending = totalPending;
     },
+    setDebt(state, action) {
+      state.Debt = action.payload;
+
+      const totalDebt = action.payload.reduce(
+        (sum: number, d: Debt) => sum + Number(d.debt || 0),
+        0
+      );
+
+      state.totalDebt = totalDebt;
+    },
   },
 });
 
-export const { increment, decrement, setValue, setPayments } =
+export const { increment, decrement, setValue, setPayments, setDebt } =
   someSlice.actions;
 
 export default someSlice.reducer;

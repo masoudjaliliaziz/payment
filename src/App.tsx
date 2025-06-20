@@ -3,6 +3,8 @@ import UploadCheckout from "./components/checks/uploadCheckout";
 import { useEffect, useState } from "react";
 import uuidv4 from "./utils/createGuid";
 import Payment from "./components/payment/Payment";
+import Debt from "./components/debt/Debt";
+import TestAdd from "./components/TestAdd";
 
 function App() {
   const [parent_GUID, setParent_GUID] = useState("");
@@ -74,6 +76,9 @@ function App() {
             <li className="font-semibold text-base-content text-md">
               <Link to="/SitePages/develop1.aspx/debt">بدهی ها</Link>
             </li>
+            <li className="font-semibold text-base-content text-md">
+              <Link to="/SitePages/develop1.aspx/add"> افزودن بدهی تست +</Link>
+            </li>
           </ul>
         </div>
 
@@ -101,7 +106,12 @@ function App() {
           />
           <Route
             path="/SitePages/develop1.aspx/debt"
-            element={<div className="text-center text-2xl ">بدهی ها</div>}
+            element={<Debt parentGUID={parent_GUID} />}
+          />
+
+          <Route
+            path="/SitePages/develop1.aspx/add"
+            element={<TestAdd parentGUID={parent_GUID} />}
           />
         </Routes>
       </div>

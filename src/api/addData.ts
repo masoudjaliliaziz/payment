@@ -1,3 +1,5 @@
+import { toast } from "react-toastify";
+import type { Debt } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
 export async function handleAddItem(
@@ -39,6 +41,55 @@ export async function handleAddItem(
         serial: data.serial,
         seri: data.seri,
         status: "1",
+        parentGUID: data.parentGUID,
+      }),
+    });
+
+    // setState({ message: `آیتم جدید (${title}) به لیست چک‌ها اضافه شد.`, title: "" });
+    // onReload();
+  } catch (err) {
+    if (err instanceof Error) {
+      console.error("خطا:", err.message);
+    } else {
+      console.error("خطای ناشناس:", err);
+    }
+  }
+}
+
+export async function handleAddTestItem(data: Debt) {
+  const listName = "Debt";
+  const itemType = "SP.Data.DebtListItem";
+  const webUrl = "https://crm.zarsim.com";
+
+  if (
+    !data.orderNum &&
+    !data.parentGUID &&
+    !data.userName &&
+    !data.debt &&
+    !data.debtDate
+  ) {
+    // setState({ message: "لطفاً یک عنوان وارد کنید." });
+    toast.info("لطفاً همه عنوانین را وارد کنید.");
+    return;
+  }
+
+  try {
+    const digest = await getDigest();
+
+    await fetch(`${webUrl}/_api/web/lists/getbytitle('${listName}')/items`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json;odata=verbose",
+        "Content-Type": "application/json;odata=verbose",
+        "X-RequestDigest": digest,
+      },
+      body: JSON.stringify({
+        __metadata: { type: itemType },
+        Title: "Debt check",
+        orderNum: String(data.orderNum),
+        debt: String(data.debt),
+        debtDate: String(data.debtDate),
+        userName: String(data.userName),
         parentGUID: data.parentGUID,
       }),
     });
