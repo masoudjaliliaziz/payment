@@ -7,7 +7,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 
 import { handleAddTestItem } from "../api/addData";
 import { toast } from "react-toastify";
-import type { Debt } from "../types/apiTypes";
+import type { DebtType } from "../types/apiTypes";
 
 type Props = {
   parentGUID: string;
@@ -21,7 +21,7 @@ function TestAdd({ parentGUID }: Props) {
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const data: Debt = {
+      const data: DebtType = {
         parentGUID: parentGUID,
         debt,
         debtDate: String(debtDate),

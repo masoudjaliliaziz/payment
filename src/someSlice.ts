@@ -1,13 +1,13 @@
 import type { PaymentType } from "./api/getData";
 import { createSlice } from "@reduxjs/toolkit";
-import type { Debt } from "./types/apiTypes";
+import type { DebtType } from "./types/apiTypes";
 
 interface SomeState {
   value: number;
   payment: PaymentType[];
   totalFinal: number;
   totalPending: number;
-  Debt: Debt[];
+  Debt: DebtType[];
   totalDebt: number;
 }
 
@@ -53,7 +53,7 @@ const someSlice = createSlice({
       state.Debt = action.payload;
 
       const totalDebt = action.payload.reduce(
-        (sum: number, d: Debt) => sum + Number(d.debt || 0),
+        (sum: number, d: DebtType) => sum + Number(d.debt || 0),
         0
       );
 

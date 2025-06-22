@@ -34,7 +34,7 @@ function Payment({ parentGUID }: Props) {
     (state: RootState) => state.someFeature.totalPending
   );
   return (
-    <div className="bg-base-100 p-4 flex flex-col items-center justify-center min-h-screen gap-3 transition-colors duration-500 w-full">
+    <div className="bg-base-100 p-4 flex flex-col items-center justify-start min-h-screen gap-3 transition-colors duration-500 w-full relative">
       {isLoading && (
         <span className="loading loading-infinity loading-lg"></span>
       )}
@@ -47,14 +47,23 @@ function Payment({ parentGUID }: Props) {
           )}
         />
       )}
-      <div className="sticky bottom-3 flex w-full items-center justify-center gap-5">
-        <p className="text-accent font-bold ">
-          جمع پرداخت شده های تایدد شده : {totalFinal.toLocaleString()} تومان
-        </p>
-        <p className="text-orange-500 font-bold ">
-          جمع پرداخت شده های در حالت انتظار {totalPending.toLocaleString()}{" "}
-          تومان
-        </p>
+
+      <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-3 justify-around items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm  ">
+        <div className="flex flex-col gap-3 justify-center items-center">
+          <span className="text-success"> جمع پرداخت های تایدد شده </span>
+          <div className="flex justify-center items-center gap-3">
+            <span className="text-base-content text-xs">ریال</span>
+            <span className="text-info">{totalFinal.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 justify-center items-center">
+          <span className="text-warning"> جمع پرداخت های در انتظار تایید </span>
+          <div className="flex justify-center items-center gap-3">
+            <span className="text-base-content text-xs">ریال</span>
+            <span className="text-info">{totalPending.toLocaleString()}</span>
+          </div>
+        </div>
       </div>
     </div>
   );

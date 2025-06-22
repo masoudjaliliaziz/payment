@@ -1,4 +1,4 @@
-export type Debt = {
+export type DebtType = {
   parentGUID: string;
   debt: string;
   debtDate: string;

@@ -1,5 +1,5 @@
 import { toast } from "react-toastify";
-import type { Debt } from "../types/apiTypes";
+import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
 export async function handleAddItem(
@@ -56,7 +56,7 @@ export async function handleAddItem(
   }
 }
 
-export async function handleAddTestItem(data: Debt) {
+export async function handleAddTestItem(data: DebtType) {
   const listName = "Debt";
   const itemType = "SP.Data.DebtListItem";
   const webUrl = "https://crm.zarsim.com";
