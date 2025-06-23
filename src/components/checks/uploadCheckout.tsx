@@ -13,7 +13,8 @@ import { toast } from "react-toastify";
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
   const [price, setPrice] = useState("");
-  const [dueDate, setDueDate] = useState<DateObject | null>(null);
+  const [dueDate, setDueDate] = useState<DateObject | null>();
+  const [dayOfYear, setDayOfYear] = useState<string>("0");
   const [serial, setSerial] = useState("");
   const [seri, setSeri] = useState("");
 
@@ -22,13 +23,16 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   useEffect(() => {
     setItem_GUID(uuidv4());
-  }, []);
+    console.log(new Date().toLocaleDateString());
+    console.log(dueDate);
+  }, [dueDate]);
 
   const mutation = useMutation({
     mutationFn: async () => {
       const data = {
         price,
         dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
+        dayOfYear,
         serial,
         seri,
         parentGUID: props.parent_GUID,
@@ -86,25 +90,35 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
         {/* ورودی تاریخ و قیمت */}
         <div className="flex flex-col sm:flex-row gap-6 w-full justify-between items-center">
           <div className="flex flex-col items-start gap-1 flex-grow">
-            <label className="font-bold text-sm text-base-content">تاریخ</label>
+            <label className="font-bold text-sm text-base-content">
+              تاریخ سر رسید
+            </label>
             <DatePicker
               calendar={persian}
               locale={persian_fa}
               value={dueDate}
-              onChange={(date) => setDueDate(date)}
+              onChange={(date: DateObject) => {
+                setDueDate(date);
+                setDayOfYear(String(date.dayOfYear));
+              }}
               inputClass="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
               placeholder="تاریخ را انتخاب کنید"
               format="YYYY/MM/DD"
             />
           </div>
           <div className="flex flex-col items-start gap-1 flex-grow">
-            <label className="font-bold text-sm text-base-content">قیمت</label>
-            <input
-              type="text"
-              value={price}
-              onChange={(e) => setPrice(e.currentTarget.value)}
-              className="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
-            />
+            <label className="font-bold text-sm text-base-content">مبلغ</label>
+            <div className="flex justify-start items-center gap-3">
+              <input
+                type="text"
+                value={price}
+                onChange={(e) => setPrice(e.currentTarget.value)}
+                className="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
+              />
+              <small className="text-xs text-base-content font-semibold">
+                ریال
+              </small>
+            </div>
           </div>
         </div>
 

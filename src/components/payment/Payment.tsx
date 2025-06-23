@@ -30,8 +30,12 @@ function Payment({ parentGUID }: Props) {
   const totalFinal = useSelector(
     (state: RootState) => state.someFeature.totalFinal
   );
-  const totalPending = useSelector(
-    (state: RootState) => state.someFeature.totalPending
+  const totalPendingAgent = useSelector(
+    (state: RootState) => state.someFeature.totalPendingAgent
+  );
+
+  const totalPendingTreatury = useSelector(
+    (state: RootState) => state.someFeature.totalPendingTretury
   );
   return (
     <div className="bg-base-100 p-4 flex flex-col items-center justify-start min-h-screen gap-3 transition-colors duration-500 w-full relative">
@@ -56,12 +60,24 @@ function Payment({ parentGUID }: Props) {
             <span className="text-info">{totalFinal.toLocaleString()}</span>
           </div>
         </div>
-
         <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-warning"> جمع پرداخت های در انتظار تایید </span>
+          <span className="text-info">جمع پرداخت های درانتظار تایید خزانه</span>
           <div className="flex justify-center items-center gap-3">
             <span className="text-base-content text-xs">ریال</span>
-            <span className="text-info">{totalPending.toLocaleString()}</span>
+            <span className="text-info">
+              {totalPendingTreatury.toLocaleString()}
+            </span>
+          </div>
+        </div>
+        <div className="flex flex-col gap-3 justify-center items-center">
+          <span className="text-warning">
+            جمع پرداخت های درانتظار تایید کارشناس
+          </span>
+          <div className="flex justify-center items-center gap-3">
+            <span className="text-base-content text-xs">ریال</span>
+            <span className="text-info">
+              {totalPendingAgent.toLocaleString()}
+            </span>
           </div>
         </div>
       </div>

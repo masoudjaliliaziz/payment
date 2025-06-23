@@ -9,6 +9,7 @@ export async function handleAddItem(
     serial: string;
     seri: string;
     parentGUID: string;
+    dayOfYear: string;
   }
   //   setState: (state: any) => void,
   //   onReload: () => void
@@ -40,7 +41,8 @@ export async function handleAddItem(
         dueDate: data.dueDate,
         serial: data.serial,
         seri: data.seri,
-        status: "1",
+        dayOfYear: data.dayOfYear,
+        status: "0",
         parentGUID: data.parentGUID,
       }),
     });

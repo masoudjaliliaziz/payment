@@ -47,6 +47,10 @@ function Debt({ parentGUID }: Props) {
   const totalDebt = useSelector(
     (state: RootState) => state.someFeature.totalDebt
   );
+
+  const totalDebtDate = useSelector(
+    (state: RootState) => state.someFeature.dueDateFinal
+  );
   const DebtList = useSelector((state: RootState) => state.someFeature.Debt);
   return (
     <div className="flex-col justify-center items-center gap-3 w-full py-6 h-dvh relative  ">
@@ -134,6 +138,13 @@ function Debt({ parentGUID }: Props) {
           <div className="flex justify-center items-center gap-3">
             <span className="text-base-content text-xs">ریال</span>
             <span className="text-info">{totalDebt.toLocaleString()}</span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-3 justify-center items-center">
+          <span className="text-primary"> تاریخ سررسید</span>
+          <div className="flex justify-center items-center gap-3">
+            <span className="text-info">{totalDebtDate}</span>
           </div>
         </div>
       </div>

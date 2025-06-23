@@ -6,18 +6,22 @@ interface SomeState {
   value: number;
   payment: PaymentType[];
   totalFinal: number;
-  totalPending: number;
+  totalPendingAgent: number;
+  totalPendingTretury: number;
   Debt: DebtType[];
   totalDebt: number;
+  dueDateFinal: number;
 }
 
 const initialState: SomeState = {
   payment: [],
   value: 0,
   totalFinal: 0,
-  totalPending: 0,
+  totalPendingAgent: 0,
+  totalPendingTretury: 0,
   Debt: [],
   totalDebt: 0,
+  dueDateFinal: 0,
 };
 
 const someSlice = createSlice({
@@ -40,14 +44,17 @@ const someSlice = createSlice({
         .filter((p: PaymentType) => p.status === String(4))
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
 
-      const totalPending = action.payload
-        .filter(
-          (p: PaymentType) => p.status === String(0) || p.status === String(1)
-        )
+      const totalPendingAgent = action.payload
+        .filter((p: PaymentType) => p.status === String(0))
+        .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
+
+      const totalPendingTretury = action.payload
+        .filter((p: PaymentType) => p.status === String(1))
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
       state.totalFinal = totalFinal;
 
-      state.totalPending = totalPending;
+      state.totalPendingAgent = totalPendingAgent;
+      state.totalPendingTretury = totalPendingTretury;
     },
     setDebt(state, action) {
       state.Debt = action.payload;
@@ -56,7 +63,14 @@ const someSlice = createSlice({
         (sum: number, d: DebtType) => sum + Number(d.debt || 0),
         0
       );
-
+      const dueDateFinal = action.payload.reduce(
+        (sum: number, d: DebtType) =>
+          sum +
+          Number(d.debtDate.split("/")["2"] || 0) *
+            Number(d.debtDate.split("/")["1"] || 0),
+        0
+      );
+      state.dueDateFinal = dueDateFinal;
       state.totalDebt = totalDebt;
     },
   },
