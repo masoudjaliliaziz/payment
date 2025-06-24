@@ -4,4 +4,6 @@ export type DebtType = {
   debtDate: string;
   orderNum: string;
   userName: string;
+  dayOfYear: number;
+  status: string;
 };

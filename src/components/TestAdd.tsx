@@ -27,6 +27,8 @@ function TestAdd({ parentGUID }: Props) {
         debtDate: String(debtDate),
         orderNum,
         userName,
+        dayOfYear: 116,
+        status: "0"
       };
       console.log(data);
       await handleAddTestItem(data);

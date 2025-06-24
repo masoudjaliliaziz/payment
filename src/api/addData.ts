@@ -93,6 +93,8 @@ export async function handleAddTestItem(data: DebtType) {
         debtDate: String(data.debtDate),
         userName: String(data.userName),
         parentGUID: data.parentGUID,
+        dayOfYear: Number(data.dayOfYear),
+        status: "0",
       }),
     });
 

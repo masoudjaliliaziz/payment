@@ -10,8 +10,29 @@ interface SomeState {
   totalPendingTretury: number;
   Debt: DebtType[];
   totalDebt: number;
-  dueDateFinal: number;
+  dueDateFinal: { dayOfYear: number; year: number } | null;
 }
+
+const fakeData: DebtType[] = [
+  {
+    debt: "123456",
+    debtDate: "۰۱/۰۲/۰۳",
+    orderNum: "123456",
+    parentGUID: "tttt",
+    userName: "masoud",
+    dayOfYear: 66,
+    status: "0",
+  },
+  {
+    debt: "123456",
+    debtDate: "۰۱/۰۲/۰۳",
+    orderNum: "123456",
+    parentGUID: "tttt",
+    userName: "masoud",
+    dayOfYear: 61,
+    status: "0",
+  },
+];
 
 const initialState: SomeState = {
   payment: [],
@@ -21,7 +42,7 @@ const initialState: SomeState = {
   totalPendingTretury: 0,
   Debt: [],
   totalDebt: 0,
-  dueDateFinal: 0,
+  dueDateFinal: null,
 };
 
 const someSlice = createSlice({
@@ -57,21 +78,33 @@ const someSlice = createSlice({
       state.totalPendingTretury = totalPendingTretury;
     },
     setDebt(state, action) {
-      state.Debt = action.payload;
+      if (action.payload.length <= 0) {
+        console.log("hello motheFucke");
+        state.Debt = fakeData;
+      } else {
+        state.Debt = action.payload;
+      }
 
-      const totalDebt = action.payload.reduce(
+      const totalDebt = state.Debt.reduce(
         (sum: number, d: DebtType) => sum + Number(d.debt || 0),
         0
       );
-      const dueDateFinal = action.payload.reduce(
-        (sum: number, d: DebtType) =>
-          sum +
-          Number(d.debtDate.split("/")["2"] || 0) *
-            Number(d.debtDate.split("/")["1"] || 0),
-        0
-      );
-      state.dueDateFinal = dueDateFinal;
       state.totalDebt = totalDebt;
+
+      if (state.Debt.length > 0) {
+        const minDay = Math.min(
+          ...state.Debt.map((d: DebtType) => d.dayOfYear)
+        );
+        const dueDay = minDay + 45;
+        const dueYear = 1404; // سال پایه (اگر نیاز داری این رو داینامیک بگیری، می‌تونی از API بخونی)
+
+        // ❌ دیگه نیاز به چک کردن عبور از سال نداری
+        // این کار رو تابع تبدیل تاریخ انجام می‌ده
+
+        state.dueDateFinal = { dayOfYear: dueDay, year: dueYear };
+      } else {
+        state.dueDateFinal = null;
+      }
     },
   },
 });
