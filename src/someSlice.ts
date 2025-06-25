@@ -1,5 +1,5 @@
-import type { PaymentType } from "./api/getData";
 import { createSlice } from "@reduxjs/toolkit";
+import type { PaymentType } from "./api/getData";
 import type { DebtType } from "./types/apiTypes";
 
 interface SomeState {
@@ -7,7 +7,7 @@ interface SomeState {
   payment: PaymentType[];
   totalFinal: number;
   totalPendingAgent: number;
-  totalPendingTretury: number;
+  totalPendingTreasury: number;
   Debt: DebtType[];
   totalDebt: number;
   dueDateFinal: { dayOfYear: number; year: number } | null;
@@ -35,15 +35,26 @@ const fakeData: DebtType[] = [
 ];
 
 const initialState: SomeState = {
-  payment: [],
   value: 0,
+  payment: [],
   totalFinal: 0,
   totalPendingAgent: 0,
-  totalPendingTretury: 0,
+  totalPendingTreasury: 0,
   Debt: [],
   totalDebt: 0,
   dueDateFinal: null,
 };
+
+// ✅ تابع تبدیل اعداد فارسی به انگلیسی
+function convertPersianNumberToEnglish(str: string): string {
+  const persianNumbers = ["۰", "۱", "۲", "۳", "۴", "۵", "۶", "۷", "۸", "۹"];
+  return str.replace(/[۰-۹]/g, (w) => String(persianNumbers.indexOf(w)));
+}
+
+// ✅ چک سال کبیسه
+function isLeapYear(year: number): boolean {
+  return ((year + 38) * 682) % 2816 < 682;
+}
 
 const someSlice = createSlice({
   name: "someFeature",
@@ -61,55 +72,66 @@ const someSlice = createSlice({
     setPayments(state, action) {
       state.payment = action.payload;
 
-      const totalFinal = action.payload
-        .filter((p: PaymentType) => p.status === String(4))
+      state.totalFinal = action.payload
+        .filter((p: PaymentType) => p.status === "4")
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
 
-      const totalPendingAgent = action.payload
-        .filter((p: PaymentType) => p.status === String(0))
+      state.totalPendingAgent = action.payload
+        .filter((p: PaymentType) => p.status === "0")
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
 
-      const totalPendingTretury = action.payload
-        .filter((p: PaymentType) => p.status === String(1))
+      state.totalPendingTreasury = action.payload
+        .filter((p: PaymentType) => p.status === "1")
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
-      state.totalFinal = totalFinal;
-
-      state.totalPendingAgent = totalPendingAgent;
-      state.totalPendingTretury = totalPendingTretury;
     },
-    setDebt(state, action) {
-      if (action.payload.length <= 0) {
-        console.log("hello motheFucke");
-        state.Debt = fakeData;
-      } else {
-        state.Debt = action.payload;
-      }
 
-      const totalDebt = state.Debt.reduce(
+    setDebt(state, action) {
+      state.Debt = action.payload.length > 0 ? action.payload : fakeData;
+
+      state.totalDebt = state.Debt.reduce(
         (sum: number, d: DebtType) => sum + Number(d.debt || 0),
         0
       );
-      state.totalDebt = totalDebt;
 
-      if (state.Debt.length > 0) {
-        const minDay = Math.min(
-          ...state.Debt.map((d: DebtType) => d.dayOfYear)
+      const debtsWithStatusZero = state.Debt.filter((d) => d.status === "0");
+
+      if (debtsWithStatusZero.length > 0) {
+        const minDebt = debtsWithStatusZero.reduce(
+          (min, d) => (d.dayOfYear < min.dayOfYear ? d : min),
+          debtsWithStatusZero[0]
         );
-        const dueDay = minDay + 45;
-        const dueYear = 1404; // سال پایه (اگر نیاز داری این رو داینامیک بگیری، می‌تونی از API بخونی)
 
-        // ❌ دیگه نیاز به چک کردن عبور از سال نداری
-        // این کار رو تابع تبدیل تاریخ انجام می‌ده
+        const persianYear = parseInt(
+          convertPersianNumberToEnglish(minDebt.debtDate.split("/")[0]),
+          10
+        );
+
+        let dueDay = minDebt.dayOfYear + 45;
+        let dueYear = persianYear;
+
+        while (dueDay > (isLeapYear(dueYear) ? 366 : 365)) {
+          dueDay -= isLeapYear(dueYear) ? 366 : 365;
+          dueYear++;
+        }
 
         state.dueDateFinal = { dayOfYear: dueDay, year: dueYear };
       } else {
         state.dueDateFinal = null;
       }
     },
+    setDueDateFinal: (state, action) => {
+      state.dueDateFinal = action.payload;
+    },
   },
 });
 
-export const { increment, decrement, setValue, setPayments, setDebt } =
-  someSlice.actions;
+export const {
+  increment,
+  decrement,
+  setValue,
+  setPayments,
+  setDebt,
+  setDueDateFinal,
+} = someSlice.actions;
 
 export default someSlice.reducer;

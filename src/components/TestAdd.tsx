@@ -6,8 +6,9 @@ import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 
 import { handleAddTestItem } from "../api/addData";
-import { toast } from "react-toastify";
+
 import type { DebtType } from "../types/apiTypes";
+import toast from "react-hot-toast";
 
 type Props = {
   parentGUID: string;
@@ -27,8 +28,8 @@ function TestAdd({ parentGUID }: Props) {
         debtDate: String(debtDate),
         orderNum,
         userName,
-        dayOfYear: 116,
-        status: "0"
+        dayOfYear: 117,
+        status: "0",
       };
       console.log(data);
       await handleAddTestItem(data);

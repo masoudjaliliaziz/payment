@@ -1,4 +1,4 @@
-import { toast } from "react-toastify";
+import toast from "react-hot-toast";
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
@@ -42,11 +42,11 @@ export async function handleAddItem(
         serial: data.serial,
         seri: data.seri,
         dayOfYear: data.dayOfYear,
-        status: "0",
+        status: "4",
         parentGUID: data.parentGUID,
       }),
     });
-
+    toast.success("اطلاعات با موفقیت ذخیره شد.");
     // setState({ message: `آیتم جدید (${title}) به لیست چک‌ها اضافه شد.`, title: "" });
     // onReload();
   } catch (err) {
@@ -71,7 +71,7 @@ export async function handleAddTestItem(data: DebtType) {
     !data.debtDate
   ) {
     // setState({ message: "لطفاً یک عنوان وارد کنید." });
-    toast.info("لطفاً همه عنوانین را وارد کنید.");
+    toast("لطفاً همه عنوانین را وارد کنید.");
     return;
   }
 

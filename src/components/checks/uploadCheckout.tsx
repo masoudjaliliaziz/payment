@@ -8,7 +8,6 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import uuidv4 from "../../utils/createGuid";
 import type { uploadCheckoutProps } from "./UploadTypes";
 import { handleAddItem } from "../../api/addData";
-import { toast } from "react-toastify";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
@@ -52,8 +51,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
       setSeri("");
 
       // اختیاری: نوتیفیکیشن یا toast موفقیت
-
-      toast.success("اطلاعات با موفقیت ذخیره شد.");
     },
     onError: (error) => {
       console.error("خطا در ذخیره یا آپلود:", error);
