@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
+import { PaymentTable } from "../paymentTable";
 
 type Props = {
   parentGUID: string;
@@ -52,10 +53,10 @@ function Payment({ parentGUID }: Props) {
       )}
 
       {isError && <p className="text-red-600">خطا: {String(error)}</p>}
+      {paymentList.length > 0 && <PaymentTable data={paymentList} />}
+      {/* {paymentList.length > 0 && <PaymentDiv paymentList={paymentList} />} */}
 
-      {paymentList.length > 0 && <PaymentDiv paymentList={paymentList} />}
-
-      <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-3 justify-around items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">
+      {/* <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-3 justify-around items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-success">جمع پرداخت‌های تایید شده</span>
           <div className="flex justify-center items-center gap-3">
@@ -87,7 +88,7 @@ function Payment({ parentGUID }: Props) {
             </span>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

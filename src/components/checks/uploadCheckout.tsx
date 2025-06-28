@@ -8,6 +8,8 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import uuidv4 from "../../utils/createGuid";
 import type { uploadCheckoutProps } from "./UploadTypes";
 import { handleAddItem } from "../../api/addData";
+import { Button } from "../ui/button";
+import { DataTableDemo } from "../DataTableDemo";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
@@ -60,7 +62,13 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   return (
     <>
-      <div className="card"></div>
+      <div className="card">
+        <div className="flex min-h-svh flex-col items-center justify-center">
+          <Button>Click me</Button>
+        </div>
+      </div>
+
+      <DataTableDemo />
       <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto  border-2 border-primary bg-base-300 ">
         {/* ورودی سری و سریال */}
         <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full justify-start">
