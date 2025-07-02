@@ -52,6 +52,26 @@ function Payment({ parentGUID }: Props) {
     }));
   }, [paymentList, debtBaseDayOfYear]);
 
+  // ✅ محاسبه راس‌گیری پرداخت‌ها
+  const paymentRas = useMemo(() => {
+    if (paymentList.length === 0) return 0;
+
+    let totalPayment = 0;
+    let weightedSum = 0;
+
+    paymentList.forEach((payment) => {
+      const price = Number(payment.price ?? 0);
+      const day = Number(payment.dayOfYear ?? 0);
+
+      totalPayment += price;
+      weightedSum += price * day;
+    });
+
+    if (totalPayment === 0) return 0;
+
+    return Math.floor(weightedSum / totalPayment);
+  }, [paymentList]);
+
   return (
     <div className="bg-base-100 p-4 flex flex-col items-center justify-start min-h-screen gap-3 transition-colors duration-500 w-full relative">
       {isLoading && (
@@ -95,6 +115,12 @@ function Payment({ parentGUID }: Props) {
               {totalPendingAgent.toLocaleString()}
             </span>
           </div>
+        </div>
+
+        {/* ✅ نمایش راس‌گیری پرداخت‌ها */}
+        <div className="flex flex-col gap-3 justify-center items-center">
+          <span className="text-base-content">راس پرداخت‌ها (Day of Year)</span>
+          <span className="text-info">{paymentRas}</span>
         </div>
       </div>
     </div>
