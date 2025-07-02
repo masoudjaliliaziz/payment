@@ -6,6 +6,24 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
 
+// ✅ تابع تبدیل Day of Year به تاریخ شمسی
+const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
+  const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  let month = 0;
+
+  while (dayOfYear > daysInMonths[month]) {
+    dayOfYear -= daysInMonths[month];
+    month++;
+  }
+
+  const finalMonth = month + 1;
+  const finalDay = dayOfYear;
+
+  return `${year}/${finalMonth.toString().padStart(2, "0")}/${finalDay
+    .toString()
+    .padStart(2, "0")}`;
+};
+
 type Props = {
   parentGUID: string;
 };
@@ -42,7 +60,7 @@ function Payment({ parentGUID }: Props) {
     debtBaseDayOfYear,
   } = useSelector((state: RootState) => state.someFeature);
 
-  // ✅ اختلاف هر پرداخت با تاریخ سررسید (dayDiff)
+  // ✅ اختلاف هر پرداخت با تاریخ سررسید
   const paymentListWithDayDiff = useMemo(() => {
     if (debtBaseDayOfYear == null) return paymentList;
 
@@ -53,8 +71,9 @@ function Payment({ parentGUID }: Props) {
   }, [paymentList, debtBaseDayOfYear]);
 
   // ✅ محاسبه راس‌گیری پرداخت‌ها
-  const paymentRas = useMemo(() => {
-    if (paymentList.length === 0) return 0;
+  const { paymentRasShamsi } = useMemo(() => {
+    if (paymentList.length === 0)
+      return { paymentRasDay: 0, paymentRasShamsi: "—" };
 
     let totalPayment = 0;
     let weightedSum = 0;
@@ -67,9 +86,17 @@ function Payment({ parentGUID }: Props) {
       weightedSum += price * day;
     });
 
-    if (totalPayment === 0) return 0;
+    if (totalPayment === 0) return { paymentRasDay: 0, paymentRasShamsi: "—" };
 
-    return Math.floor(weightedSum / totalPayment);
+    const paymentRasDay = Math.floor(weightedSum / totalPayment);
+
+    // فرض: تاریخ یکی از پرداخت‌ها مثل "1402/05/10"
+    const sampleDate = paymentList[0].dueDate || "1402/01/01";
+    const year = Number(sampleDate.split("/")[0]);
+
+    const paymentRasShamsi = dayOfYearToShamsi(paymentRasDay, year);
+
+    return { paymentRasDay, paymentRasShamsi };
   }, [paymentList]);
 
   return (
@@ -117,10 +144,10 @@ function Payment({ parentGUID }: Props) {
           </div>
         </div>
 
-        {/* ✅ نمایش راس‌گیری پرداخت‌ها */}
+        {/* ✅ نمایش راس‌گیری پرداخت‌ها به تاریخ شمسی */}
         <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-base-content">راس پرداخت‌ها (Day of Year)</span>
-          <span className="text-info">{paymentRas}</span>
+          <span className="text-base-content">راس پرداخت‌ها</span>
+          <span className="text-info">{paymentRasShamsi}</span>
         </div>
       </div>
     </div>
