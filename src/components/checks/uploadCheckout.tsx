@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { FileUploader } from "./FileUploader";
-import type { FileUploaderHandle } from "./FileUploader";
+
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
 import uuidv4 from "../../utils/createGuid";
 import type { uploadCheckoutProps } from "./UploadTypes";
 import { handleAddItem } from "../../api/addData";
+import { FileUploader, type FileUploaderHandle } from "./FileUploader";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");

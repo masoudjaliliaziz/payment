@@ -11,6 +11,11 @@ interface SomeState {
   Debt: DebtType[];
   totalDebt: number;
   dueDateFinal: { dayOfYear: number; year: number } | null;
+
+  debtBaseDayOfYear: number | null;
+  paymentBaseDayOfYear: number | null;
+  debtPaymentDayDiff: number | null;
+  dayDiff?: number;
 }
 
 const fakeData: DebtType[] = [
@@ -43,6 +48,9 @@ const initialState: SomeState = {
   Debt: [],
   totalDebt: 0,
   dueDateFinal: null,
+  debtBaseDayOfYear: null,
+  paymentBaseDayOfYear: null,
+  debtPaymentDayDiff: null,
 };
 
 // ✅ تابع تبدیل اعداد فارسی به انگلیسی
@@ -83,30 +91,79 @@ const someSlice = createSlice({
       state.totalPendingTreasury = action.payload
         .filter((p: PaymentType) => p.status === "1")
         .reduce((sum: number, p: PaymentType) => sum + Number(p.price || 0), 0);
-    },
 
+      const paymentsWithStatusFour = action.payload.filter(
+        (p: PaymentType) => p.status === "4"
+      );
+
+      if (paymentsWithStatusFour.length > 0) {
+        const totalPaymentAmount = paymentsWithStatusFour.reduce(
+          (sum: number, p: PaymentType) => sum + Number(p.price || 0),
+          0
+        );
+
+        const weightedPaymentSum = paymentsWithStatusFour.reduce(
+          (sum: number, p: PaymentType) =>
+            sum + Number(p.price || 0) * Number(p.dayOfYear || 0),
+          0
+        );
+
+        const avgPaymentDayOfYear = weightedPaymentSum / totalPaymentAmount;
+
+        state.paymentBaseDayOfYear = Math.round(avgPaymentDayOfYear);
+      } else {
+        state.paymentBaseDayOfYear = null;
+      }
+
+      if (
+        state.debtBaseDayOfYear != null &&
+        state.paymentBaseDayOfYear != null
+      ) {
+        state.debtPaymentDayDiff =
+          state.debtBaseDayOfYear - state.paymentBaseDayOfYear;
+      } else {
+        state.debtPaymentDayDiff = null;
+      }
+
+      // ✅ اختلاف هر پرداخت با تاریخ سررسید بدهی
+      if (state.debtBaseDayOfYear != null) {
+        state.payment = state.payment.map((p: PaymentType) => ({
+          ...p,
+          dayDiff: Number(p.dayOfYear || 0) - state.debtBaseDayOfYear!,
+        }));
+      }
+    },
     setDebt(state, action) {
       state.Debt = action.payload.length > 0 ? action.payload : fakeData;
 
-      state.totalDebt = state.Debt.reduce(
+      const debtsWithStatusZero = state.Debt.filter((d) => d.status === "0");
+
+      state.totalDebt = debtsWithStatusZero.reduce(
         (sum: number, d: DebtType) => sum + Number(d.debt || 0),
         0
       );
 
-      const debtsWithStatusZero = state.Debt.filter((d) => d.status === "0");
-
       if (debtsWithStatusZero.length > 0) {
-        const minDebt = debtsWithStatusZero.reduce(
-          (min, d) => (d.dayOfYear < min.dayOfYear ? d : min),
-          debtsWithStatusZero[0]
+        const totalDebtAmount = debtsWithStatusZero.reduce(
+          (sum, d) => sum + Number(d.debt || 0),
+          0
         );
 
+        const weightedSum = debtsWithStatusZero.reduce(
+          (sum, d) => sum + Number(d.debt || 0) * d.dayOfYear,
+          0
+        );
+
+        const avgDayOfYear = weightedSum / totalDebtAmount;
+
         const persianYear = parseInt(
-          convertPersianNumberToEnglish(minDebt.debtDate.split("/")[0]),
+          convertPersianNumberToEnglish(
+            debtsWithStatusZero[0].debtDate.split("/")[0]
+          ),
           10
         );
 
-        let dueDay = minDebt.dayOfYear + 45;
+        let dueDay = avgDayOfYear; // راس
         let dueYear = persianYear;
 
         while (dueDay > (isLeapYear(dueYear) ? 366 : 365)) {
@@ -114,11 +171,17 @@ const someSlice = createSlice({
           dueYear++;
         }
 
-        state.dueDateFinal = { dayOfYear: dueDay, year: dueYear };
+        state.dueDateFinal = { dayOfYear: Math.round(dueDay), year: dueYear };
+
+        // ذخیره کردن dayOfYear در فیلد جدید
+        state.debtBaseDayOfYear = Math.round(dueDay);
       } else {
         state.dueDateFinal = null;
+        state.debtBaseDayOfYear = null;
+        state.totalDebt = 0;
       }
     },
+
     setDueDateFinal: (state, action) => {
       state.dueDateFinal = action.payload;
     },

@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import PaymentDiv from "./PaymentDiv";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
@@ -35,15 +35,22 @@ function Payment({ parentGUID }: Props) {
     }
   }, [paymentList, dispatch]);
 
-  const totalFinal = useSelector(
-    (state: RootState) => state.someFeature.totalFinal
-  );
-  const totalPendingAgent = useSelector(
-    (state: RootState) => state.someFeature.totalPendingAgent
-  );
-  const totalPendingTreasury = useSelector(
-    (state: RootState) => state.someFeature.totalPendingTreasury
-  );
+  const {
+    totalFinal,
+    totalPendingAgent,
+    totalPendingTreasury,
+    debtBaseDayOfYear,
+  } = useSelector((state: RootState) => state.someFeature);
+
+  // ✅ اختلاف هر پرداخت با تاریخ سررسید (dayDiff)
+  const paymentListWithDayDiff = useMemo(() => {
+    if (debtBaseDayOfYear == null) return paymentList;
+
+    return paymentList.map((payment) => ({
+      ...payment,
+      dayDiff: Number(payment.dayOfYear ?? 0) - Number(debtBaseDayOfYear),
+    }));
+  }, [paymentList, debtBaseDayOfYear]);
 
   return (
     <div className="bg-base-100 p-4 flex flex-col items-center justify-start min-h-screen gap-3 transition-colors duration-500 w-full relative">
@@ -53,7 +60,9 @@ function Payment({ parentGUID }: Props) {
 
       {isError && <p className="text-red-600">خطا: {String(error)}</p>}
 
-      {paymentList.length > 0 && <PaymentDiv paymentList={paymentList} />}
+      {paymentList.length > 0 && (
+        <PaymentDiv paymentList={paymentListWithDayDiff} />
+      )}
 
       <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-3 justify-around items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">
         <div className="flex flex-col gap-3 justify-center items-center">

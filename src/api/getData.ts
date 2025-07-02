@@ -4,6 +4,7 @@ export type PaymentType = {
   serial: string;
   seri: string;
   parentGUID: string;
+  dayOfYear:string;
   Title: string;
   status: string;
   agentDescription: string;

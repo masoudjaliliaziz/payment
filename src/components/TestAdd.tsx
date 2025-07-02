@@ -19,6 +19,7 @@ function TestAdd({ parentGUID }: Props) {
   const [debtDate, setDebtDate] = useState<DateObject | null>(null);
   const [orderNum, setOrderNum] = useState("");
   const [debt, setDebt] = useState("");
+  const [dayOfYear, setDayOfYear] = useState<string>("0");
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -28,7 +29,7 @@ function TestAdd({ parentGUID }: Props) {
         debtDate: String(debtDate),
         orderNum,
         userName,
-        dayOfYear: 117,
+        dayOfYear:Number(dayOfYear),
         status: "0",
       };
       console.log(data);
@@ -88,7 +89,10 @@ function TestAdd({ parentGUID }: Props) {
               calendar={persian}
               locale={persian_fa}
               value={debtDate}
-              onChange={(date) => setDebtDate(date)}
+              onChange={(date) => {
+                setDebtDate(date);
+                setDayOfYear(String(date?.dayOfYear));
+              }}
               inputClass="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
               placeholder="تاریخ را انتخاب کنید"
               format="YYYY/MM/DD"
