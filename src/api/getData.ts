@@ -1,10 +1,11 @@
 export type PaymentType = {
+  ID: number;
   price: string;
   dueDate: string;
   serial: string;
   seri: string;
   parentGUID: string;
-  dayOfYear:string;
+  dayOfYear: string;
   Title: string;
   status: string;
   agentDescription: string;

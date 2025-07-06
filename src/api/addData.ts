@@ -2,25 +2,20 @@ import toast from "react-hot-toast";
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
-export async function handleAddItem(
-  data: {
-    price: string;
-    dueDate: string;
-    serial: string;
-    seri: string;
-    parentGUID: string;
-    dayOfYear: string;
-  }
-  //   setState: (state: any) => void,
-  //   onReload: () => void
-) {
+export async function handleAddItem(data: {
+  price: string;
+  dueDate: string;
+  serial: string;
+  seri: string;
+  parentGUID: string;
+  dayOfYear: string;
+}) {
   const listName = "CustomerPayment";
   const itemType = "SP.Data.CustomerPaymentListItem";
   const webUrl = "https://crm.zarsim.com";
 
-  if (!data.price && !data.dueDate && !data.serial && !data.seri) {
-    // setState({ message: "لطفاً یک عنوان وارد کنید." });
-    alert("لطفاً همه عنوانین را وارد کنید.");
+  if (!data.price || !data.dueDate || !data.serial || !data.seri) {
+    alert("لطفاً همه فیلدها را وارد کنید.");
     return;
   }
 
@@ -42,17 +37,18 @@ export async function handleAddItem(
         serial: data.serial,
         seri: data.seri,
         dayOfYear: data.dayOfYear,
-        status: "4",
+        status: "0",
         parentGUID: data.parentGUID,
       }),
     });
+
     toast.success("اطلاعات با موفقیت ذخیره شد.");
-    // setState({ message: `آیتم جدید (${title}) به لیست چک‌ها اضافه شد.`, title: "" });
-    // onReload();
   } catch (err) {
     if (err instanceof Error) {
+      toast.error(`خطا: ${err.message}`);
       console.error("خطا:", err.message);
     } else {
+      toast.error("خطای ناشناس رخ داد");
       console.error("خطای ناشناس:", err);
     }
   }

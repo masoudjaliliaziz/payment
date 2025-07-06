@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
 
-// ✅ تابع تبدیل Day of Year به تاریخ شمسی
+// ✅ تبدیل Day of Year به تاریخ شمسی
 const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
   const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
   let month = 0;
@@ -22,6 +22,20 @@ const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
   return `${year}/${finalMonth.toString().padStart(2, "0")}/${finalDay
     .toString()
     .padStart(2, "0")}`;
+};
+
+// ✅ تبدیل اعداد فارسی به انگلیسی
+const convertPersianDigitsToEnglish = (str: string): string => {
+  return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString());
+};
+
+// ✅ گرفتن سال شمسی با اعداد انگلیسی
+const getCurrentShamsiYear = (): number => {
+  const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    year: "numeric",
+  });
+  const yearStr = formatter.format(new Date()); // خروجی مثل "۱۴۰۳"
+  return Number(convertPersianDigitsToEnglish(yearStr)); // تبدیل به عدد قابل استفاده
 };
 
 type Props = {
@@ -60,17 +74,14 @@ function Payment({ parentGUID }: Props) {
     debtBaseDayOfYear,
   } = useSelector((state: RootState) => state.someFeature);
 
-  // ✅ اختلاف هر پرداخت با تاریخ سررسید
   const paymentListWithDayDiff = useMemo(() => {
     if (debtBaseDayOfYear == null) return paymentList;
-
     return paymentList.map((payment) => ({
       ...payment,
       dayDiff: Number(payment.dayOfYear ?? 0) - Number(debtBaseDayOfYear),
     }));
   }, [paymentList, debtBaseDayOfYear]);
 
-  // ✅ محاسبه راس‌گیری پرداخت‌ها
   const { paymentRasShamsi } = useMemo(() => {
     if (paymentList.length === 0)
       return { paymentRasDay: 0, paymentRasShamsi: "—" };
@@ -81,7 +92,6 @@ function Payment({ parentGUID }: Props) {
     paymentList.forEach((payment) => {
       const price = Number(payment.price ?? 0);
       const day = Number(payment.dayOfYear ?? 0);
-
       totalPayment += price;
       weightedSum += price * day;
     });
@@ -89,11 +99,7 @@ function Payment({ parentGUID }: Props) {
     if (totalPayment === 0) return { paymentRasDay: 0, paymentRasShamsi: "—" };
 
     const paymentRasDay = Math.floor(weightedSum / totalPayment);
-
-    // فرض: تاریخ یکی از پرداخت‌ها مثل "1402/05/10"
-    const sampleDate = paymentList[0].dueDate || "1402/01/01";
-    const year = Number(sampleDate.split("/")[0]);
-
+    const year = getCurrentShamsiYear();
     const paymentRasShamsi = dayOfYearToShamsi(paymentRasDay, year);
 
     return { paymentRasDay, paymentRasShamsi };
@@ -144,7 +150,6 @@ function Payment({ parentGUID }: Props) {
           </div>
         </div>
 
-        {/* ✅ نمایش راس‌گیری پرداخت‌ها به تاریخ شمسی */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-base-content">راس پرداخت‌ها</span>
           <span className="text-info">{paymentRasShamsi}</span>

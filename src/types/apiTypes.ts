@@ -8,6 +8,7 @@ export type DebtType = {
   status: string;
 };
 export type PaymentType = {
+  ID: number;
   price: string;
   dueDate: string;
   serial: string;
