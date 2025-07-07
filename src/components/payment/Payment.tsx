@@ -114,7 +114,10 @@ function Payment({ parentGUID }: Props) {
       {isError && <p className="text-red-600">خطا: {String(error)}</p>}
 
       {paymentList.length > 0 && (
-        <PaymentDiv paymentList={paymentListWithDayDiff} />
+        <PaymentDiv
+          parentGUID={parentGUID}
+          paymentList={paymentListWithDayDiff}
+        />
       )}
 
       <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-3 justify-around items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">

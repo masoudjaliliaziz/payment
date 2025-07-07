@@ -1,10 +1,60 @@
+import { useState, useEffect } from "react";
 import type { PaymentType } from "../../api/getData";
+import { useDeletePayment } from "../../hooks/useDeletePayment";
+import { useUpdatePayment } from "../../hooks/useUpdatePayment";
 import ChecksPreviewItem from "./ChecksPreviewItem";
 import Modal from "./Modal";
+import ModalWrapper from "../ModalWrapper";
+import { useQueryClient } from "@tanstack/react-query";
 
-type Props = { payment: PaymentType & { dayDiff?: number } };
+type Props = {
+  parentGUID: string;
+  payment: PaymentType & { dayDiff?: number };
+};
 
-function PaymentCard({ payment }: Props) {
+function PaymentCard({ parentGUID, payment }: Props) {
+  const updateMutation = useUpdatePayment(parentGUID);
+  const deleteMutation = useDeletePayment(parentGUID);
+  const queryClient = useQueryClient();
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    price: payment.price || "",
+    dueDate: payment.dueDate || "",
+  });
+
+  // همگام سازی editData با تغییر props.payment
+  useEffect(() => {
+    setEditData({
+      price: payment.price || "",
+      dueDate: payment.dueDate || "",
+    });
+  }, [payment]);
+
+  const handleDelete = (id: number) => {
+    if (confirm("آیا از حذف اطمینان دارید؟")) {
+      deleteMutation.mutate(id, {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["payments", parentGUID] });
+        },
+      });
+    }
+  };
+
+  const handleUpdate = () => {
+    updateMutation.mutate(
+      {
+        itemId: payment.ID,
+        data: editData,
+      },
+      {
+        onSuccess: () => {
+          queryClient.invalidateQueries({ queryKey: ["payments", parentGUID] });
+          setIsEditModalOpen(false);
+        },
+      }
+    );
+  };
+
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
   const getDayDiffColor = () => {
     if (payment.dayDiff == null) return "text-base-content";
@@ -38,10 +88,28 @@ function PaymentCard({ payment }: Props) {
           title={{ slag: "وضعیت", data: payment?.status || "—" }}
         />
 
-        {/* ✅ نمایش اختلاف روز */}
+        {/* نمایش اختلاف روز */}
         {payment.dayDiff !== undefined && (
           <div className={`font-bold ${getDayDiffColor()}`}>
             اختلاف با سررسید: {payment.dayDiff} روز
+          </div>
+        )}
+        {payment.status === "0" && (
+          <div className="flex justify-end gap-2 w-full">
+            <button
+              type="button"
+              className="btn btn-error btn-sm"
+              onClick={() => handleDelete(payment.ID)}
+            >
+              حذف
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm"
+              onClick={() => setIsEditModalOpen(true)}
+            >
+              ویرایش
+            </button>
           </div>
         )}
 
@@ -62,6 +130,47 @@ function PaymentCard({ payment }: Props) {
           />
         </div>
       </div>
+
+      <ModalWrapper
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+      >
+        <h3 className="font-bold text-lg mb-4">ویرایش پرداخت</h3>
+
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col">
+            مبلغ
+            <input
+              type="text"
+              value={editData.price}
+              onChange={(e) =>
+                setEditData({ ...editData, price: e.target.value })
+              }
+              className="input input-bordered"
+            />
+          </label>
+
+          <label className="flex flex-col">
+            تاریخ سررسید
+            <input
+              type="text"
+              value={editData.dueDate}
+              onChange={(e) =>
+                setEditData({ ...editData, dueDate: e.target.value })
+              }
+              className="input input-bordered"
+            />
+          </label>
+
+          <button
+            type="button"
+            className="btn btn-success"
+            onClick={handleUpdate}
+          >
+            ذخیره تغییرات
+          </button>
+        </div>
+      </ModalWrapper>
     </div>
   );
 }
