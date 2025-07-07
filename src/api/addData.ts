@@ -3,7 +3,7 @@ import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
 export async function handleAddItem(data: {
-  price: string;
+  price: string ;
   dueDate: string;
   serial: string;
   seri: string;

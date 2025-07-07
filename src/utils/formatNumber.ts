@@ -1,8 +1,10 @@
-export const formatNumberWithCommas = (value: string): string => {
-  const number = value.replace(/\D/g, ""); // فقط عدد نگه دار
-  return Number(number).toLocaleString("fa-IR"); // سه رقمی جدا کن با کاما
-};
+// تبدیل عدد به رشته با کاما
+export const formatNumber = (num: number | "") =>
+  num === "" ? "" : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
-export const removeCommas = (value: string): string => {
-  return value.replace(/,/g, "");
+// تبدیل رشته به عدد خام
+export const parseNumber = (str: string): number | "" => {
+  const cleaned = str.replace(/,/g, "");
+  const parsed = parseInt(cleaned, 10);
+  return isNaN(parsed) ? "" : parsed;
 };
