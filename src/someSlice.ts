@@ -16,6 +16,8 @@ interface SomeState {
   paymentBaseDayOfYear: number | null;
   debtPaymentDayDiff: number | null;
   dayDiff?: number;
+  price: number | "";
+  rawPrice: number | "";
 }
 
 const fakeData: DebtType[] = [
@@ -51,6 +53,8 @@ const initialState: SomeState = {
   debtBaseDayOfYear: null,
   paymentBaseDayOfYear: null,
   debtPaymentDayDiff: null,
+  price: "",
+  rawPrice: "",
 };
 
 // ✅ تابع تبدیل اعداد فارسی به انگلیسی
@@ -185,6 +189,10 @@ const someSlice = createSlice({
     setDueDateFinal: (state, action) => {
       state.dueDateFinal = action.payload;
     },
+    setPrice: (state, action) => {
+      state.rawPrice = action.payload; // مقدار خام
+      state.price = action.payload; // همین رو نگه می‌داریم و هنگام نمایش فرمت می‌کنیم
+    },
   },
 });
 
@@ -195,6 +203,7 @@ export const {
   setPayments,
   setDebt,
   setDueDateFinal,
+  setPrice,
 } = someSlice.actions;
 
 export default someSlice.reducer;
