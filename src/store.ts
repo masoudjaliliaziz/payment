@@ -8,8 +8,8 @@ export const store = configureStore({
   },
 });
 
-// تایپ ریشه‌ی state برنامه
+
 export type RootState = ReturnType<typeof store.getState>;
 
-// تایپ Dispatch برنامه
+
 export type AppDispatch = typeof store.dispatch;

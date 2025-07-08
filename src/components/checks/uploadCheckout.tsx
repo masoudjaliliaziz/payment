@@ -35,6 +35,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
         serial,
         seri,
         parentGUID: props.parent_GUID,
+        itemGUID: item_GUID,
       };
 
       await handleAddItem(data);
