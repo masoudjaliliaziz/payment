@@ -59,6 +59,7 @@ function Payment({ parentGUID }: Props) {
       );
     },
     enabled: !!parentGUID,
+    refetchInterval: 3000,
   });
 
   useEffect(() => {

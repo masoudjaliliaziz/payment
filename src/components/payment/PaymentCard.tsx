@@ -118,14 +118,14 @@ function PaymentCard({ parentGUID, payment }: Props) {
             id="agent-description-modal"
             title={{
               slag: "توضیحات کارشناس",
-              data: payment?.agentDescription || "توضیحاتی درج نشده",
+              data: payment?.agentUnconfirmReason || "توضیحاتی درج نشده",
             }}
           />
           <Modal
             id="treasury-confirm-description-modal"
             title={{
               slag: "توضیحات خزانه‌داری",
-              data: payment?.treasuryConfirmDescription || "توضیحاتی درج نشده",
+              data: payment?.treasuryUnconfirmReason || "توضیحاتی درج نشده",
             }}
           />
         </div>
