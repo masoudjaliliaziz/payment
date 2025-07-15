@@ -22,3 +22,15 @@ export type PaymentType = {
   treasuryUnconfirmReason: string;
   dayOfYear: string;
 };
+
+export type SayadiResultType = {
+  iban: string;
+  issuedDate: string;
+  expirationDate: string;
+  serialNo: string;
+  seriesNo: string;
+  mediaType: string;
+  branchCode: string;
+  name: string;
+  returnedCheques: null | string;
+};

@@ -2,8 +2,7 @@ export type PaymentType = {
   ID: number;
   price: string;
   dueDate: string;
-  serial: string;
-  seri: string;
+  sayadiCode: string;
   parentGUID: string;
   dayOfYear: string;
   Title: string;

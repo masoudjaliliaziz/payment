@@ -15,25 +15,32 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
   const [dueDate, setDueDate] = useState<DateObject | null>();
   const [dayOfYear, setDayOfYear] = useState<string>("0");
-  const [serial, setSerial] = useState("");
-  const [seri, setSeri] = useState("");
+
+  const [sayadiCode, setSayadiCode] = useState("");
+
+  const [nationalId, setNationalId] = useState("");
 
   const checkPic = useRef<FileUploaderHandle | null>(null);
   const checkConfirmPic = useRef<FileUploaderHandle | null>(null);
   const dispatch = useDispatch();
   const price = useSelector((state: RootState) => state.someFeature.price);
+  const qrInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     setItem_GUID(uuidv4());
   }, []);
-
+  useEffect(() => {
+    if (qrInputRef.current) {
+      qrInputRef.current.focus();
+    }
+  }, []);
   const mutation = useMutation({
     mutationFn: async () => {
       const data = {
         price: price === "" ? "" : price.toString(),
         dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
         dayOfYear: String(dayOfYear),
-        serial,
-        seri,
+        sayadiCode: sayadiCode.trim(),
+        nationalId: nationalId.trim(),
         parentGUID: props.parent_GUID,
         itemGUID: item_GUID,
       };
@@ -48,8 +55,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
       dispatch(setPrice(""));
       setDueDate(null);
-      setSerial("");
-      setSeri("");
+      setSayadiCode("");
+      setNationalId("");
     },
     onError: (error) => {
       console.error("خطا در ذخیره یا آپلود:", error);
@@ -63,25 +70,49 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
     const parsed = parseInt(cleaned, 10);
     return isNaN(parsed) ? "" : parsed;
   };
+
+  const handleQRCodeInput = (value: string) => {
+    const fromQR = getLast16Chars(value);
+    setSayadiCode(fromQR);
+  };
+
+  const handleQRCodeInputForGetNationalId = (value: string) => {
+    const fromQR = getOwnerNationalId(value);
+    setNationalId(fromQR);
+  };
+  function getLast16Chars(str: string) {
+    return str.slice(-16);
+  }
+  // تابعی که از قبل داشتیم برای استخراج شناسه صیادی
+
+  function getOwnerNationalId(str: string) {
+    const removeFirstthreeChar = str.slice(4);
+    const seprateFromIR = removeFirstthreeChar.split("IR");
+    const nationalId = seprateFromIR["0"];
+    return nationalId;
+  }
+
   return (
     <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto border-2 border-primary bg-base-300">
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full justify-start">
-        <div className="flex flex-col items-start gap-1 flex-shrink-0">
-          <label className="font-bold text-sm text-base-content">سری</label>
+        <div className="flex flex-col w-full gap-2">
+          <label className="font-bold text-sm text-base-content">
+            شناسه صیادی
+          </label>
           <input
+            ref={qrInputRef}
             type="text"
-            value={seri}
-            onChange={(e) => setSeri(e.currentTarget.value)}
-            className="sm:w-20 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
-          />
-        </div>
-        <div className="flex flex-col items-start gap-1 flex-grow">
-          <label className="font-bold text-sm text-base-content">سریال</label>
-          <input
-            type="text"
-            value={serial}
-            onChange={(e) => setSerial(e.currentTarget.value)}
-            className="w-auto px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
+            value={sayadiCode}
+            onChange={(e) => {
+              handleQRCodeInput(e.target.value);
+              handleQRCodeInputForGetNationalId(e.target.value);
+              e.target.value = ""; // اگر لازم باشه پاک کنی
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.preventDefault();
+            }}
+            placeholder="اسکن یا وارد کردن کد صیادی"
+            className="w-full px-3 py-2 border-2 border-primary rounded-md font-semibold focus:outline-none text-left ltr"
           />
         </div>
       </div>

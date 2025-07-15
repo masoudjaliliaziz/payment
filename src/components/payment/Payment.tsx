@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
 
+
 // ✅ تبدیل Day of Year به تاریخ شمسی
 const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
   const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
@@ -105,6 +106,7 @@ function Payment({ parentGUID }: Props) {
 
     return { paymentRasDay, paymentRasShamsi };
   }, [paymentList]);
+
 
   return (
     <div className="bg-base-100 p-4 flex flex-col items-center justify-start min-h-screen gap-3 transition-colors duration-500 w-full relative">

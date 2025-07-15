@@ -5,17 +5,17 @@ import { getDigest } from "./getDigest";
 export async function handleAddItem(data: {
   price: string;
   dueDate: string;
-  serial: string;
-  seri: string;
+  nationalId: string;
   parentGUID: string;
   dayOfYear: string;
-  itemGUID:string;
+  itemGUID: string;
+  sayadiCode: string;
 }) {
   const listName = "CustomerPayment";
   const itemType = "SP.Data.CustomerPaymentListItem";
   const webUrl = "https://crm.zarsim.com";
 
-  if (!data.price || !data.dueDate || !data.serial || !data.seri) {
+  if (!data.price || !data.dueDate || !data.sayadiCode) {
     alert("لطفاً همه فیلدها را وارد کنید.");
     return;
   }
@@ -35,12 +35,13 @@ export async function handleAddItem(data: {
         Title: "disributer check",
         price: data.price,
         dueDate: data.dueDate,
-        serial: data.serial,
-        seri: data.seri,
+        sayadiCode: data.sayadiCode,
         dayOfYear: data.dayOfYear,
+        nationalId: data.nationalId,
         status: "0",
+
         parentGUID: data.parentGUID,
-        itemGUID:data.itemGUID
+        itemGUID: data.itemGUID,
       }),
     });
 

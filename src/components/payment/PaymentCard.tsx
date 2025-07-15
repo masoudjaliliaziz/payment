@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import type { PaymentType } from "../../api/getData";
 import { useDeletePayment } from "../../hooks/useDeletePayment";
 import { useUpdatePayment } from "../../hooks/useUpdatePayment";
@@ -6,6 +6,8 @@ import ChecksPreviewItem from "./ChecksPreviewItem";
 import Modal from "./Modal";
 import ModalWrapper from "../ModalWrapper";
 import { useQueryClient } from "@tanstack/react-query";
+import { getSayadInquiry, getSayadToken } from "../../api/getToken";
+import type { SayadiResultType } from "../../types/apiTypes";
 
 type Props = {
   parentGUID: string;
@@ -22,12 +24,19 @@ function PaymentCard({ parentGUID, payment }: Props) {
     dueDate: payment.dueDate || "",
   });
 
+  const [sayadiData, setSayadiData] = useState<SayadiResultType>();
+
   // همگام سازی editData با تغییر props.payment
   useEffect(() => {
-    setEditData({
-      price: payment.price || "",
-      dueDate: payment.dueDate || "",
-    });
+    if (
+      payment.price !== editData.price ||
+      payment.dueDate !== editData.dueDate
+    ) {
+      setEditData({
+        price: payment.price || "",
+        dueDate: payment.dueDate || "",
+      });
+    }
   }, [payment]);
 
   const handleDelete = (id: number) => {
@@ -41,6 +50,16 @@ function PaymentCard({ parentGUID, payment }: Props) {
   };
 
   const handleUpdate = () => {
+    if (!editData.price || !editData.dueDate) {
+      alert("مبلغ و تاریخ سررسید نمی‌توانند خالی باشند.");
+      return;
+    }
+
+    if (isNaN(Number(editData.price))) {
+      alert("مبلغ باید عدد باشد.");
+      return;
+    }
+
     updateMutation.mutate(
       {
         itemId: payment.ID,
@@ -55,6 +74,26 @@ function PaymentCard({ parentGUID, payment }: Props) {
     );
   };
 
+  useEffect(() => {
+    async function getSayadInquery() {
+      // ساخت trackId رندوم هر بار
+      const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
+      try {
+        const token = await getSayadToken();
+        const getSayadIdentify = await getSayadInquiry(
+          payment.sayadiCode,
+          token,
+          trackId
+        );
+        setSayadiData(getSayadIdentify);
+      } catch (error) {
+        console.error("خطا در دریافت اطلاعات صیادی:", error);
+      }
+    }
+
+    getSayadInquery();
+  }, []);
+
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
   const getDayDiffColor = () => {
     if (payment.dayDiff == null) return "text-base-content";
@@ -68,25 +107,33 @@ function PaymentCard({ parentGUID, payment }: Props) {
       <div className="shadow rounded-md py-5 px-4 border-primary border-2 mb-3 w-full flex flex-col justify-center items-end gap-3 bg-base-300">
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
-            title={{ slag: "سریال", data: payment?.serial || "—" }}
+            title={{ slag: "شناسه صیادی", data: payment?.sayadiCode || "—" }}
           />
           <ChecksPreviewItem
-            title={{ slag: "سری", data: payment?.seri || "—" }}
+            title={{ slag: "سری ", data: sayadiData?.seriesNo || "—" }}
+          />
+          <ChecksPreviewItem
+            title={{ slag: " سریال", data: sayadiData?.serialNo || "—" }}
           />
         </div>
-
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
-            title={{ slag: "مبلغ", data: payment?.price || "—" }}
+            title={{ slag: "نام صاحب چک", data: sayadiData?.name || "—" }}
           />
+
           <ChecksPreviewItem
             title={{ slag: "تاریخ سر رسید", data: payment?.dueDate || "—" }}
           />
         </div>
-
-        <ChecksPreviewItem
-          title={{ slag: "وضعیت", data: payment?.status || "—" }}
-        />
+        <div className="flex justify-between items-center w-full flex-row-reverse">
+          {" "}
+          <ChecksPreviewItem
+            title={{ slag: " مبلغ", data: payment?.price || "—" }}
+          />
+          <ChecksPreviewItem
+            title={{ slag: "وضعیت", data: payment?.status || "—" }}
+          />
+        </div>
 
         {/* نمایش اختلاف روز */}
         {payment.dayDiff !== undefined && (
@@ -175,4 +222,4 @@ function PaymentCard({ parentGUID, payment }: Props) {
   );
 }
 
-export default PaymentCard;
+export default memo(PaymentCard);

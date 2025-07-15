@@ -64,9 +64,6 @@ function convertPersianNumberToEnglish(str: string): string {
 }
 
 // ✅ چک سال کبیسه
-function isLeapYear(year: number): boolean {
-  return ((year + 38) * 682) % 2816 < 682;
-}
 
 const someSlice = createSlice({
   name: "someFeature",
@@ -140,52 +137,60 @@ const someSlice = createSlice({
     setDebt(state, action) {
       state.Debt = action.payload.length > 0 ? action.payload : fakeData;
 
-      const debtsWithStatusZero = state.Debt.filter((d) => d.status === "0");
+      const debtsWithStatusZero = state.Debt.filter(
+        (d) => d.status === "0"
+      ).sort((a, b) => a.dayOfYear - b.dayOfYear); // صعودی
 
       state.totalDebt = debtsWithStatusZero.reduce(
-        (sum: number, d: DebtType) => sum + Number(d.debt || 0),
+        (sum, d) => sum + Number(d.debt || 0),
         0
       );
 
-      if (debtsWithStatusZero.length > 0) {
-        const totalDebtAmount = debtsWithStatusZero.reduce(
-          (sum, d) => sum + Number(d.debt || 0),
-          0
-        );
+      let remainingPayment = state.totalFinal;
 
-        const weightedSum = debtsWithStatusZero.reduce(
-          (sum, d) => sum + Number(d.debt || 0) * d.dayOfYear,
-          0
-        );
+      let unpaidDebt: DebtType | null = null;
 
-        const avgDayOfYear = weightedSum / totalDebtAmount;
+      for (const debt of debtsWithStatusZero) {
+        const debtAmount = Number(debt.debt || 0);
+        if (remainingPayment >= debtAmount) {
+          remainingPayment -= debtAmount;
+        } else {
+          unpaidDebt = debt;
+          break;
+        }
+      }
 
+      if (unpaidDebt) {
         const persianYear = parseInt(
-          convertPersianNumberToEnglish(
-            debtsWithStatusZero[0].debtDate.split("/")[0]
-          ),
+          convertPersianNumberToEnglish(unpaidDebt.debtDate.split("/")[0]),
           10
         );
 
-        let dueDay = avgDayOfYear; // راس
-        let dueYear = persianYear;
+        state.dueDateFinal = {
+          dayOfYear: unpaidDebt.dayOfYear,
+          year: persianYear,
+        };
+        state.debtBaseDayOfYear = unpaidDebt.dayOfYear;
+      } else if (debtsWithStatusZero.length > 0) {
+        // در صورتی که همه بدهی‌ها تسویه شدن، راس آخرین بدهی رو بگیر
+        const lastDebt = debtsWithStatusZero[debtsWithStatusZero.length - 1];
 
-        while (dueDay > (isLeapYear(dueYear) ? 366 : 365)) {
-          dueDay -= isLeapYear(dueYear) ? 366 : 365;
-          dueYear++;
-        }
+        const persianYear = parseInt(
+          convertPersianNumberToEnglish(lastDebt.debtDate.split("/")[0]),
+          10
+        );
 
-        state.dueDateFinal = { dayOfYear: Math.round(dueDay), year: dueYear };
-
-        // ذخیره کردن dayOfYear در فیلد جدید
-        state.debtBaseDayOfYear = Math.round(dueDay);
+        state.dueDateFinal = {
+          dayOfYear: lastDebt.dayOfYear,
+          year: persianYear,
+        };
+        state.debtBaseDayOfYear = lastDebt.dayOfYear;
       } else {
         state.dueDateFinal = null;
         state.debtBaseDayOfYear = null;
         state.totalDebt = 0;
       }
     },
-
     setDueDateFinal: (state, action) => {
       state.dueDateFinal = action.payload;
     },
