@@ -3,6 +3,7 @@ export type PaymentType = {
   price: string;
   dueDate: string;
   sayadiCode: string;
+  nationalId: string;
   parentGUID: string;
   dayOfYear: string;
   Title: string;

@@ -40,7 +40,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
         dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
         dayOfYear: String(dayOfYear),
         sayadiCode: sayadiCode.trim(),
-        nationalId: nationalId.trim(),
+        nationalId: nationalId,
         parentGUID: props.parent_GUID,
         itemGUID: item_GUID,
       };
@@ -77,8 +77,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   };
 
   const handleQRCodeInputForGetNationalId = (value: string) => {
-    const fromQR = getOwnerNationalId(value);
-    setNationalId(fromQR);
+    const fromQR2 = getOwnerNationalId(value);
+    setNationalId(fromQR2);
   };
   function getLast16Chars(str: string) {
     return str.slice(-16);
@@ -86,11 +86,19 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   // تابعی که از قبل داشتیم برای استخراج شناسه صیادی
 
   function getOwnerNationalId(str: string) {
-    const removeFirstthreeChar = str.slice(4);
-    const seprateFromIR = removeFirstthreeChar.split("IR");
-    const nationalId = seprateFromIR["0"];
-    return nationalId;
+    if (!str.includes("IR")) return "";
+    const parts = str.split("IR");
+    const beforeIR = parts["0"];
+
+    return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
   }
+
+  // function getOwnerNationalId(str: string) {
+  //   const removeFirstthreeChar = str.slice(4);
+  //   const seprateFromIR = removeFirstthreeChar.split("IR");
+  //   const nationalId = seprateFromIR["0"];
+  //   return nationalId;
+  // }
 
   return (
     <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto border-2 border-primary bg-base-300">
