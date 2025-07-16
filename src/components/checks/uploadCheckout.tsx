@@ -56,7 +56,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
       dispatch(setPrice(""));
       setDueDate(null);
       setSayadiCode("");
-      setNationalId("");
     },
     onError: (error) => {
       console.error("خطا در ذخیره یا آپلود:", error);
@@ -78,7 +77,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   const handleQRCodeInputForGetNationalId = (value: string) => {
     const fromQR2 = getOwnerNationalId(value);
-    setNationalId(fromQR2);
+    console.log("|222222222", fromQR2);
+    if (fromQR2.length === 10) setNationalId(fromQR2);
   };
   function getLast16Chars(str: string) {
     return str.slice(-16);
@@ -87,16 +87,32 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   function getOwnerNationalId(str: string) {
     if (!str.includes("IR")) return "";
-    const parts = str.split("IR");
-    const beforeIR = parts["0"];
 
+    const parts = str.split("IR");
+    if (parts.length < 2 || parts[0].length < 10) return "";
+
+    const beforeIR = parts[0];
     return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
   }
 
   // function getOwnerNationalId(str: string) {
+  //   if (!str.includes("IR")) return "";
+  //   console.log("11111", str);
+  //   const parts = str.split("IR");
+  //   console.log("11112", parts);
+  //   const beforeIR = parts["0"];
+  //   console.log("11113", beforeIR);
+
+  //   return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
+  // }
+
+  // function getOwnerNationalId(str: string) {
   //   const removeFirstthreeChar = str.slice(4);
+
   //   const seprateFromIR = removeFirstthreeChar.split("IR");
+
   //   const nationalId = seprateFromIR["0"];
+
   //   return nationalId;
   // }
 
@@ -114,7 +130,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             onChange={(e) => {
               handleQRCodeInput(e.target.value);
               handleQRCodeInputForGetNationalId(e.target.value);
-              e.target.value = ""; // اگر لازم باشه پاک کنی
             }}
             onKeyDown={(e) => {
               if (e.key === "Enter") e.preventDefault();
@@ -124,6 +139,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
           />
         </div>
       </div>
+      <p>{nationalId}</p>
+      <p>{sayadiCode}</p>
 
       <div className="flex flex-col sm:flex-row gap-6 w-full justify-between items-center">
         <div className="flex flex-col items-start gap-1 flex-grow">

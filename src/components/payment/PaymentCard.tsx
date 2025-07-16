@@ -6,12 +6,8 @@ import ChecksPreviewItem from "./ChecksPreviewItem";
 import Modal from "./Modal";
 import ModalWrapper from "../ModalWrapper";
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  getCheckColors,
-  getSayadInquiry,
-  getSayadToken,
-} from "../../api/getToken";
-import type { checkColor, SayadiResultType } from "../../types/apiTypes";
+import { getSayadInquiry, getSayadToken } from "../../api/getToken";
+import type { SayadiResultType } from "../../types/apiTypes";
 
 type Props = {
   parentGUID: string;
@@ -29,7 +25,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
   });
 
   const [sayadiData, setSayadiData] = useState<SayadiResultType>();
-  const [colorData, setColorData] = useState<checkColor>();
+  // const [colorData, setColorData] = useState<checkColor>();
 
   // همگام سازی editData با تغییر props.payment
   useEffect(() => {
@@ -96,23 +92,23 @@ function PaymentCard({ parentGUID, payment }: Props) {
         console.error("خطا در دریافت اطلاعات صیادی:", error);
       }
     }
-    async function getCheckColor() {
-      // ساخت trackId رندوم هر بار
-      const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
-      try {
-        const token = await getSayadToken("credit:cheque-color-inquiry:get");
-        const getColor = await getCheckColors(
-          payment.nationalId,
-          token,
-          trackId
-        );
-        setColorData(getColor);
-      } catch (error) {
-        console.error("خطا در دریافت اطلاعات رنگ:", error);
-      }
-    }
+    // async function getCheckColor() {
+    //   // ساخت trackId رندوم هر بار
+    //   const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
+    //   try {
+    //     const token = await getSayadToken("credit:cheque-color-inquiry:get");
+    //     const getColor = await getCheckColors(
+    //       payment.nationalId,
+    //       token,
+    //       trackId
+    //     );
+    //     setColorData(getColor);
+    //   } catch (error) {
+    //     console.error("خطا در دریافت اطلاعات رنگ:", error);
+    //   }
+    // }
     getSayadInquery();
-    getCheckColor();
+    // getCheckColor();
   }, []);
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
@@ -154,9 +150,9 @@ function PaymentCard({ parentGUID, payment }: Props) {
           <ChecksPreviewItem
             title={{ slag: "وضعیت", data: payment?.status || "—" }}
           />
-          <ChecksPreviewItem
+          {/* <ChecksPreviewItem
             title={{ slag: " استعلام رنگ چک", data: colorData?.chequeColor || "—" }}
-          />
+          /> */}
         </div>
 
         {/* نمایش اختلاف روز */}
