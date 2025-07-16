@@ -35,6 +35,6 @@ export type SayadiResultType = {
   returnedCheques: null | string;
 };
 
-export type checkColor = {
+export type CheckColor = {
   chequeColor: string;
 };

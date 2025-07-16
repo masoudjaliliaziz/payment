@@ -6,8 +6,13 @@ import ChecksPreviewItem from "./ChecksPreviewItem";
 import Modal from "./Modal";
 import ModalWrapper from "../ModalWrapper";
 import { useQueryClient } from "@tanstack/react-query";
-import { getSayadInquiry, getSayadToken } from "../../api/getToken";
+import {
+  // getCheckColors,
+  getSayadInquiry,
+  getSayadToken,
+} from "../../api/getToken";
 import type { SayadiResultType } from "../../types/apiTypes";
+import { useCheckColor } from "../../hooks/useCheckColor";
 
 type Props = {
   parentGUID: string;
@@ -25,8 +30,8 @@ function PaymentCard({ parentGUID, payment }: Props) {
   });
 
   const [sayadiData, setSayadiData] = useState<SayadiResultType>();
-  // const [colorData, setColorData] = useState<checkColor>();
 
+  const { colorData } = useCheckColor(payment.nationalId);
   // همگام سازی editData با تغییر props.payment
   useEffect(() => {
     if (
@@ -92,23 +97,8 @@ function PaymentCard({ parentGUID, payment }: Props) {
         console.error("خطا در دریافت اطلاعات صیادی:", error);
       }
     }
-    // async function getCheckColor() {
-    //   // ساخت trackId رندوم هر بار
-    //   const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
-    //   try {
-    //     const token = await getSayadToken("credit:cheque-color-inquiry:get");
-    //     const getColor = await getCheckColors(
-    //       payment.nationalId,
-    //       token,
-    //       trackId
-    //     );
-    //     setColorData(getColor);
-    //   } catch (error) {
-    //     console.error("خطا در دریافت اطلاعات رنگ:", error);
-    //   }
-    // }
+
     getSayadInquery();
-    // getCheckColor();
   }, []);
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
@@ -121,7 +111,19 @@ function PaymentCard({ parentGUID, payment }: Props) {
 
   return (
     <div className="p-4 flex flex-col items-center gap-3 transition-colors duration-500 w-[33%]">
-      <div className="shadow rounded-md py-5 px-4 border-primary border-2 mb-3 w-full flex flex-col justify-center items-end gap-3 bg-base-300">
+      <div
+        className={`shadow rounded-md py-5 px-4 border-primary border-2 mb-3 w-full flex flex-col justify-center items-end gap-3 ${
+          colorData?.chequeColor === "1"
+            ? "bg-base-300"
+            : colorData?.chequeColor === "2"
+            ? "bg-yellow-400"
+            : colorData?.chequeColor === "3"
+            ? "bg-orange-400"
+            : colorData?.chequeColor === "4"
+            ? "bg-amber-950"
+            : "bg-red-500"
+        }`}
+      >
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
             title={{ slag: "شناسه صیادی", data: payment?.sayadiCode || "—" }}
@@ -150,9 +152,12 @@ function PaymentCard({ parentGUID, payment }: Props) {
           <ChecksPreviewItem
             title={{ slag: "وضعیت", data: payment?.status || "—" }}
           />
-          {/* <ChecksPreviewItem
-            title={{ slag: " استعلام رنگ چک", data: colorData?.chequeColor || "—" }}
-          /> */}
+          <ChecksPreviewItem
+            title={{
+              slag: " استعلام رنگ چک",
+              data: colorData?.chequeColor || "—",
+            }}
+          />
         </div>
 
         {/* نمایش اختلاف روز */}
