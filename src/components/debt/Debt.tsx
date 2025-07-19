@@ -123,7 +123,7 @@ function Debt({ parentGUID }: Props) {
     remainingBalance >= 0 ? "text-green-600" : "text-red-600";
 
   return (
-    <div className="flex flex-col justify-center items-center gap-3 w-full py-6 h-dvh relative">
+    <div className="flex flex-col justify-center items-center gap-3 w-full py-6 h-dvh relative bg-orange-800">
       {isLoading && (
         <span className="loading loading-infinity loading-lg"></span>
       )}

@@ -115,37 +115,43 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   //   return nationalId;
   // }
-
   return (
-    <div className="p-5 w-full max-w-4xl rounded-lg flex flex-col items-center gap-6 mx-auto border-2 border-primary bg-base-300">
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full justify-start">
-        <div className="flex flex-col w-full gap-2">
-          <label className="font-bold text-sm text-base-content">
-            شناسه صیادی
-          </label>
-          <input
-            ref={qrInputRef}
-            type="text"
-            value={sayadiCode}
-            onChange={(e) => {
-              handleQRCodeInput(e.target.value);
-              handleQRCodeInputForGetNationalId(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.preventDefault();
-            }}
-            placeholder="اسکن یا وارد کردن کد صیادی"
-            className="w-full px-3 py-2 border-2 border-primary rounded-md font-semibold focus:outline-none text-left ltr"
-          />
+    <div className="w-full bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xl flex flex-col gap-6 transition-all duration-300">
+      <h2 className="text-lg font-bold text-base-content border-b border-base-200 pb-2">
+        ثبت چک جدید
+      </h2>
+
+      {/* شناسه صیادی و کد ملی */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-semibold text-base-content">
+          شناسه صیادی (از QR)
+        </label>
+        <input
+          ref={qrInputRef}
+          type="text"
+          value={sayadiCode}
+          onChange={(e) => {
+            handleQRCodeInput(e.target.value);
+            handleQRCodeInputForGetNationalId(e.target.value);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") e.preventDefault();
+          }}
+          placeholder="اسکن یا وارد کردن کد صیادی"
+          className="input input-bordered w-full font-mono text-sm ltr"
+        />
+        <div className="text-xs text-gray-500 font-medium flex flex-col sm:flex-row gap-1 sm:gap-4 mt-1">
+          <span>
+            کد ملی صاحب چک: <strong>{nationalId || "-"}</strong>
+          </span>
         </div>
       </div>
-      <p>{nationalId}</p>
-      <p>{sayadiCode}</p>
 
-      <div className="flex flex-col sm:flex-row gap-6 w-full justify-between items-center">
-        <div className="flex flex-col items-start gap-1 flex-grow">
-          <label className="font-bold text-sm text-base-content">
-            تاریخ سر رسید
+      {/* تاریخ و مبلغ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-base-content">
+            تاریخ سررسید
           </label>
           <DatePicker
             calendar={persian}
@@ -155,55 +161,59 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
               setDueDate(date);
               setDayOfYear(String(date.dayOfYear));
             }}
-            inputClass="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
+            inputClass="input input-bordered w-full"
             placeholder="تاریخ را انتخاب کنید"
             format="YYYY/MM/DD"
           />
         </div>
-        <div className="flex flex-col items-start gap-1 flex-grow">
-          <label className="font-bold text-sm text-base-content">مبلغ</label>
-          <div className="flex justify-start items-center gap-3">
-            <input
-              type="text"
-              value={formatNumber(price)}
-              onChange={(e) => dispatch(setPrice(parseNumber(e.target.value)))}
-              placeholder="مبلغ را وارد کنید"
-              className="border border-gray-300 rounded px-3 py-2 focus:outline-none font-bold"
-            />
 
-            <small className="text-xs text-base-content font-semibold">
-              ریال
-            </small>
-          </div>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold text-base-content">
+            مبلغ (ریال)
+          </label>
+          <input
+            type="text"
+            value={formatNumber(price)}
+            onChange={(e) => dispatch(setPrice(parseNumber(e.target.value)))}
+            placeholder="مثال: 1,500,000"
+            className="input input-bordered w-full font-semibold"
+          />
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 w-full justify-between items-center">
-        <FileUploader
-          ref={checkPic}
-          orderNumber={props.parent_GUID}
-          subFolder={item_GUID}
-          title="تصویر چک"
-          inputId="file-upload-check-pic"
-        />
-        <FileUploader
-          ref={checkConfirmPic}
-          orderNumber={props.parent_GUID}
-          subFolder={item_GUID}
-          title="تصویر ثبت چک"
-          inputId="file-upload-check-confirm"
-        />
+      {/* آپلود فایل‌ها */}
+      <div className="flex flex-col  gap-4 items-stretch">
+        <div className="flex-1">
+          <FileUploader
+            ref={checkPic}
+            orderNumber={props.parent_GUID}
+            subFolder={item_GUID}
+            title="تصویر چک"
+            inputId="file-upload-check-pic"
+          />
+        </div>
+        <div className="flex-1">
+          <FileUploader
+            ref={checkConfirmPic}
+            orderNumber={props.parent_GUID}
+            subFolder={item_GUID}
+            title="رسید ثبت چک"
+            inputId="file-upload-check-confirm"
+          />
+        </div>
+      </div>
+
+      {/* دکمه ذخیره */}
+      <div className="flex justify-end mt-4">
         <button
           type="button"
           onClick={() => mutation.mutate()}
-          className={`border-2 font-bold px-5 py-2 rounded-md transition-colors duration-300 flex-shrink-0 ${
-            mutation.isPending
-              ? "bg-gray-400 text-white cursor-not-allowed"
-              : "border-primary hover:bg-white hover:text-gray-800 hover:border-gray-800"
+          className={`btn w-full ${
+            mutation.isPending ? "btn-disabled loading" : "btn-primary"
           }`}
           disabled={mutation.isPending}
         >
-          {mutation.isPending ? "در حال ذخیره..." : "ذخیره"}
+          {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
         </button>
       </div>
     </div>
