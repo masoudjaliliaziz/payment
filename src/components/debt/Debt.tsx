@@ -123,7 +123,7 @@ function Debt({ parentGUID }: Props) {
     remainingBalance >= 0 ? "text-green-600" : "text-red-600";
 
   return (
-    <div className="flex flex-col justify-center items-center gap-3 w-full py-6 h-dvh relative bg-orange-800">
+    <div className="flex flex-col justify-center items-center gap-3 w-full py-6 h-dvh relative rounded-lg">
       {isLoading && (
         <span className="loading loading-infinity loading-lg"></span>
       )}
@@ -174,7 +174,7 @@ function Debt({ parentGUID }: Props) {
       </div>
 
       {/* بخش اطلاعات پایین */}
-      <div className="bg-base-100 sticky bottom-3 w-1/2 mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">
+      <div className="bg-base-100 sticky bottom-0 w-[95%] h-24 mx-auto flex flex-row-reverse gap-6 justify-between items-center px-7 py-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm">
         {/* جمع کل بدهی */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-primary">جمع کل بدهی</span>
@@ -201,8 +201,9 @@ function Debt({ parentGUID }: Props) {
               {Math.abs(remainingBalance).toLocaleString()}
             </span>
           </div>
-          <span className={balanceColor}>{balanceStatus}</span>
         </div>
+
+        <span className={balanceColor}>{balanceStatus}</span>
       </div>
     </div>
   );

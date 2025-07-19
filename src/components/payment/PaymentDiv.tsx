@@ -6,13 +6,106 @@ type Props = {
   parentGUID: string;
   paymentList: (PaymentType & { dayDiff?: number })[];
 };
+// const paymentListTest: PaymentType[] = [
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+//   {
+//     ID: 1,
+//     price: "1000",
+//     dayOfYear: "100",
+//     agentDescription: "Test Payment 1",
+//     agentUnconfirmReason: "aa",
+//     dueDate: "1402/01/01",
+//     nationalId: "1234567890",
+//     parentGUID: "1111111111111111",
+//     sayadiCode: "123456789",
+//     status: "0",
+//     Title: "test payment 1",
+//     treasuryConfirmDescription: "hi",
+//     treasuryUnconfirmReason: "hello",
+//   },
+// ];
 
 export default function PaymentDiv({ paymentList, parentGUID }: Props) {
   return (
-    <div className="p-4 flex flex-row items-start justify-start min-h-screen gap-3 transition-colors duration-500 w-full">
-      {paymentList.map((p) => (
-        <PaymentCard key={p.ID} parentGUID={parentGUID} payment={p} />
+    <>
+      {" "}
+      {paymentList.map((p, i) => (
+        <PaymentCard index={i} key={p.ID} parentGUID={parentGUID} payment={p} />
       ))}
-    </div>
+    </>
   );
 }

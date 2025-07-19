@@ -25,12 +25,13 @@ function App() {
   return (
     <div className="min-h-screen bg-base-100">
       {/* نوار بالا */}
-      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-10 bg-blue-700">
+      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-10 ">
         <div className="navbar-start">
           <a className="btn btn-ghost text-xl text-base-content">زرسیم</a>
         </div>
         <div className="navbar-end">
           <button
+            type="button"
             onClick={toggleDarkMode}
             className="btn btn-outline btn-sm border-base-content text-base-content"
           >
@@ -44,10 +45,10 @@ function App() {
         <div className=" col-span-1">
           <UploadCheckout parent_GUID={parent_GUID} />
         </div>
-        <div className="col-span-2 bg-blue-400">
+        <div className="col-span-2 bg-base-200 rounded-lg shadow-md ">
           <Payment parentGUID={parent_GUID} />
         </div>
-        <div className="col-span-2">
+        <div className="col-span-2 bg-base-200 rounded-lg shadow-md ">
           <Debt parentGUID={parent_GUID} />
         </div>
       </div>

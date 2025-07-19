@@ -1,3 +1,4 @@
+import { Paperclip } from "lucide-react";
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
 import toast from "react-hot-toast";
 
@@ -104,8 +105,8 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
     return (
       <div
         className="
-          flex justify-between items-center gap-5 px-4 py-1.5
-           border-2 border-primary rounded-md
+          flex flex-col justify-between items-end gap-5 px-4 py-1.5
+            rounded-md
           "
       >
         <label
@@ -113,12 +114,13 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
           className="
               rounded-md 
              p-2
-            bg-gray-800 text-white flex justify-center items-center 
+            flex justify-center items-center font-bold text-xs border-2
             cursor-pointer transition-colors duration-300
-            hover:bg-white hover:text-gray-800
+            gap-2
           "
         >
           {title}
+          <Paperclip width={14} height={14} />
         </label>
 
         <input

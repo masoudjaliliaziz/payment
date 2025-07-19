@@ -11,8 +11,14 @@ export default function ChecksPreviewItem({ title }: Props) {
   const safeData = data ?? "—"; // اگه null یا undefined بود، "—" نشون بده
 
   return (
-    <div className="flex flex-row-reverse justify-center items-center bg-base-100 rounded-md p-1 gap-2">
-      <span className="font-bold text-primary">{slag}</span>
+    <div
+      className={`flex justify-center items-center bg-base-100 rounded-md p-1 gap-2 ${
+        slag === "شناسه صیادی" || slag === "نام صاحب چک"
+          ? "flex-col"
+          : "flex-row-reverse"
+      }`}
+    >
+      <span className="font-bold text-primary text-sm">{slag}</span>
       {slag !== "وضعیت" && (
         <span className="text-base-content font-semibold text-sm m-0">
           {safeData}

@@ -13,13 +13,15 @@ import {
 } from "../../api/getToken";
 import type { SayadiResultType } from "../../types/apiTypes";
 import { useCheckColor } from "../../hooks/useCheckColor";
+import { Trash } from "lucide-react";
 
 type Props = {
   parentGUID: string;
   payment: PaymentType & { dayDiff?: number };
+  index: number; // 🆕
 };
 
-function PaymentCard({ parentGUID, payment }: Props) {
+function PaymentCard({ parentGUID, payment, index }: Props) {
   const updateMutation = useUpdatePayment(parentGUID);
   const deleteMutation = useDeletePayment(parentGUID);
   const queryClient = useQueryClient();
@@ -110,19 +112,13 @@ function PaymentCard({ parentGUID, payment }: Props) {
   };
 
   return (
-    <div className="p-4 flex flex-col items-center gap-3 transition-colors duration-500 w-[33%]">
+    <div
+      className={` flex flex-col items-center  transition-colors duration-500 w-full ${
+        index % 2 === 0 ? "bg-base-300" : "bg-base-100"
+      }`}
+    >
       <div
-        className={`shadow rounded-md py-5 px-4 border-primary border-2 mb-3 w-full flex flex-col justify-center items-end gap-3 ${
-          colorData?.chequeColor === "1"
-            ? "bg-base-300"
-            : colorData?.chequeColor === "2"
-            ? "bg-yellow-400"
-            : colorData?.chequeColor === "3"
-            ? "bg-orange-400"
-            : colorData?.chequeColor === "4"
-            ? "bg-amber-950"
-            : "bg-red-500"
-        }`}
+        className={`shadow-md rounded-md py-5 px-4   w-full flex flex-col justify-center items-end gap-1 `}
       >
         <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
@@ -134,54 +130,29 @@ function PaymentCard({ parentGUID, payment }: Props) {
           <ChecksPreviewItem
             title={{ slag: " سریال", data: sayadiData?.serialNo || "—" }}
           />
-        </div>
-        <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
             title={{ slag: "نام صاحب چک", data: sayadiData?.name || "—" }}
           />
-
+        </div>
+        <div className="flex justify-between items-center w-full flex-row-reverse">
           <ChecksPreviewItem
             title={{ slag: "تاریخ سر رسید", data: payment?.dueDate || "—" }}
           />
-        </div>
-        <div className="flex justify-between items-center w-full flex-row-reverse">
-          {" "}
           <ChecksPreviewItem
             title={{ slag: " مبلغ", data: payment?.price || "—" }}
           />
           <ChecksPreviewItem
             title={{ slag: "وضعیت", data: payment?.status || "—" }}
           />
-          <ChecksPreviewItem
-            title={{
-              slag: " استعلام رنگ چک",
-              data: colorData?.chequeColor || "—",
-            }}
-          />
+        </div>
+        <div className="flex justify-between items-center w-full flex-row-reverse">
+          {" "}
         </div>
 
         {/* نمایش اختلاف روز */}
         {payment.dayDiff !== undefined && (
           <div className={`font-bold ${getDayDiffColor()}`}>
             اختلاف با سررسید: {payment.dayDiff} روز
-          </div>
-        )}
-        {payment.status === "0" && (
-          <div className="flex justify-end gap-2 w-full">
-            <button
-              type="button"
-              className="btn btn-error btn-sm"
-              onClick={() => handleDelete(payment.ID)}
-            >
-              حذف
-            </button>
-            <button
-              type="button"
-              className="btn btn-primary btn-sm"
-              onClick={() => setIsEditModalOpen(true)}
-            >
-              ویرایش
-            </button>
           </div>
         )}
 
@@ -200,6 +171,39 @@ function PaymentCard({ parentGUID, payment }: Props) {
               data: payment?.treasuryUnconfirmReason || "توضیحاتی درج نشده",
             }}
           />
+
+          <ChecksPreviewItem
+            title={{
+              slag: " استعلام رنگ چک",
+              data: colorData?.chequeColor || "—",
+            }}
+          />
+          <div
+            className={`w-5 h-5 rounded-full ${
+              colorData?.chequeColor === "1"
+                ? "bg-base-300"
+                : colorData?.chequeColor === "2"
+                ? "bg-yellow-400"
+                : colorData?.chequeColor === "3"
+                ? "bg-orange-400"
+                : colorData?.chequeColor === "4"
+                ? "bg-amber-950"
+                : colorData?.chequeColor === "5"
+                ? "bg-red-500"
+                : "bg-gray-500 border-2 border-base-content"
+            }`}
+          ></div>
+          {payment.status === "0" && (
+            <div className="flex justify-end gap-2 ">
+              <button
+                type="button"
+                className="btn btn-error btn-sm"
+                onClick={() => handleDelete(payment.ID)}
+              >
+                <Trash width={16} height={16} />
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
