@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
 import UploadCheckout from "./components/checks/uploadCheckout";
-import Payment from "./components/payment/Payment";
-import Debt from "./components/debt/Debt";
+// import Payment from "./components/payment/Payment";
+// import Debt from "./components/debt/Debt";
 
 import uuidv4 from "./utils/createGuid";
+// import Test from "./components/payment/Test";
+import TestAdd from "./components/TestAdd";
+import Payment from "./components/payment/Payment";
+import Debt from "./components/debt/Debt";
 
 function App() {
   const [parent_GUID, setParent_GUID] = useState("");
@@ -52,11 +56,14 @@ function App() {
           <Debt parentGUID={parent_GUID} />
         </div>
       </div>
-
-      {/* اگر بخش تست هم نیاز بود اضافه کن: */}
-      {/* <div className="mt-4">
-        <TestAdd parentGUID={parent_GUID} />
+      {/* <Test parentGUID={parent_GUID} />
+      <div className=" col-span-1">
+        <UploadCheckout parent_GUID={parent_GUID} />
       </div> */}
+      {/* اگر بخش تست هم نیاز بود اضافه کن: */}
+      <div className="mt-4">
+        <TestAdd parentGUID={parent_GUID} />
+      </div>
     </div>
   );
 }
