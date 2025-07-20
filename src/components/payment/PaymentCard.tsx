@@ -102,6 +102,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
           name: sayadiData?.name,
           serialNo: sayadiData?.serialNo,
           seriesNo: sayadiData?.seriesNo,
+          checksColor: colorData?.chequeColor,
         });
       } catch (error) {
         console.error("خطا در دریافت اطلاعات صیادی:", error);
@@ -117,6 +118,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     sayadiData?.name,
     sayadiData?.serialNo,
     sayadiData?.seriesNo,
+    colorData?.chequeColor,
   ]);
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن

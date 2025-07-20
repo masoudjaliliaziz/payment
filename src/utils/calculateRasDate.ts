@@ -24,7 +24,7 @@ export function calculateRasDateDebt(data: DebtType[]) {
     (sum, item: DebtType) => sum + Number(item.debt),
     0
   );
-  console.log("totalAmount", totalAmount);
+
   if (totalAmount === 0) return null;
 
   const weightedSum = data.reduce(

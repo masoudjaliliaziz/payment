@@ -28,7 +28,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const qrInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     setItem_GUID(uuidv4());
-    console.log(customerData);
   }, [customerData]);
   useEffect(() => {
     if (qrInputRef.current) {
@@ -98,26 +97,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
     return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
   }
 
-  // function getOwnerNationalId(str: string) {
-  //   if (!str.includes("IR")) return "";
-  //   console.log("11111", str);
-  //   const parts = str.split("IR");
-  //   console.log("11112", parts);
-  //   const beforeIR = parts["0"];
-  //   console.log("11113", beforeIR);
-
-  //   return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
-  // }
-
-  // function getOwnerNationalId(str: string) {
-  //   const removeFirstthreeChar = str.slice(4);
-
-  //   const seprateFromIR = removeFirstthreeChar.split("IR");
-
-  //   const nationalId = seprateFromIR["0"];
-
-  //   return nationalId;
-  // }
   return (
     <div className="flex flex-col gap-4 mb-6  p-4 rounded-lg text-base-content">
       {" "}

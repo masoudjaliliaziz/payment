@@ -35,6 +35,7 @@ export async function updateCustomerItemByGuid(
     name?: string;
     iban?: string;
     branchCode?: string;
+    checksColor?: string;
   }
 ) {
   const listName = "customerPayment";
