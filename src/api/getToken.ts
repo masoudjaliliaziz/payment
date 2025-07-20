@@ -34,6 +34,8 @@ export async function getSayadInquiry(
 
   const data = await res.json();
   const result = await data.result;
+
+  
   console.log("INQUIRY RESULT:", data);
   return result;
 }

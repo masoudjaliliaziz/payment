@@ -83,3 +83,23 @@ export async function loadCurrentUser(
     return [];
   }
 }
+export async function getItemIdByGuid(guid: string): Promise<number | null> {
+  const webUrl = "https://crm.zarsim.com";
+  const listName = "customerPayment";
+
+  try {
+    const res = await fetch(
+      `${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$filter=parentGUID eq '${guid}'`,
+      { headers: { Accept: "application/json;odata=verbose" } }
+    );
+
+    const json = await res.json();
+    const item = json?.d?.results?.[0];
+
+    if (!item) return null;
+    return item.Id; // یا item.ID
+  } catch (err) {
+    console.error("خطا در گرفتن آیتم:", err);
+    return null;
+  }
+}

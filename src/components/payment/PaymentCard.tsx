@@ -14,6 +14,7 @@ import {
 import type { SayadiResultType } from "../../types/apiTypes";
 import { useCheckColor } from "../../hooks/useCheckColor";
 import { Trash } from "lucide-react";
+import { updateCustomerItemByGuid } from "../../api/updateData";
 
 type Props = {
   parentGUID: string;
@@ -45,7 +46,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
         dueDate: payment.dueDate || "",
       });
     }
-  }, [payment]);
+  }, [editData.dueDate, editData.price, payment]);
 
   const handleDelete = (id: number) => {
     if (confirm("آیا از حذف اطمینان دارید؟")) {
@@ -95,13 +96,28 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
           trackId
         );
         setSayadiData(getSayadIdentify);
+        await updateCustomerItemByGuid(parentGUID, {
+          iban: sayadiData?.iban,
+          branchCode: sayadiData?.branchCode,
+          name: sayadiData?.name,
+          serialNo: sayadiData?.serialNo,
+          seriesNo: sayadiData?.seriesNo,
+        });
       } catch (error) {
         console.error("خطا در دریافت اطلاعات صیادی:", error);
       }
     }
 
     getSayadInquery();
-  }, []);
+  }, [
+    parentGUID,
+    payment.sayadiCode,
+    sayadiData?.branchCode,
+    sayadiData?.iban,
+    sayadiData?.name,
+    sayadiData?.serialNo,
+    sayadiData?.seriesNo,
+  ]);
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
   const getDayDiffColor = () => {
