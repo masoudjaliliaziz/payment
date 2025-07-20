@@ -10,6 +10,7 @@ import { FileUploader, type FileUploaderHandle } from "./FileUploader";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { setPrice } from "../../someSlice";
+import { useCustomers } from "../../hooks/useCustomerData";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
@@ -19,7 +20,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [sayadiCode, setSayadiCode] = useState("");
 
   const [nationalId, setNationalId] = useState("");
-
+  const { data: customerData } = useCustomers(props.parent_GUID);
   const checkPic = useRef<FileUploaderHandle | null>(null);
   const checkConfirmPic = useRef<FileUploaderHandle | null>(null);
   const dispatch = useDispatch();
@@ -27,7 +28,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const qrInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     setItem_GUID(uuidv4());
-  }, []);
+    console.log(customerData);
+  }, [customerData]);
   useEffect(() => {
     if (qrInputRef.current) {
       qrInputRef.current.focus();
@@ -43,6 +45,8 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
         nationalId: nationalId,
         parentGUID: props.parent_GUID,
         itemGUID: item_GUID,
+        SalesExpert: customerData?.["0"]?.SalesExpert || "",
+        SalesExpertAcunt_text: customerData?.["0"]?.SalesExpertAcunt_text || "",
       };
 
       await handleAddItem(data);
@@ -77,7 +81,6 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
 
   const handleQRCodeInputForGetNationalId = (value: string) => {
     const fromQR2 = getOwnerNationalId(value);
-    console.log("|222222222", fromQR2);
     if (fromQR2.length === 10) setNationalId(fromQR2);
   };
   function getLast16Chars(str: string) {

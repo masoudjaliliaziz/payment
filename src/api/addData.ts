@@ -10,6 +10,8 @@ export async function handleAddItem(data: {
   dayOfYear: string;
   itemGUID: string;
   sayadiCode: string;
+  SalesExpertAcunt_text: string;
+  SalesExpert: string;
 }) {
   const listName = "CustomerPayment";
   const itemType = "SP.Data.CustomerPaymentListItem";
@@ -39,7 +41,8 @@ export async function handleAddItem(data: {
         dayOfYear: data.dayOfYear,
         nationalId: data.nationalId,
         status: "0",
-
+        SalesExpert: data.SalesExpert,
+        SalesExpertAcunt_text: data.SalesExpertAcunt_text,
         parentGUID: data.parentGUID,
         itemGUID: data.itemGUID,
       }),

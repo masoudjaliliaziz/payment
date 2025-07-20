@@ -8,20 +8,23 @@ import { store } from "./store.ts";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { Toaster } from "react-hot-toast";
+import { BrowserRouter } from "react-router-dom";
 const queryClient = new QueryClient();
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <App />
-        <Toaster
-          toastOptions={{
-            className: "",
-            style: {
-              padding: "16px",
-            },
-          }}
-        />
+        <BrowserRouter>
+          <App />
+          <Toaster
+            toastOptions={{
+              className: "",
+              style: {
+                padding: "16px",
+              },
+            }}
+          />
+        </BrowserRouter>
         <ReactQueryDevtools initialIsOpen={false} />
       </QueryClientProvider>
     </Provider>
