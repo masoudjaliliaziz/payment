@@ -53,7 +53,6 @@ function Debt({ parentGUID }: Props) {
       (sum, item) => sum + Number(item.price || 0),
       0
     );
-
     const sortedDebts = [...debtList]
       .filter((d) => d.debt && d.dayOfYear)
       .sort((a, b) => Number(a.dayOfYear) - Number(b.dayOfYear));

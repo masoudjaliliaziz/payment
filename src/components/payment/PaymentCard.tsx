@@ -22,6 +22,7 @@ type Props = {
   index: number; // 🆕
 };
 
+
 function PaymentCard({ parentGUID, payment, index }: Props) {
   const updateMutation = useUpdatePayment(parentGUID);
   const deleteMutation = useDeletePayment(parentGUID);
@@ -56,6 +57,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     }
   };
 
+
   const handleUpdate = () => {
     if (!editData.price || !editData.dueDate) {
       alert("مبلغ و تاریخ سررسید نمی‌توانند خالی باشند.");
@@ -80,6 +82,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
       }
     );
   };
+
 
   //sourse by nodejs local proxy ----------------------------------
   // const [sayadiData, setSayadiData] = useState<SayadiResultType>();
@@ -124,12 +127,14 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
 
+  
   const getDayDiffColor = () => {
     if (payment.dayDiff == null) return "text-base-content";
     if (payment.dayDiff > 0) return "text-success";
     if (payment.dayDiff < 0) return "text-error";
     return "text-warning";
   };
+
 
   return (
     <div
@@ -138,7 +143,6 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
       }`}
     >
       <>
-        {" "}
         <div
           className={`shadow-md rounded-md py-5 px-4   w-full flex flex-col justify-center items-end gap-1 `}
         >
@@ -293,6 +297,7 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
       </>
     </div>
   );
+
 }
 
 export default memo(PaymentCard);
