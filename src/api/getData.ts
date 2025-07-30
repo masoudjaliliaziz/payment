@@ -1,3 +1,7 @@
+
+
+//type for payments -------------------------
+
 import type { CustomerType } from "../types/apiTypes";
 
 export type PaymentType = {
@@ -11,11 +15,17 @@ export type PaymentType = {
   Title: string;
   status: string;
   agentDescription: string;
-  agentUnconfirmReason: string;
   treasuryConfirmDescription: string;
-  treasuryUnconfirmReason: string;
+  iban: string;
+  name: string;
+  serialNo: string;
+  seriesNo: string;
+  branchCode: string;
+  checksColor: string;
+  Verified: string;
 };
 
+//load paymentrs byu guyid for each customer -=------------------------------
 export async function loadPayment(
   parentGUID: string
 ): Promise<Partial<PaymentType[]>> {
@@ -39,6 +49,7 @@ export async function loadPayment(
   }
 }
 
+//temp for develop ( this have been load from farvardin)----------------------
 export async function loadDebt(
   parentGUID: string
 ): Promise<Partial<PaymentType[]>> {
@@ -62,6 +73,7 @@ export async function loadDebt(
   }
 }
 
+//load currentUser ---------------------------
 export async function loadCurrentUser(
   parentGUID: string
 ): Promise<Partial<CustomerType[]>> {
@@ -83,6 +95,8 @@ export async function loadCurrentUser(
     return [];
   }
 }
+
+//get checks by GUID----------------------
 export async function getItemIdByGuid(guid: string): Promise<number | null> {
   const webUrl = "https://crm.zarsim.com";
   const listName = "customerPayment";

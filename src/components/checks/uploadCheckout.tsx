@@ -16,9 +16,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
   const [dueDate, setDueDate] = useState<DateObject | null>();
   const [dayOfYear, setDayOfYear] = useState<string>("0");
-
   const [sayadiCode, setSayadiCode] = useState("");
-
   const [nationalId, setNationalId] = useState("");
   const { data: customerData } = useCustomers(props.parent_GUID);
   const checkPic = useRef<FileUploaderHandle | null>(null);

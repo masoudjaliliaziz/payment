@@ -6,6 +6,9 @@ type Props = {
   parentGUID: string;
   paymentList: (PaymentType & { dayDiff?: number })[];
 };
+
+//temp ndata for develope ----------------------------------
+
 // const paymentListTest: PaymentType[] = [
 //   {
 //     ID: 1,
