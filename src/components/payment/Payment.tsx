@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import PaymentDiv from "./PaymentDiv";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
@@ -10,16 +10,11 @@ import type { RootState } from "../../store";
 const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
   const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
   let month = 0;
-
   while (dayOfYear > daysInMonths[month]) {
     dayOfYear -= daysInMonths[month];
     month++;
   }
-
-  const finalMonth = month + 1;
-  const finalDay = dayOfYear;
-
-  return `${year}/${finalMonth.toString().padStart(2, "0")}/${finalDay
+  return `${year}/${(month + 1).toString().padStart(2, "0")}/${dayOfYear
     .toString()
     .padStart(2, "0")}`;
 };
@@ -34,16 +29,27 @@ const getCurrentShamsiYear = (): number => {
   const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
     year: "numeric",
   });
-  const yearStr = formatter.format(new Date()); // خروجی مثل "۱۴۰۳"
-  return Number(convertPersianDigitsToEnglish(yearStr)); // تبدیل به عدد قابل استفاده
+  const yearStr = formatter.format(new Date());
+  return Number(convertPersianDigitsToEnglish(yearStr));
 };
 
 type Props = {
   parentGUID: string;
 };
 
+const statusLabels = {
+  all: "همه",
+  0: "در انتظار تایید کارشناس",
+  1: "تایید شده توسط کارشناس",
+  2: "رد شده توسط کارشناس",
+  3: "رد شده توسط خزانه",
+  4: "تایید شده توسط خزانه",
+};
+
 function Payment({ parentGUID }: Props) {
   const dispatch = useDispatch();
+  const [selectedStatus, setSelectedStatus] =
+    useState<keyof typeof statusLabels>("all");
 
   const {
     data: paymentList = [],
@@ -83,6 +89,13 @@ function Payment({ parentGUID }: Props) {
     }));
   }, [paymentList, debtBaseDayOfYear]);
 
+  const filteredPayments = useMemo(() => {
+    if (selectedStatus === "all") return paymentListWithDayDiff;
+    return paymentListWithDayDiff.filter(
+      (p) => Number(p.status) === Number(selectedStatus)
+    );
+  }, [selectedStatus, paymentListWithDayDiff]);
+
   const { paymentRasShamsi } = useMemo(() => {
     if (paymentList.length === 0)
       return { paymentRasDay: 0, paymentRasShamsi: "—" };
@@ -109,22 +122,38 @@ function Payment({ parentGUID }: Props) {
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg ">
       <div className="flex-1 overflow-y-auto w-full px-4 py-6">
+        {/* 🔘 فیلتر وضعیت پرداخت */}
+        <div className="mb-4 flex flex-wrap gap-2 justify-center">
+          {Object.entries(statusLabels).map(([key, label]) => (
+            <button
+              type="button"
+              key={key}
+              onClick={() =>
+                setSelectedStatus(key as keyof typeof statusLabels)
+              }
+              className={`px-3 py-1 text-sm rounded-full border transition ${
+                selectedStatus === key
+                  ? "bg-primary text-white border-primary"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
         {isLoading && (
           <span className="loading loading-infinity loading-lg"></span>
         )}
         {isError && <p className="text-red-600">خطا: {String(error)}</p>}
 
-        {paymentList.length > 0 && (
-          <PaymentDiv
-            parentGUID={parentGUID}
-            paymentList={paymentListWithDayDiff}
-          />
+        {filteredPayments.length > 0 && (
+          <PaymentDiv parentGUID={parentGUID} paymentList={filteredPayments} />
         )}
       </div>
-      {/* ✅ فوتر اطلاعات مالی، مشابه Debt */}
-      {/* ✅ فوتر در انتهای صفحه، ولی بدون position: fixed */}
+
+      {/* ✅ فوتر اطلاعات مالی */}
       <div className="bg-base-100 w-full max-w-[95%] h-24 mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm sticky bottom-0 z-10">
-        {/* پرداخت‌های تایید شده */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-success">جمع پرداخت‌های تایید شده</span>
           <div className="flex justify-center items-center gap-3">
@@ -133,7 +162,6 @@ function Payment({ parentGUID }: Props) {
           </div>
         </div>
 
-        {/* پرداخت‌های خزانه */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-info">در انتظار تایید خزانه</span>
           <div className="flex justify-center items-center gap-3">
@@ -144,7 +172,6 @@ function Payment({ parentGUID }: Props) {
           </div>
         </div>
 
-        {/* پرداخت‌های کارشناس */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-warning">در انتظار تایید کارشناس</span>
           <div className="flex justify-center items-center gap-3">
@@ -155,7 +182,6 @@ function Payment({ parentGUID }: Props) {
           </div>
         </div>
 
-        {/* راس پرداخت‌ها */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-base-content">راس پرداخت‌ها</span>
           <span className="text-info">{paymentRasShamsi}</span>
