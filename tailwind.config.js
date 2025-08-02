@@ -6,6 +6,7 @@ export default {
   },
   plugins: [require("daisyui")],
   daisyui: {
-    themes: ["light", "dark", "cupcake"], // اینجا اسم تم‌ها رو مشخص کن
+    themes: ["light", "dark", "cupcake"], // تم‌های مجاز
+    defaultTheme: "light", // 👈 تم پیش‌فرض
   },
 };

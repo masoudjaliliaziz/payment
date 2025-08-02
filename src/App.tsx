@@ -1,13 +1,12 @@
+import { Routes, Route, Link } from "react-router-dom";
+import PaymentsPage from "./routes/PaymentsPage";
+import DebtsPage from "./routes/DebtsPage";
+import { BanknoteArrowDownIcon, BanknoteArrowUpIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import UploadCheckout from "./components/checks/uploadCheckout";
-import TestAdd from "./components/TestAdd";
-import Payment from "./components/payment/Payment";
-import Debt from "./components/debt/Debt";
-import { useParentGuid } from "./hooks/useParentGuid";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const guid = useParentGuid();
+
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
@@ -16,44 +15,47 @@ function App() {
   }, [isDarkMode]);
 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
-
   return (
-    <div className="min-h-screen bg-base-100">
-      {/* نوار بالا */}
-      <div className="navbar bg-base-100 shadow-sm sticky top-0 z-10">
-        <div className="navbar-start">
-          <a className="btn btn-ghost text-xl text-base-content">زرسیم</a>
+    <div className="min-h-screen flex bg-base-100 relative">
+      {/* Sidebar */}
+      <aside className="w-34 bg-base-200 shadow-md flex flex-col justify-between ">
+        <div className="p-4 space-y-2  flex flex-col items-center">
+          <span className="text-lg font-bold mb-4 text-base-content w-full bg-base-300 text-center rounded-lg px-2 py-1 ">
+            مدیریت مالی
+          </span>
+
+          <Link
+            to="/"
+            className="btn btn-ghost w-full flex justify-between text-xs"
+          >
+            <BanknoteArrowDownIcon width={20} height={20} />
+            پرداخت
+          </Link>
+          <Link
+            to="/debts"
+            className="btn btn-ghost w-full text-xs flex justify-between"
+          >
+            <BanknoteArrowUpIcon width={20} height={20} />
+            بدهی
+          </Link>
         </div>
-        <div className="navbar-end">
+        <div className="p-4">
           <button
-            type="button"
             onClick={toggleDarkMode}
-            className="btn btn-outline btn-sm border-base-content text-base-content"
+            className="btn btn-outline btn-sm w-full border-base-content text-base-content"
           >
             {isDarkMode ? "🌞 لایت" : "🌙 دارک"}
           </button>
         </div>
-      </div>
+      </aside>
 
-      {/* گرید اصلی */}
-      <div className="grid grid-cols-5 gap-4 p-4 w-full mx-auto">
-        <div className="col-span-1">
-          <UploadCheckout parent_GUID={guid} />
-        </div>
-        <div className="col-span-2 bg-base-200 rounded-lg shadow-md">
-          <Payment parentGUID={guid} />
-        </div>
-        <div className="col-span-2 bg-base-200 rounded-lg shadow-md">
-          <Debt parentGUID={guid} />
-        </div>
-      </div>
-
-      {/* نمایش اطلاعات مشتری در صورت نیاز */}
-      <div className="p-4"></div>
-
-      <div className="mt-4">
-        <TestAdd parentGUID={guid} />
-      </div>
+      {/* Main content */}
+      <main className="flex-1 overflow-y-auto">
+        <Routes>
+          <Route path="/" element={<PaymentsPage />} />
+          <Route path="/debts" element={<DebtsPage />} />
+        </Routes>
+      </main>
     </div>
   );
 }

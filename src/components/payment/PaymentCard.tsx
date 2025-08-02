@@ -189,7 +189,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
           payment?.iban !== undefined &&
           payment?.iban !== "" ? (
             <span className="font-bold text-sky-700 text-sm">
-              {getBankNameFromIBAN(payment.iban) || "نامشخص"}
+              {getBankNameFromIBAN(payment?.iban)}
             </span>
           ) : (
             <span>نامشخص</span>

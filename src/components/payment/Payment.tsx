@@ -107,30 +107,23 @@ function Payment({ parentGUID }: Props) {
   }, [paymentList]);
 
   return (
-    <div className="flex flex-col h-dvh justify-between items-center gap-3 w-full py-6 relative bg-base-200 rounded-lg">
-      {isLoading && (
-        <span className="loading loading-infinity loading-lg"></span>
-      )}
+    <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg ">
+      <div className="flex-1 overflow-y-auto w-full px-4 py-6">
+        {isLoading && (
+          <span className="loading loading-infinity loading-lg"></span>
+        )}
+        {isError && <p className="text-red-600">خطا: {String(error)}</p>}
 
-      {isError && <p className="text-red-600">خطا: {String(error)}</p>}
-
-      <div className="p-4 flex flex-col items-center justify-start  gap-4 transition-colors duration-500 w-full h-full overflow-auto ">
         {paymentList.length > 0 && (
           <PaymentDiv
             parentGUID={parentGUID}
             paymentList={paymentListWithDayDiff}
           />
         )}
-
-        {/* <PaymentDiv
-          parentGUID={parentGUID}
-          paymentList={paymentListWithDayDiff}
-        /> */}
       </div>
-
       {/* ✅ فوتر اطلاعات مالی، مشابه Debt */}
       {/* ✅ فوتر در انتهای صفحه، ولی بدون position: fixed */}
-      <div className="bg-base-100 w-[95%] h-24 mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm sticky bottom-0">
+      <div className="bg-base-100 w-full max-w-[95%] h-24 mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm sticky bottom-0 z-10">
         {/* پرداخت‌های تایید شده */}
         <div className="flex flex-col gap-3 justify-center items-center">
           <span className="text-success">جمع پرداخت‌های تایید شده</span>
