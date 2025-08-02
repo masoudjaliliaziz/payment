@@ -1,23 +1,36 @@
-import { useSearchParams } from "react-router-dom";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 export const useParentGuid = (): string => {
-  const [params] = useSearchParams();
+  const [guid, setGuid] = useState("");
 
-  const guid = useMemo(() => {
-    // اول تلاش کن از React Router بگیری
-    const fromRouter = params.get("guid_form");
-    if (fromRouter) return fromRouter;
+  useEffect(() => {
+    // مرحله 1: گرفتن از search (قبل از #)
+    const searchParams = new URLSearchParams(window.location.search);
+    const guidFromSearch = searchParams.get("guid_form");
 
-    // اگر React Router نتونست، مستقیم از URL کامل بگیر
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromUrl = urlParams.get("guid_form");
-    if (fromUrl) return fromUrl;
+    if (guidFromSearch) {
+      localStorage.setItem("guid_form", guidFromSearch);
+      setGuid(guidFromSearch);
+      return;
+    }
 
-    // در نهایت از localStorage بخون
+    // مرحله 2: بررسی hash (برای زمانی که ?guid داخل #/ هست)
+    const hash = window.location.hash;
+    const hashParams = new URLSearchParams(
+      hash.includes("?") ? hash.split("?")[1] : ""
+    );
+    const guidFromHash = hashParams.get("guid_form");
+
+    if (guidFromHash) {
+      localStorage.setItem("guid_form", guidFromHash);
+      setGuid(guidFromHash);
+      return;
+    }
+
+    // مرحله 3: گرفتن از localStorage
     const fromStorage = localStorage.getItem("guid_form") ?? "";
-    return fromStorage;
-  }, [params]);
+    setGuid(fromStorage);
+  }, []);
 
-  return guid ?? "";
+  return guid;
 };

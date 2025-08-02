@@ -13,8 +13,8 @@ export async function handleAddItem(data: {
   SalesExpertAcunt_text: string;
   SalesExpert: string;
 }) {
-  const listName = "CustomerPayment";
-  const itemType = "SP.Data.CustomerPaymentListItem";
+  const listName = "CustomerPaymentDraft";
+  const itemType = "SP.Data.CustomerPaymentDraftListItem";
   const webUrl = "https://crm.zarsim.com";
 
   if (!data.price || !data.dueDate || !data.sayadiCode) {
