@@ -22,7 +22,6 @@ type Props = {
   index: number; // 🆕
 };
 
-
 function PaymentCard({ parentGUID, payment, index }: Props) {
   const updateMutation = useUpdatePayment(parentGUID);
   const deleteMutation = useDeletePayment(parentGUID);
@@ -57,7 +56,6 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     }
   };
 
-
   const handleUpdate = () => {
     if (!editData.price || !editData.dueDate) {
       alert("مبلغ و تاریخ سررسید نمی‌توانند خالی باشند.");
@@ -83,16 +81,12 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     );
   };
 
-
-  //sourse by nodejs local proxy ----------------------------------
-  // const [sayadiData, setSayadiData] = useState<SayadiResultType>();
-
   // useEffect(() => {
   //   async function getSayadInquery() {
-  //     // ساخت trackId رندوم هر بار
-  //     const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
-  //     try {
-  //       const token = await getSayadToken("credit:sayad-serial-inquiry:get");
+  // ساخت trackId رندوم هر بار
+  // const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
+  // try {
+  //   const token = await getSayadToken("credit:sayad-serial-inquiry:get");
 
   //       const getSayadIdentify = await getSayadInquiry(
   //         payment.sayadiCode,
@@ -126,15 +120,12 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
   // ]);
 
   // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
-
-  
   const getDayDiffColor = () => {
     if (payment.dayDiff == null) return "text-base-content";
     if (payment.dayDiff > 0) return "text-success";
     if (payment.dayDiff < 0) return "text-error";
     return "text-warning";
   };
-
 
   return (
     <div
@@ -201,14 +192,14 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
 
           <div className="flex justify-between items-center w-full flex-row-reverse">
             <Modal
-              id="agent-description-modal"
+              id={`agent-description-modal-${payment.ID}`}
               title={{
                 slag: "توضیحات کارشناس",
                 data: payment?.agentDescription || "توضیحاتی درج نشده",
               }}
             />
             <Modal
-              id="treasury-confirm-description-modal"
+              id={`treasury-confirm-description-modal-${payment.ID}`}
               title={{
                 slag: "توضیحات خزانه‌داری",
                 data:
@@ -297,7 +288,6 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
       </>
     </div>
   );
-
 }
 
 export default memo(PaymentCard);
