@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
@@ -7,27 +7,25 @@ import uuidv4 from "../../utils/createGuid";
 import type { uploadCheckoutProps } from "./UploadTypes";
 import { handleAddItem } from "../../api/addData";
 import { FileUploader, type FileUploaderHandle } from "./FileUploader";
-import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "../../store";
-import { setPrice } from "../../someSlice";
+
 import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import toast from "react-hot-toast";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
-  const [dueDate, setDueDate] = useState<DateObject | null>();
+  const [dueDate, setDueDate] = useState<DateObject | null>(null);
   const [dayOfYear, setDayOfYear] = useState<string>("0");
   const [sayadiCode, setSayadiCode] = useState("");
   const [nationalId, setNationalId] = useState("");
   const [sayadiError, setSayadiError] = useState<string | null>(null);
+  const [price, setPriceState] = useState<number | "">("");
 
   const checkPic = useRef<FileUploaderHandle | null>(null);
   const checkConfirmPic = useRef<FileUploaderHandle | null>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
+  const queryClient = useQueryClient();
 
-  const dispatch = useDispatch();
-  const price = useSelector((state: RootState) => state.someFeature.price);
   const { data: customerData } = useCustomers(props.parent_GUID);
 
   const { data: paymentList = [] } = useQuery<PaymentType[]>({
@@ -81,7 +79,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
       }
 
       const data = {
-        price: price.toString(),
+        price: price ? price.toString() : "",
         dueDate: dueDate?.format("YYYY/MM/DD") || "",
         dayOfYear,
         sayadiCode: sayadiCode.trim(),
@@ -100,9 +98,10 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
     },
     onSuccess: () => {
       toast.success("چک با موفقیت ثبت شد");
+      queryClient.invalidateQueries({ queryKey: ["paymentsDraft"] });
       checkPic.current?.clearFile?.();
       checkConfirmPic.current?.clearFile?.();
-      dispatch(setPrice(""));
+      setPriceState("");
       setDueDate(null);
       setSayadiCode("");
       setNationalId("");
@@ -188,7 +187,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
               value={dueDate}
               onChange={(date: DateObject) => {
                 setDueDate(date);
-                setDayOfYear(String(date.dayOfYear));
+                setDayOfYear(String(date?.dayOfYear ?? 0));
               }}
               inputClass="input input-bordered w-full"
               placeholder="تاریخ را انتخاب کنید"
@@ -201,7 +200,7 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
             <input
               type="text"
               value={formatNumber(price)}
-              onChange={(e) => dispatch(setPrice(parseNumber(e.target.value)))}
+              onChange={(e) => setPriceState(parseNumber(e.target.value))}
               className="input input-bordered w-full font-semibold"
               placeholder="مثال: 1,500,000"
             />
