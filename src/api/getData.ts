@@ -8,6 +8,7 @@ export type PaymentType = {
   dueDate: string;
   sayadiCode: string;
   nationalId: string;
+  itemGUID: string;
   parentGUID: string;
   dayOfYear: string;
   Title: string;
@@ -21,6 +22,8 @@ export type PaymentType = {
   branchCode: string;
   checksColor: string;
   Verified: string;
+  SalesExpert: string;
+  SalesExpertAcunt_text: string;
 };
 
 //load paymentrs byu guyid for each customer -=------------------------------

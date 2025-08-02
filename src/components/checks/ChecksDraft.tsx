@@ -12,15 +12,13 @@ type Props = {
 };
 
 function ChecksDraft({ parentGUID }: Props) {
-  console.log("parentGUID in ChecksDraft:", parentGUID);
-
   const { data: paymentListDraft = [] } = useQuery<PaymentType[]>({
-    queryKey: ["paymentsDraft"],
+    queryKey: ["paymentsDraft", parentGUID],
     queryFn: async () => {
       const data = await loadPaymentDraft(parentGUID);
-      return (data as (PaymentType | undefined)[]).filter(
-        (item): item is PaymentType => item !== undefined
-      );
+      return (data as (PaymentType | undefined)[])
+        .filter((item): item is PaymentType => item !== undefined)
+        .filter((item) => item.status === "0"); // ✅ فقط چک‌های با وضعیت 0
     },
     enabled: !!parentGUID,
     refetchInterval: 3000,
@@ -49,7 +47,6 @@ function ChecksDraft({ parentGUID }: Props) {
 
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
-      {/* Sticky header with Ras Date & Select All */}
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
         <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
           راس چک‌های انتخابی: {rasDate}
