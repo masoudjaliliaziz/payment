@@ -2,28 +2,20 @@ import { useState, useEffect, memo } from "react";
 import type { PaymentType } from "../../api/getData";
 import { useDeletePayment } from "../../hooks/useDeletePayment";
 import { useUpdatePayment } from "../../hooks/useUpdatePayment";
-import ChecksPreviewItem from "./ChecksPreviewItem";
+
 import Modal from "./Modal";
 import ModalWrapper from "../ModalWrapper";
 import { useQueryClient } from "@tanstack/react-query";
-// import {
-//   // getCheckColors,
-//   getSayadInquiry,
-//   getSayadToken,
-// } from "../../api/getToken";
-// import type { SayadiResultType } from "../../types/apiTypes";
-// import { useCheckColor } from "../../hooks/useCheckColor";
+
 import { Trash } from "lucide-react";
-// import { updateCustomerItemByGuid } from "../../api/updateData";
+import { getBankNameFromIBAN } from "../../utils/getBankNameFromIban";
 
 type Props = {
   parentGUID: string;
   payment: PaymentType & { dayDiff?: number };
-  index: number; // 🆕
 };
 
-
-function PaymentCard({ parentGUID, payment, index }: Props) {
+function PaymentCard({ parentGUID, payment }: Props) {
   const updateMutation = useUpdatePayment(parentGUID);
   const deleteMutation = useDeletePayment(parentGUID);
   const queryClient = useQueryClient();
@@ -33,8 +25,6 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     dueDate: payment.dueDate || "",
   });
 
-  // const { colorData } = useCheckColor(payment.nationalId);
-  // همگام سازی editData با تغییر props.payment
   useEffect(() => {
     if (
       payment.price !== editData.price ||
@@ -45,7 +35,18 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
         dueDate: payment.dueDate || "",
       });
     }
-  }, [editData.dueDate, editData.price, payment]);
+  }, [payment]);
+
+  const getCheckColor = (colorCode: string | undefined) => {
+    const colorMap: Record<string, string> = {
+      "1": "bg-gray-100",
+      "2": "bg-yellow-300",
+      "3": "bg-orange-300",
+      "4": "bg-amber-800",
+      "5": "bg-red-400",
+    };
+    return colorMap[colorCode ?? ""] ?? "bg-gray-500 border border-gray-700";
+  };
 
   const handleDelete = (id: number) => {
     if (confirm("آیا از حذف اطمینان دارید؟")) {
@@ -56,7 +57,6 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
       });
     }
   };
-
 
   const handleUpdate = () => {
     if (!editData.price || !editData.dueDate) {
@@ -83,183 +83,155 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
     );
   };
 
-
-  //sourse by nodejs local proxy ----------------------------------
-  // const [sayadiData, setSayadiData] = useState<SayadiResultType>();
-
-  // useEffect(() => {
-  //   async function getSayadInquery() {
-  //     // ساخت trackId رندوم هر بار
-  //     const trackId = Math.floor(Math.random() * 1_000_000_000).toString();
-  //     try {
-  //       const token = await getSayadToken("credit:sayad-serial-inquiry:get");
-
-  //       const getSayadIdentify = await getSayadInquiry(
-  //         payment.sayadiCode,
-  //         token,
-  //         trackId
-  //       );
-  //       setSayadiData(getSayadIdentify);
-  //       await updateCustomerItemByGuid(parentGUID, {
-  //         iban: sayadiData?.iban,
-  //         branchCode: sayadiData?.branchCode,
-  //         name: sayadiData?.name,
-  //         serialNo: sayadiData?.serialNo,
-  //         seriesNo: sayadiData?.seriesNo,
-  //         checksColor: colorData?.chequeColor,
-  //       });
-  //     } catch (error) {
-  //       console.error("خطا در دریافت اطلاعات صیادی:", error);
-  //     }
-  //   }
-
-  //   getSayadInquery();
-  // }, [
-  //   parentGUID,
-  //   payment.sayadiCode,
-  //   sayadiData?.branchCode,
-  //   sayadiData?.iban,
-  //   sayadiData?.name,
-  //   sayadiData?.serialNo,
-  //   sayadiData?.seriesNo,
-  //   colorData?.chequeColor,
-  // ]);
-
-  // رنگ اختلاف روز بر اساس مثبت یا منفی بودن
-
-  
-  const getDayDiffColor = () => {
-    if (payment.dayDiff == null) return "text-base-content";
-    if (payment.dayDiff > 0) return "text-success";
-    if (payment.dayDiff < 0) return "text-error";
-    return "text-warning";
-  };
-
-
   return (
-    <div
-      className={` flex flex-col items-center  transition-colors duration-500 w-full ${
-        index % 2 === 0 ? "bg-base-300" : "bg-base-100"
-      }`}
-    >
-      <>
-        <div
-          className={`shadow-md rounded-md py-5 px-4   w-full flex flex-col justify-center items-end gap-1 `}
-        >
-          <div className="flex justify-between items-center w-full flex-row-reverse">
-            <ChecksPreviewItem
-              title={{
-                slag: "شناسه صیادی",
-                data: payment?.sayadiCode || "—",
-              }}
-            />
+    <div className="w-full flex flex-col gap-2 p-3 rounded-md bg-white">
+      <div className="flex items-center justify-between bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
+        {payment.status === "0" && (
+          <button
+            type="button"
+            className="btn btn-error btn-xs text-white"
+            onClick={() => handleDelete(payment.ID)}
+          >
+            <Trash width={16} height={16} />
+          </button>
+        )}
+        <Modal
+          id="agent-description-modal"
+          title={{
+            slag: "توضیحات کارشناس",
+            data: payment?.agentDescription || "توضیحاتی درج نشده",
+          }}
+        />
+        <Modal
+          id="treasury-confirm-description-modal"
+          title={{
+            slag: "توضیحات خزانه‌داری",
+            data: payment?.treasuryConfirmDescription || "توضیحاتی درج نشده",
+          }}
+        />
 
-            {payment?.Verified === "0" ? (
-              <p className="skeleton"></p>
-            ) : (
-              <ChecksPreviewItem
-                title={{ slag: "سری ", data: payment?.seriesNo || "—" }}
-              />
-            )}
-            {payment?.Verified === "0" ? (
-              <p className="skeleton"></p>
-            ) : (
-              <ChecksPreviewItem
-                title={{ slag: " سریال", data: payment?.serialNo || "—" }}
-              />
-            )}
-
-            {payment?.Verified === "0" ? (
-              <p className="skeleton"></p>
-            ) : (
-              <ChecksPreviewItem
-                title={{ slag: "نام صاحب چک", data: payment?.name || "—" }}
-              />
-            )}
-          </div>
-          <div className="flex justify-between items-center w-full flex-row-reverse">
-            <ChecksPreviewItem
-              title={{ slag: "تاریخ سر رسید", data: payment?.dueDate || "—" }}
-            />
-            <ChecksPreviewItem
-              title={{ slag: " مبلغ", data: payment?.price || "—" }}
-            />
-            <ChecksPreviewItem
-              title={{ slag: "وضعیت", data: payment?.status || "—" }}
-            />
-          </div>
-          <div className="flex justify-between items-center w-full flex-row-reverse">
-            {" "}
-          </div>
-
-          {/* نمایش اختلاف روز */}
-          {payment.dayDiff !== undefined && (
-            <div className={`font-bold ${getDayDiffColor()}`}>
-              اختلاف با سررسید: {payment.dayDiff} روز
-            </div>
-          )}
-
-          <div className="flex justify-between items-center w-full flex-row-reverse">
-            <Modal
-              id="agent-description-modal"
-              title={{
-                slag: "توضیحات کارشناس",
-                data: payment?.agentDescription || "توضیحاتی درج نشده",
-              }}
-            />
-            <Modal
-              id="treasury-confirm-description-modal"
-              title={{
-                slag: "توضیحات خزانه‌داری",
-                data:
-                  payment?.treasuryConfirmDescription || "توضیحاتی درج نشده",
-              }}
-            />
-
-            <ChecksPreviewItem
-              title={{
-                slag: " استعلام رنگ چک",
-                data: payment?.checksColor || "—",
-              }}
-            />
-            {payment?.Verified === "0" ? (
-              <p className="skeleton"></p>
-            ) : (
-              <div
-                className={`w-5 h-5 rounded-full ${
-                  payment?.checksColor === "1"
-                    ? "bg-base-300"
-                    : payment?.checksColor === "2"
-                    ? "bg-yellow-400"
-                    : payment?.checksColor === "3"
-                    ? "bg-orange-400"
-                    : payment?.checksColor === "4"
-                    ? "bg-amber-950"
-                    : payment?.checksColor === "5"
-                    ? "bg-red-500"
-                    : "bg-gray-500 border-2 border-base-content"
-                }`}
-              ></div>
-            )}
-            {payment.status === "0" && (
-              <div className="flex justify-end gap-2 ">
-                <button
-                  type="button"
-                  className="btn btn-error btn-sm"
-                  onClick={() => handleDelete(payment.ID)}
-                >
-                  <Trash width={16} height={16} />
-                </button>
-              </div>
-            )}
+        <div>
+          <div className="flex gap-1 items-center">
+            {Array.from({ length: Number(payment.checksColor) }, (_, i) => (
+              <span
+                key={i}
+                className={`rounded-sm w-3 h-3 ${getCheckColor(
+                  payment.checksColor
+                )}`}
+              ></span>
+            ))}
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-3 transition-colors duration-500 w-full">
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> سری </p>
+          {payment?.seriesNo !== null &&
+          payment?.seriesNo !== undefined &&
+          payment?.seriesNo !== "" ? (
+            <span className="font-bold text-sky-700 text-sm">
+              {payment?.seriesNo || "نامشخص"}
+            </span>
+          ) : (
+            <span>نامشخص</span>
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> سریال</p>
+          <span className="font-bold text-sky-700 text-sm">
+            {payment?.serialNo !== null &&
+            payment?.serialNo !== undefined &&
+            payment?.serialNo !== "" ? (
+              <span className="font-bold text-sky-700 text-sm">
+                {payment?.serialNo || "نامشخص"}
+              </span>
+            ) : (
+              <span>نامشخص</span>
+            )}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> نام صاحب چک </p>
+          <span className="font-bold text-sky-700 text-sm">
+            {payment?.name !== null &&
+            payment?.name !== undefined &&
+            payment?.name !== "" ? (
+              <span className="font-bold text-sky-700 text-sm">
+                {payment?.name || "نامشخص"}
+              </span>
+            ) : (
+              <span>نامشخص</span>
+            )}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> تاریخ سررسید </p>
+          <span className="font-bold text-sky-700 text-sm">
+            {payment?.dueDate || "نامشخص"}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> مبلغ </p>
+          <span className="font-bold text-sky-700 text-sm">
+            {payment?.price}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> بانک </p>
+
+          {payment?.iban !== null &&
+          payment?.iban !== undefined &&
+          payment?.iban !== "" ? (
+            <span className="font-bold text-sky-700 text-sm">
+              {getBankNameFromIBAN(payment.iban) || "نامشخص"}
+            </span>
+          ) : (
+            <span>نامشخص</span>
+          )}
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> وضعیت </p>
+          <span className="font-bold text-sky-700 text-sm">
+            {payment.status === "0"
+              ? "در انتظار تایید کارشناس"
+              : payment.status === "1"
+              ? "در انتظار تایید خزانه "
+              : payment.status === "2"
+              ? "رد شده توسط کارشناس"
+              : payment.status === "3"
+              ? "رد شده توسط خزانه"
+              : payment.status === "4"
+              ? "تایید نهایی"
+              : "نامشخص"}
+          </span>
+        </div>
+
+        <div>
+          <p className="text-sm font-semibold text-gray-500"> شماره شبا </p>
+
+          {payment?.iban !== null &&
+          payment?.iban !== undefined &&
+          payment?.iban !== "" ? (
+            <span className="font-bold text-sky-700 text-sm">
+              {payment?.iban || "نامشخص"}
+            </span>
+          ) : (
+            <span>نامشخص</span>
+          )}
+        </div>
+
         <ModalWrapper
           isOpen={isEditModalOpen}
           onClose={() => setIsEditModalOpen(false)}
         >
           <h3 className="font-bold text-lg mb-4">ویرایش پرداخت</h3>
-
           <div className="flex flex-col gap-3">
             <label className="flex flex-col">
               مبلغ
@@ -294,10 +266,11 @@ function PaymentCard({ parentGUID, payment, index }: Props) {
             </button>
           </div>
         </ModalWrapper>
-      </>
+
+        {/* Popup for check color change */}
+      </div>
     </div>
   );
-
 }
 
 export default memo(PaymentCard);

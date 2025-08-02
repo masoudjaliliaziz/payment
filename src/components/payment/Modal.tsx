@@ -21,7 +21,11 @@ function Modal({ id, title }: Props) {
 
   return (
     <>
-      <button type="button" className="btn text-primary" onClick={openModal}>
+      <button
+        type="button"
+        className=" font-bold text-xs text-sky-700  border-2 rounded-md px-1.5 py-1 hover:bg-sky-700 hover:text-white"
+        onClick={openModal}
+      >
         {slag}
       </button>
 

@@ -6,13 +6,14 @@ interface FileUploaderProps {
   orderNumber?: string;
   subFolder?: string;
   title?: string;
-  inputId: string; // اضافه شد
+  inputId: string; // مشخص‌کننده‌ی یکتا برای input
 }
 
 export interface FileUploaderHandle {
   getFile: () => File | null;
   clearFile: () => void;
   uploadFile: () => Promise<void>;
+  hasFile: () => boolean;
 }
 
 const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
@@ -42,7 +43,8 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
         }
 
         const cleanOrderNumber = orderNumber.replace(/[#%*<>?/\\|]/g, "_");
-        const isCheckPic = title === "تصویر چک";
+        const isCheckPic =
+          title === "تصویر چک" || title === "تصویر چک (الزامی)";
         const subTypeFolder = isCheckPic ? "checkPic" : "checkPicConfirm";
         const webUrl = "https://crm.zarsim.com";
         const libraryName = "customer_checks";
@@ -100,24 +102,14 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
           setUploadProgress(0);
         }
       },
+      hasFile: () => selectedFile !== null, // ✅ اضافه‌شده برای بررسی اجباری بودن فایل
     }));
 
     return (
-      <div
-        className="
-          flex flex-col justify-between items-end gap-5 px-4 py-1.5
-            rounded-md
-          "
-      >
+      <div className="flex flex-col justify-between items-end gap-5 px-4 py-1.5 rounded-md">
         <label
           htmlFor={inputId}
-          className="
-              rounded-md 
-             p-2
-            flex justify-center items-center font-bold text-xs border-2
-            cursor-pointer transition-colors duration-300
-            gap-2
-          "
+          className="rounded-md p-2 flex justify-center items-center font-bold text-xs border-2 cursor-pointer transition-colors duration-300 gap-2"
         >
           {title}
           <Paperclip width={14} height={14} />
@@ -138,8 +130,8 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
         />
 
         {selectedFile ? (
-          <div className="flex items-center justify-between gap-3 ">
-            <p className="text-sm font-bold ">{selectedFile.name}</p>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm font-bold">{selectedFile.name}</p>
             <button
               type="button"
               onClick={() => {
@@ -149,19 +141,13 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
                 if (fileInputRef.current) fileInputRef.current.value = "";
               }}
               aria-label="پاک کردن فایل"
-              className="
-    w-[30px] h-[30px]
-    flex items-center justify-center
-    bg-red-600 text-white rounded-md 
-    text-lg font-bold cursor-pointer transition-colors duration-300
-    hover:bg-white hover:text-red-600
-  "
+              className="w-[30px] h-[30px] flex items-center justify-center bg-red-600 text-white rounded-md text-lg font-bold cursor-pointer transition-colors duration-300 hover:bg-white hover:text-red-600"
             >
               ×
             </button>
           </div>
         ) : (
-          <p className="text-sm font-semibold text-base-content  ">
+          <p className="text-sm font-semibold text-base-content">
             هنوز فایلی انتخاب نشده
           </p>
         )}

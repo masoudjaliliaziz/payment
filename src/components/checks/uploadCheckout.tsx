@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
 import persian_fa from "react-date-object/locales/persian_fa";
@@ -11,6 +11,8 @@ import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../store";
 import { setPrice } from "../../someSlice";
 import { useCustomers } from "../../hooks/useCustomerData";
+import { loadPayment, type PaymentType } from "../../api/getData";
+import toast from "react-hot-toast";
 
 const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [item_GUID, setItem_GUID] = useState("");
@@ -18,28 +20,72 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   const [dayOfYear, setDayOfYear] = useState<string>("0");
   const [sayadiCode, setSayadiCode] = useState("");
   const [nationalId, setNationalId] = useState("");
-  const { data: customerData } = useCustomers(props.parent_GUID);
+  const [sayadiError, setSayadiError] = useState<string | null>(null);
+
   const checkPic = useRef<FileUploaderHandle | null>(null);
   const checkConfirmPic = useRef<FileUploaderHandle | null>(null);
+  const qrInputRef = useRef<HTMLInputElement>(null);
+
   const dispatch = useDispatch();
   const price = useSelector((state: RootState) => state.someFeature.price);
-  const qrInputRef = useRef<HTMLInputElement>(null);
+  const { data: customerData } = useCustomers(props.parent_GUID);
+
+  const { data: paymentList = [] } = useQuery<PaymentType[]>({
+    queryKey: ["payments", props.parent_GUID],
+    queryFn: async () => {
+      const data = await loadPayment(props.parent_GUID);
+      return (data as (PaymentType | undefined)[]).filter(
+        (item): item is PaymentType => item !== undefined
+      );
+    },
+    enabled: !!props.parent_GUID,
+  });
+
   useEffect(() => {
     setItem_GUID(uuidv4());
   }, [customerData]);
+
   useEffect(() => {
-    if (qrInputRef.current) {
-      qrInputRef.current.focus();
-    }
+    if (qrInputRef.current) qrInputRef.current.focus();
   }, []);
+
+  useEffect(() => {
+    if (!sayadiCode.trim()) {
+      setSayadiError(null);
+      return;
+    }
+    if (paymentList.some((p) => p.sayadiCode === sayadiCode.trim())) {
+      setSayadiError("این شناسه صیادی قبلاً ثبت شده است.");
+    } else {
+      setSayadiError(null);
+    }
+  }, [sayadiCode, paymentList]);
+
+  const validateFields = () => {
+    if (!sayadiCode.trim()) return "شناسه صیادی وارد نشده است.";
+    if (sayadiError) return sayadiError;
+    if (!nationalId.trim() || nationalId.length !== 10)
+      return "کد ملی معتبر وارد نشده است.";
+    if (!dueDate) return "تاریخ سررسید انتخاب نشده است.";
+    if (!price || price === 0) return "مبلغ وارد نشده است.";
+    if (!checkPic.current?.hasFile?.()) return "تصویر چک الزامی است.";
+    return null;
+  };
+
   const mutation = useMutation({
     mutationFn: async () => {
+      const error = validateFields();
+      if (error) {
+        toast.error(error);
+        throw new Error(error);
+      }
+
       const data = {
-        price: price === "" ? "" : price.toString(),
-        dueDate: dueDate ? dueDate.format("YYYY/MM/DD") : "",
-        dayOfYear: String(dayOfYear),
+        price: price.toString(),
+        dueDate: dueDate?.format("YYYY/MM/DD") || "",
+        dayOfYear,
         sayadiCode: sayadiCode.trim(),
-        nationalId: nationalId,
+        nationalId,
         parentGUID: props.parent_GUID,
         itemGUID: item_GUID,
         SalesExpert: customerData?.["0"]?.SalesExpert || "",
@@ -47,21 +93,27 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
       };
 
       await handleAddItem(data);
-      if (checkConfirmPic.current) await checkConfirmPic.current.uploadFile();
       if (checkPic.current) await checkPic.current.uploadFile();
+      if (checkConfirmPic.current?.hasFile?.()) {
+        await checkConfirmPic.current.uploadFile();
+      }
     },
     onSuccess: () => {
-      if (checkConfirmPic.current) checkConfirmPic.current.clearFile();
-      if (checkPic.current) checkPic.current.clearFile();
-
+      toast.success("چک با موفقیت ثبت شد");
+      checkPic.current?.clearFile?.();
+      checkConfirmPic.current?.clearFile?.();
       dispatch(setPrice(""));
       setDueDate(null);
       setSayadiCode("");
+      setNationalId("");
+      setSayadiError(null);
     },
     onError: (error) => {
-      console.error("خطا در ذخیره یا آپلود:", error);
+      toast.error("خطا در ثبت چک");
+      console.error("خطا:", error);
     },
   });
+
   const formatNumber = (num: number | "") =>
     num === "" ? "" : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 
@@ -72,69 +124,64 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
   };
 
   const handleQRCodeInput = (value: string) => {
-    const fromQR = getLast16Chars(value);
-    setSayadiCode(fromQR);
+    setSayadiCode(getLast16Chars(value));
+    const national = getOwnerNationalId(value);
+    if (national.length === 10) setNationalId(national);
   };
 
-  const handleQRCodeInputForGetNationalId = (value: string) => {
-    const fromQR2 = getOwnerNationalId(value);
-    if (fromQR2.length === 10) setNationalId(fromQR2);
-  };
   function getLast16Chars(str: string) {
     return str.slice(-16);
   }
-  // تابعی که از قبل داشتیم برای استخراج شناسه صیادی
 
   function getOwnerNationalId(str: string) {
     if (!str.includes("IR")) return "";
-
     const parts = str.split("IR");
     if (parts.length < 2 || parts[0].length < 10) return "";
-
-    const beforeIR = parts[0];
-    return beforeIR.slice(-10); // 10 رقم آخر قبل از IR
+    return parts[0].slice(-10);
   }
 
   return (
-    <div className="flex flex-col gap-4 mb-6  p-4 rounded-lg text-base-content">
-      {" "}
+    <div className="flex flex-col gap-4 mb-6 p-4 rounded-lg text-base-content">
       <div className="w-full bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xl flex flex-col gap-6 transition-all duration-300">
-        <span className="text-lg font-bold text-base-content border-b border-base-200 pb-2 text-right">
+        <span className="text-lg font-bold border-b pb-2 text-right">
           ثبت چک جدید
         </span>
 
-        {/* شناسه صیادی و کد ملی */}
-        <div className="flex flex-col gap-2">
-          <label className="text-sm font-semibold text-base-content">
-            شناسه صیادی (از QR)
-          </label>
+        {/* شناسه صیادی */}
+        <div className="flex flex-col gap-1">
+          <label className="text-sm font-semibold">شناسه صیادی (از QR)</label>
           <input
             ref={qrInputRef}
             type="text"
             value={sayadiCode}
-            onChange={(e) => {
-              handleQRCodeInput(e.target.value);
-              handleQRCodeInputForGetNationalId(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.preventDefault();
-            }}
+            onChange={(e) => handleQRCodeInput(e.target.value)}
+            className={`input input-bordered w-full font-mono text-sm ltr ${
+              sayadiError ? "input-error border-red-600" : ""
+            }`}
             placeholder="اسکن یا وارد کردن کد صیادی"
+          />
+          {sayadiError && (
+            <span className="text-xs text-red-600">{sayadiError}</span>
+          )}
+        </div>
+
+        {/* کد ملی */}
+        <div className="flex flex-col gap-2">
+          <label className="text-sm font-semibold">کد ملی صاحب چک</label>
+          <input
+            type="text"
+            value={nationalId}
+            onChange={(e) => setNationalId(e.target.value)}
+            maxLength={10}
+            placeholder="مثلاً: 1234567890"
             className="input input-bordered w-full font-mono text-sm ltr"
           />
-          <div className="text-xs text-gray-500 font-medium flex flex-col sm:flex-row gap-1 sm:gap-4 mt-1">
-            <span>
-              کد ملی صاحب چک: <strong>{nationalId || "-"}</strong>
-            </span>
-          </div>
         </div>
 
         {/* تاریخ و مبلغ */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-base-content">
-              تاریخ سررسید
-            </label>
+            <label className="text-sm font-semibold">تاریخ سررسید</label>
             <DatePicker
               calendar={persian}
               locale={persian_fa}
@@ -150,68 +197,49 @@ const UploadCheckout: React.FC<uploadCheckoutProps> = (props) => {
           </div>
 
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-semibold text-base-content">
-              مبلغ (ریال)
-            </label>
+            <label className="text-sm font-semibold">مبلغ (ریال)</label>
             <input
               type="text"
               value={formatNumber(price)}
               onChange={(e) => dispatch(setPrice(parseNumber(e.target.value)))}
-              placeholder="مثال: 1,500,000"
               className="input input-bordered w-full font-semibold"
+              placeholder="مثال: 1,500,000"
             />
           </div>
         </div>
 
-        {/* آپلود فایل‌ها */}
-        <div className="flex flex-col  gap-4 items-stretch">
-          <div className="flex-1">
-            <FileUploader
-              ref={checkPic}
-              orderNumber={props.parent_GUID}
-              subFolder={item_GUID}
-              title="تصویر چک"
-              inputId="file-upload-check-pic"
-            />
-          </div>
-          <div className="flex-1">
-            <FileUploader
-              ref={checkConfirmPic}
-              orderNumber={props.parent_GUID}
-              subFolder={item_GUID}
-              title="رسید ثبت چک"
-              inputId="file-upload-check-confirm"
-            />
-          </div>
+        {/* فایل‌ها */}
+        <div className="flex flex-col gap-4">
+          <FileUploader
+            ref={checkPic}
+            orderNumber={props.parent_GUID}
+            subFolder={item_GUID}
+            title="تصویر چک (الزامی)"
+            inputId="file-upload-check-pic"
+          />
+          <FileUploader
+            ref={checkConfirmPic}
+            orderNumber={props.parent_GUID}
+            subFolder={item_GUID}
+            title="رسید ثبت چک (اختیاری)"
+            inputId="file-upload-check-confirm"
+          />
         </div>
 
-        {/* دکمه ذخیره */}
+        {/* دکمه ثبت */}
         <div className="flex justify-end mt-4">
           <button
             type="button"
             onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
             className={`btn w-full ${
               mutation.isPending ? "btn-disabled loading" : "btn-primary"
             }`}
-            disabled={mutation.isPending}
           >
             {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
           </button>
         </div>
       </div>
-      {/* <figure className="diff  h-9 aspect-16/9 rounded-xl" tabIndex={0}>
-        <div className="diff-item-1" role="img" tabIndex={0}>
-          <div className="bg-primary  text-base-100 grid place-content-center text-6xl font-black">
-            ZARSIM
-          </div>
-        </div>
-        <div className="diff-item-2" role="img">
-          <div className="bg-base-100 text-primary grid place-content-center text-6xl font-black">
-            ZARSIM
-          </div>
-        </div>
-        <div className="diff-resizer"></div>
-      </figure> */}
     </div>
   );
 };
