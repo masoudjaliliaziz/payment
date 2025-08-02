@@ -66,21 +66,22 @@ function ChecksDraftCard({
       }`}
       onClick={() => toggleSelect(paymentDraft)}
     >
-      <div className="flex items-center justify-between bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
-        {paymentDraft.status === "0" && (
-          <button
-            type="button"
-            className="btn btn-error btn-xs text-white"
-            onClick={(e) => {
-              e.stopPropagation();
-              handleDelete(paymentDraft.ID);
-            }}
-          >
-            <Trash width={16} height={16} />
-          </button>
-        )}
-
-        <div className="grid grid-cols-3 transition-colors duration-500 w-full">
+      <div className="flex flex-col items-center justify-center bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
+        <div className="bg-slate-200 p-3 rounded-md flex justify-end items-center w-full">
+          {paymentDraft.status === "0" && (
+            <button
+              type="button"
+              className="btn btn-error btn-xs text-white"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDelete(paymentDraft.ID);
+              }}
+            >
+              <Trash width={16} height={16} />
+            </button>
+          )}
+        </div>
+        <div className="grid grid-cols-4 transition-colors duration-500 w-full">
           <div>
             <p className="text-sm font-semibold text-gray-500">تاریخ سررسید</p>
             <span className="font-bold text-sky-700 text-sm">

@@ -12,8 +12,10 @@ type Props = {
 };
 
 function ChecksDraft({ parentGUID }: Props) {
+  console.log("parentGUID in ChecksDraft:", parentGUID);
+
   const { data: paymentListDraft = [] } = useQuery<PaymentType[]>({
-    queryKey: ["paymentsDraft", parentGUID],
+    queryKey: ["paymentsDraft"],
     queryFn: async () => {
       const data = await loadPaymentDraft(parentGUID);
       return (data as (PaymentType | undefined)[]).filter(

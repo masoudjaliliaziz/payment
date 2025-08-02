@@ -1,5 +1,3 @@
-
-
 //type for payments -------------------------
 
 import type { CustomerType } from "../types/apiTypes";
@@ -72,11 +70,6 @@ export async function loadPaymentDraft(
   }
 }
 
-
-
-
-
-
 //temp for develop ( this have been load from farvardin)----------------------
 export async function loadDebt(
   parentGUID: string
@@ -104,7 +97,9 @@ export async function loadDebt(
 //load currentUser ---------------------------
 export async function loadCurrentUser(
   parentGUID: string
-): Promise<Partial<CustomerType[]>> {
+): Promise<CustomerType[]> {
+  if (!parentGUID) return [];
+
   const webUrl = "https://crm.zarsim.com";
   const listName = "customer_info";
 

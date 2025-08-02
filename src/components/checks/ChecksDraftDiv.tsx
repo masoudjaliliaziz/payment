@@ -8,8 +8,6 @@ type Props = {
   toggleSelect: (p: PaymentType) => void;
 };
 
-
-
 export default function ChecksDraftDiv({
   paymentListDraft,
   parentGUID,
@@ -17,7 +15,7 @@ export default function ChecksDraftDiv({
   toggleSelect,
 }: Props) {
   return (
-    <>
+    <div className="flex flex-col gap-3 justify-center items-center">
       {paymentListDraft.map((p) => (
         <ChecksDraftCard
           key={p.ID}
@@ -27,6 +25,6 @@ export default function ChecksDraftDiv({
           toggleSelect={toggleSelect}
         />
       ))}
-    </>
+    </div>
   );
 }
