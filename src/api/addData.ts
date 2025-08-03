@@ -1,6 +1,7 @@
 import toast from "react-hot-toast";
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
+import type { PaymentType } from "./getData";
 
 export async function handleAddItem(
   data: Partial<{
@@ -22,9 +23,21 @@ export async function handleAddItem(
   const itemType = "SP.Data.CustomerPaymentDraftListItem";
   const webUrl = "https://crm.zarsim.com";
 
-  if (!data.price || !data.dueDate || !data.sayadiCode) {
-    alert("لطفاً همه فیلدها را وارد کنید.");
+  if (!data.price || !data.dueDate) {
+    toast.error("لطفاً مبلغ و تاریخ سررسید را وارد کنید.");
     return;
+  }
+
+  if (data.cash === "1") {
+    if (!data.bankName) {
+      toast.error("نام بانک الزامی است.");
+      return;
+    }
+  } else {
+    if (!data.sayadiCode) {
+      toast.error("شناسه صیادی الزامی است.");
+      return;
+    }
   }
 
   try {
@@ -67,30 +80,75 @@ export async function handleAddItem(
   }
 }
 
-export async function handleAddItemToPayment(data: {
-  price: string;
-  dueDate: string;
-  nationalId: string;
-  parentGUID: string;
-  dayOfYear: string;
-  itemGUID: string;
-  sayadiCode: string;
-  SalesExpertAcunt_text: string;
-  SalesExpert: string;
-}) {
+export async function handleAddItemToPayment(
+  data: Partial<{
+    price: string;
+    dueDate: string;
+    nationalId: string;
+    parentGUID: string;
+    dayOfYear: string;
+    itemGUID: string;
+    sayadiCode: string;
+    SalesExpertAcunt_text: string;
+    SalesExpert: string;
+    status: string;
+    cash: string;
+    bankName?: string;
+  }>
+) {
   const listName = "CustomerPayment";
   const itemType = "SP.Data.CustomerPaymentListItem";
   const webUrl = "https://crm.zarsim.com";
 
-  if (!data.price || !data.dueDate || !data.sayadiCode) {
-    alert("لطفاً همه فیلدها را وارد کنید.");
+  if (!data.price || !data.dueDate) {
+    toast.error("لطفاً مبلغ و تاریخ سررسید را وارد کنید.");
     return;
+  }
+
+  if (data.cash === "1") {
+    if (!data.bankName) {
+      toast.error("نام بانک الزامی است.");
+      return;
+    }
+  } else {
+    if (!data.sayadiCode) {
+      toast.error("شناسه صیادی الزامی است.");
+      return;
+    }
   }
 
   try {
     const digest = await getDigest();
 
-    // ثبت اطلاعات در CustomerPayment
+    const bodyData: Partial<
+      PaymentType & { __metadata: { type: string }; Title: string }
+    > = {
+      __metadata: { type: itemType },
+      Title: "disributer check",
+      price: data.price,
+      dueDate: data.dueDate,
+      sayadiCode: data.sayadiCode,
+      dayOfYear: data.dayOfYear,
+      nationalId: data.nationalId,
+      SalesExpert: data.SalesExpert,
+      SalesExpertAcunt_text: data.SalesExpertAcunt_text,
+      parentGUID: data.parentGUID,
+      itemGUID: data.itemGUID,
+      cash: data.cash,
+    };
+
+    console.log("cash value:", data.cash); // 🔍 بررسی مقدار
+
+    if (String(data.cash) === "1") {
+      bodyData.status = "1";
+      bodyData.bankName = data.bankName || "";
+    } else {
+      bodyData.status = "0";
+      bodyData.Verified = "0";
+    }
+
+    console.log("bodyData being sent:", bodyData);
+
     await fetch(`${webUrl}/_api/web/lists/getbytitle('${listName}')/items`, {
       method: "POST",
       headers: {
@@ -98,21 +156,7 @@ export async function handleAddItemToPayment(data: {
         "Content-Type": "application/json;odata=verbose",
         "X-RequestDigest": digest,
       },
-      body: JSON.stringify({
-        __metadata: { type: itemType },
-        Title: "disributer check",
-        price: data.price,
-        dueDate: data.dueDate,
-        sayadiCode: data.sayadiCode,
-        dayOfYear: data.dayOfYear,
-        nationalId: data.nationalId,
-        status: "0",
-        Verified: "0",
-        SalesExpert: data.SalesExpert,
-        SalesExpertAcunt_text: data.SalesExpertAcunt_text,
-        parentGUID: data.parentGUID,
-        itemGUID: data.itemGUID,
-      }),
+      body: JSON.stringify(bodyData),
     });
 
     // پیدا کردن آیتم مربوط به itemGUID در customerPaymentDraft
@@ -131,7 +175,6 @@ export async function handleAddItemToPayment(data: {
     if (items.length > 0) {
       const itemId = items[0].Id;
 
-      // آپدیت کردن ستون status
       await fetch(
         `${webUrl}/_api/web/lists/getbytitle('customerPaymentDraft')/items(${itemId})`,
         {

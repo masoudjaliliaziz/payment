@@ -54,17 +54,33 @@ function ChecksDraftCard({
 
   const mutation = useMutation({
     mutationFn: async () => {
-      const data = {
-        price: paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
-        dueDate: paymentDraft.dueDate,
-        dayOfYear: String(paymentDraft.dayOfYear),
-        sayadiCode: paymentDraft.sayadiCode.trim(),
-        nationalId: paymentDraft.nationalId,
-        parentGUID: paymentDraft.parentGUID,
-        itemGUID: paymentDraft.itemGUID,
-        SalesExpert: paymentDraft.SalesExpert || "",
-        SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
-      };
+      let data = {};
+      if (paymentDraft.cash === "0") {
+        data = {
+          price: paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
+          dueDate: paymentDraft.dueDate,
+          dayOfYear: String(paymentDraft.dayOfYear),
+          sayadiCode: paymentDraft.sayadiCode.trim(),
+          nationalId: paymentDraft.nationalId,
+          parentGUID: paymentDraft.parentGUID,
+          itemGUID: paymentDraft.itemGUID,
+          SalesExpert: paymentDraft.SalesExpert || "",
+          SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
+          cash: "0",
+        };
+      } else {
+        data = {
+          price: paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
+          dueDate: paymentDraft.dueDate,
+          dayOfYear: String(paymentDraft.dayOfYear),
+          parentGUID: paymentDraft.parentGUID,
+          bankName: paymentDraft.bankName || "",
+          cash: "1",
+          itemGUID: paymentDraft.itemGUID,
+          SalesExpert: paymentDraft.SalesExpert || "",
+          SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
+        };
+      }
 
       await handleAddItemToPayment(data);
     },
@@ -76,11 +92,7 @@ function ChecksDraftCard({
     },
   });
   // 🔒 داده‌های اجباری: اگر ناقص بودن، اصلاً چیزی رندر نشه
-  const isValid =
-    paymentDraft.price &&
-    paymentDraft.dueDate &&
-    paymentDraft.nationalId &&
-    paymentDraft.sayadiCode;
+  const isValid = paymentDraft.price && paymentDraft.dueDate;
 
   if (!isValid) return null;
 
@@ -91,63 +103,120 @@ function ChecksDraftCard({
       }`}
       onClick={() => toggleSelect(paymentDraft)}
     >
-      <div className="flex flex-col items-center justify-center bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
-        <div className="bg-slate-200 p-3 rounded-md flex justify-end items-center w-full gap-3">
-          {paymentDraft.status === "0" && (
+      {paymentDraft.cash === "0" && (
+        <div className="flex flex-col items-center justify-center bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
+          <div className="bg-slate-200 p-3 rounded-md flex justify-end items-center w-full gap-3">
+            {paymentDraft.status === "0" && (
+              <button
+                type="button"
+                className="btn btn-error btn-xs text-white w-[75px] h-[35px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(paymentDraft.ID);
+                }}
+              >
+                <Trash width={16} height={16} />
+              </button>
+            )}
             <button
               type="button"
-              className="btn btn-error btn-xs text-white w-[75px] h-[35px]"
-              onClick={(e) => {
-                e.stopPropagation();
-                handleDelete(paymentDraft.ID);
-              }}
+              onClick={() => mutation.mutate()}
+              className={`btn w-[75px] h-[35px] ${
+                mutation.isPending ? "btn-disabled loading" : "btn-primary"
+              }`}
+              disabled={mutation.isPending}
             >
-              <Trash width={16} height={16} />
+              {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
             </button>
-          )}
-          <button
-            type="button"
-            onClick={() => mutation.mutate()}
-            className={`btn w-[75px] h-[35px] ${
-              mutation.isPending ? "btn-disabled loading" : "btn-primary"
-            }`}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
-          </button>
-        </div>
-        <div className="grid grid-cols-4 transition-colors duration-500 w-full">
-          <div>
-            <p className="text-sm font-semibold text-gray-500">تاریخ سررسید</p>
-            <span className="font-bold text-sky-700 text-sm">
-              {paymentDraft.dueDate}
-            </span>
           </div>
+          <div className="grid grid-cols-4 transition-colors duration-500 w-full">
+            <div>
+              <p className="text-sm font-semibold text-gray-500">
+                تاریخ سررسید
+              </p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.dueDate}
+              </span>
+            </div>
 
-          <div>
-            <p className="text-sm font-semibold text-gray-500">مبلغ</p>
-            <span className="font-bold text-sky-700 text-sm">
-              {paymentDraft.price}
-            </span>
-          </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-500">مبلغ</p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.price}
+              </span>
+            </div>
 
-          <div>
-            <p className="text-sm font-semibold text-gray-500">
-              شناسه حقیقی / حقوقی
-            </p>
-            <span className="font-bold text-sky-700 text-sm">
-              {paymentDraft.nationalId}
-            </span>
-          </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-500">
+                شناسه حقیقی / حقوقی
+              </p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.nationalId}
+              </span>
+            </div>
 
-          <div>
-            <p className="text-sm font-semibold text-gray-500">شناسه صیادی</p>
-            <span className="font-bold text-sky-700 text-sm">
-              {paymentDraft.sayadiCode}
-            </span>
+            <div>
+              <p className="text-sm font-semibold text-gray-500">شناسه صیادی</p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.sayadiCode}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+      {paymentDraft.cash === "1" && (
+        <div className="flex flex-col items-center justify-center bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
+          <div className="bg-slate-200 p-3 rounded-md flex justify-end items-center w-full gap-3">
+            <span className="font-semibold text-info">واریز نقدی</span>
+            {paymentDraft.status === "0" && (
+              <button
+                type="button"
+                className="btn btn-error btn-xs text-white w-[75px] h-[35px]"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(paymentDraft.ID);
+                }}
+              >
+                <Trash width={16} height={16} />
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={() => mutation.mutate()}
+              className={`btn w-[75px] h-[35px] ${
+                mutation.isPending ? "btn-disabled loading" : "btn-primary"
+              }`}
+              disabled={mutation.isPending}
+            >
+              {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
+            </button>
+          </div>
+          <div className="grid grid-cols-4 transition-colors duration-500 w-full">
+            <div>
+              <p className="text-sm font-semibold text-gray-500">
+                تاریخ سررسید
+              </p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.dueDate}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-500">مبلغ</p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.price}
+              </span>
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-gray-500">نام بانک</p>
+              <span className="font-bold text-sky-700 text-sm">
+                {paymentDraft.bankName}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

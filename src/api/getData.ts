@@ -24,6 +24,8 @@ export type PaymentType = {
   Verified: string;
   SalesExpert: string;
   SalesExpertAcunt_text: string;
+  cash: string;
+  bankName: string;
 };
 
 //load paymentrs byu guyid for each customer -=------------------------------
