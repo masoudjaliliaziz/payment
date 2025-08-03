@@ -2,17 +2,22 @@ import toast from "react-hot-toast";
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 
-export async function handleAddItem(data: {
-  price: string;
-  dueDate: string;
-  nationalId: string;
-  parentGUID: string;
-  dayOfYear: string;
-  itemGUID: string;
-  sayadiCode: string;
-  SalesExpertAcunt_text: string;
-  SalesExpert: string;
-}) {
+export async function handleAddItem(
+  data: Partial<{
+    price: string;
+    dueDate: string;
+    nationalId: string;
+    parentGUID: string;
+    dayOfYear: string;
+    itemGUID: string;
+    sayadiCode: string;
+    SalesExpertAcunt_text: string;
+    SalesExpert: string;
+    status: string;
+    cash: string;
+    bankName?: string;
+  }>
+) {
   const listName = "CustomerPaymentDraft";
   const itemType = "SP.Data.CustomerPaymentDraftListItem";
   const webUrl = "https://crm.zarsim.com";
@@ -40,7 +45,9 @@ export async function handleAddItem(data: {
         sayadiCode: data.sayadiCode,
         dayOfYear: data.dayOfYear,
         nationalId: data.nationalId,
-        status: "0",
+        cash: data.cash,
+        status: data.status,
+        bankName: data.bankName || "",
         SalesExpert: data.SalesExpert,
         SalesExpertAcunt_text: data.SalesExpertAcunt_text,
         parentGUID: data.parentGUID,
