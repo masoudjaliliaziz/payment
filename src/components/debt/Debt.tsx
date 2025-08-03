@@ -134,30 +134,30 @@ function Debt({ parentGUID }: Props) {
           return (
             <div
               key={index}
-              className={`flex w-full items-start justify-between px-6 py-3 rounded-md shadow-md  ${
+              className={`grid grid-cols-5  p-3 rounded-md shadow-md w-full items-center justify-center bg-red-500${
                 index % 2 === 0 ? "bg-base-300" : "bg-base-100"
               }`}
             >
-              <div className="flex flex-row-reverse items-center gap-5">
+              <div className="flex flex-row-reverse items-center gap-1.5 ">
                 <span className="font-semibold text-sm text-primary">
-                  جمع کل فاکتور
+                  جمع کل
                 </span>
                 <span className="font-semibold text-sm text-base-content">
-                  {debt.originalDebt}
+                  {Number(debt.originalDebt).toLocaleString() || "نامشخص"}
                 </span>
               </div>
 
-              <div className="flex flex-row-reverse items-center gap-5">
+              <div className="flex flex-row-reverse items-center gap-1.5 ">
                 <span className="font-semibold text-sm text-primary">
                   باقی‌مانده
                 </span>
                 <span className="font-semibold text-sm text-base-content">
-                  {debt.debt}
+                  {Number(debt.debt).toLocaleString() || "نامشخص"}
                 </span>
               </div>
 
               {/* بقیه فیلدها مثل شماره فاکتور و تاریخ */}
-              <div className="flex flex-row-reverse items-center gap-5">
+              <div className="flex flex-row-reverse items-center gap-1.5 ">
                 <span className="font-semibold text-sm text-primary">
                   شماره فاکتور
                 </span>
@@ -165,8 +165,18 @@ function Debt({ parentGUID }: Props) {
                   {debt.orderNum}
                 </span>
               </div>
-
-              <div className="flex flex-row-reverse items-center gap-5">
+              <div className="flex justify-center items-center gap-1.5 ">
+                {isSettled ? (
+                  <span className="text-green-600 font-bold text-xs ">
+                    تسویه شده
+                  </span>
+                ) : (
+                  <span className="text-red-600 font-bold text-xs  ">
+                    پرداخت نشده
+                  </span>
+                )}
+              </div>
+              <div className="flex flex-row-reverse items-center gap-1.5 ">
                 <span className="font-semibold text-sm text-primary">
                   تاریخ ایجاد فاکتور
                 </span>
@@ -176,12 +186,6 @@ function Debt({ parentGUID }: Props) {
               </div>
 
               {/* بقیه اطلاعات فاکتور */}
-
-              {isSettled ? (
-                <span className="text-green-600 font-bold">✔️ تسویه شده</span>
-              ) : (
-                <span className="text-red-600 font-bold">✖️ پرداخت نشده</span>
-              )}
             </div>
           );
         })}

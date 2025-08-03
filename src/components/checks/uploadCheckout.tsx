@@ -243,8 +243,13 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               <input
                 type="text"
                 value={nationalId}
-                onChange={(e) => setNationalId(e.target.value)}
-                maxLength={10}
+                onChange={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setNationalId(e.target.value);
+                }}
+                minLength={10}
+                maxLength={11}
                 placeholder="مثلاً: 1234567890"
                 className="input input-bordered w-full font-mono text-sm ltr"
               />
