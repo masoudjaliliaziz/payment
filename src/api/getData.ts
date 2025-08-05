@@ -26,6 +26,8 @@ export type PaymentType = {
   SalesExpertAcunt_text: string;
   cash: string;
   bankName: string;
+  VerifiedHoghoghi: string;
+  nationalIdHoghoghi: string;
 };
 
 //load paymentrs byu guyid for each customer -=------------------------------

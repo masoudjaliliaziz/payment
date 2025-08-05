@@ -2,22 +2,30 @@ import toast from "react-hot-toast";
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 import type { PaymentType } from "./getData";
-
+type Data = {
+  __metadata: { type: string };
+  Title: string;
+  price: string;
+  dueDate: string;
+  sayadiCode: string;
+  dayOfYear: string;
+  nationalId: string;
+  nationalIdHoghoghi: string;
+  cash: string;
+  status: string;
+  bankName: string;
+  SalesExpert: string;
+  SalesExpertAcunt_text: string;
+  parentGUID: string;
+  itemGUID: string;
+  Verified?: string;
+  VerifiedHoghoghi?: string;
+};
 export async function handleAddItem(
-  data: Partial<{
-    price: string;
-    dueDate: string;
-    nationalId: string;
-    parentGUID: string;
-    dayOfYear: string;
-    itemGUID: string;
-    sayadiCode: string;
-    SalesExpertAcunt_text: string;
-    SalesExpert: string;
-    status: string;
-    cash: string;
-    bankName?: string;
-  }>
+  data: Partial<Data> & {
+    Verified?: string;
+    VerifiedHoghoghi?: string;
+  }
 ) {
   const listName = "CustomerPaymentDraft";
   const itemType = "SP.Data.CustomerPaymentDraftListItem";
@@ -43,6 +51,35 @@ export async function handleAddItem(
   try {
     const digest = await getDigest();
 
+    // تعریف bodyData با فیلدهای پایه
+    const bodyData: Partial<Data> = {
+      __metadata: { type: itemType },
+      Title: "disributer check",
+      price: data.price,
+      dueDate: data.dueDate,
+      sayadiCode: data.sayadiCode,
+      dayOfYear: data.dayOfYear,
+
+      nationalIdHoghoghi: data.nationalIdHoghoghi,
+      cash: data.cash,
+      status: data.status,
+      bankName: data.bankName || "",
+      SalesExpert: data.SalesExpert,
+      SalesExpertAcunt_text: data.SalesExpertAcunt_text,
+      parentGUID: data.parentGUID,
+      itemGUID: data.itemGUID,
+    };
+
+    // فقط یکی از این دو را اضافه کن اگر مقدار داشته باشند
+    if (data.nationalId) {
+      bodyData.Verified = data.Verified;
+      bodyData.nationalId = data.nationalId;
+    }
+    if (data.nationalIdHoghoghi) {
+      bodyData.VerifiedHoghoghi = data.VerifiedHoghoghi;
+      bodyData.nationalIdHoghoghi = data.nationalIdHoghoghi;
+    }
+
     await fetch(`${webUrl}/_api/web/lists/getbytitle('${listName}')/items`, {
       method: "POST",
       headers: {
@@ -50,22 +87,7 @@ export async function handleAddItem(
         "Content-Type": "application/json;odata=verbose",
         "X-RequestDigest": digest,
       },
-      body: JSON.stringify({
-        __metadata: { type: itemType },
-        Title: "disributer check",
-        price: data.price,
-        dueDate: data.dueDate,
-        sayadiCode: data.sayadiCode,
-        dayOfYear: data.dayOfYear,
-        nationalId: data.nationalId,
-        cash: data.cash,
-        status: data.status,
-        bankName: data.bankName || "",
-        SalesExpert: data.SalesExpert,
-        SalesExpertAcunt_text: data.SalesExpertAcunt_text,
-        parentGUID: data.parentGUID,
-        itemGUID: data.itemGUID,
-      }),
+      body: JSON.stringify(bodyData),
     });
 
     toast.success("اطلاعات با موفقیت ذخیره شد.");
@@ -94,6 +116,8 @@ export async function handleAddItemToPayment(
     status: string;
     cash: string;
     bankName?: string;
+    nationalIdHoghoghi?: string;
+    VerifiedHoghoghi?: string;  
   }>
 ) {
   const listName = "CustomerPayment";
@@ -129,7 +153,6 @@ export async function handleAddItemToPayment(
       dueDate: data.dueDate,
       sayadiCode: data.sayadiCode,
       dayOfYear: data.dayOfYear,
-      nationalId: data.nationalId,
       SalesExpert: data.SalesExpert,
       SalesExpertAcunt_text: data.SalesExpertAcunt_text,
       parentGUID: data.parentGUID,
@@ -139,13 +162,19 @@ export async function handleAddItemToPayment(
 
     console.log("cash value:", data.cash); // 🔍 بررسی مقدار
 
-    if (String(data.cash) === "1") {
-      bodyData.status = "1";
-      bodyData.bankName = data.bankName || "";
-    } else {
-      bodyData.status = "0";
-      bodyData.Verified = "0";
-    }
+if (String(data.cash) === "1") {
+  bodyData.status = "1";
+  bodyData.bankName = data.bankName || "";
+} else {
+  if (data.nationalIdHoghoghi) {
+    bodyData.VerifiedHoghoghi = "0";
+    bodyData.nationalIdHoghoghi = data.nationalIdHoghoghi;
+  } else {
+    bodyData.Verified = "0";
+    bodyData.nationalId = data.nationalId;
+  }
+}
+
 
     console.log("bodyData being sent:", bodyData);
 

@@ -18,27 +18,27 @@ type Props = {
 };
 
 const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
+  const [activeTab, setActiveTab] = useState<"hoghoghi" | "haghighi">(
+    "haghighi"
+  );
   const [item_GUID, setItem_GUID] = useState("");
   const [dueDate, setDueDate] = useState<DateObject | null>(null);
   const [dayOfYear, setDayOfYear] = useState<string>("0");
   const [sayadiCode, setSayadiCode] = useState("");
   const [nationalId, setNationalId] = useState("");
+  const [nationalIdHoghoghi, setNationalIdHoghoghi] = useState("");
   const [sayadiError, setSayadiError] = useState<string | null>(null);
   const [price, setPriceState] = useState<number | "">("");
   const [priceCash, setPriceCashState] = useState<number | "">("");
   const [dayOfYearCash, setDayOfYearCash] = useState<string>("0");
   const [dueDateCash, setDueDateCash] = useState<DateObject | null>(null);
-
   const [bankName, setBankName] = useState<string>("");
   const cashPic = useRef<FileUploaderHandle | null>(null);
-
   const checkPic = useRef<FileUploaderHandle | null>(null);
   const checkConfirmPic = useRef<FileUploaderHandle | null>(null);
   const qrInputRef = useRef<HTMLInputElement>(null);
   const queryClient = useQueryClient();
-
   const { data: customerData } = useCustomers(parent_GUID);
-
   const { data: paymentList = [] } = useQuery<PaymentType[]>({
     queryKey: ["payments", parent_GUID],
     queryFn: async () => {
@@ -75,8 +75,6 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
       if (!sayadiCode.trim()) return "شناسه صیادی وارد نشده است.";
       if (sayadiError) return sayadiError;
 
-      if (!nationalId.trim() || nationalId.length !== 10)
-        return "کد ملی معتبر وارد نشده است.";
       if (!dueDate) return "تاریخ سررسید انتخاب نشده است.";
       if (!price || price === 0) return "مبلغ وارد نشده است.";
 
@@ -105,6 +103,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
         price: string;
         dueDate: string;
         nationalId?: string;
+        nationalIdHoghoghi?: string;
         parentGUID: string;
         dayOfYear: string;
         itemGUID: string;
@@ -114,8 +113,10 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
         status: string;
         cash: string;
         bankName?: string;
+        Verified?: string;
+        VerifiedHoghoghi?: string;
       };
-      if (type === "check") {
+      if (type === "check" && activeTab === "haghighi") {
         data = {
           price: price ? price.toString() : "",
           dueDate: dueDate?.format("YYYY/MM/DD") || "",
@@ -129,6 +130,23 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
             customerData?.["0"]?.SalesExpertAcunt_text || "",
           status: "0",
           cash: "0",
+          Verified: "0",
+        };
+      } else if (type === "check" && activeTab === "hoghoghi") {
+        data = {
+          price: price ? price.toString() : "",
+          dueDate: dueDate?.format("YYYY/MM/DD") || "",
+          dayOfYear,
+          sayadiCode: sayadiCode.trim(),
+          nationalIdHoghoghi,
+          parentGUID: parent_GUID,
+          itemGUID: item_GUID,
+          SalesExpert: customerData?.["0"]?.SalesExpert || "",
+          SalesExpertAcunt_text:
+            customerData?.["0"]?.SalesExpertAcunt_text || "",
+          status: "0",
+          cash: "0",
+          VerifiedHoghoghi: "0",
         };
       } else {
         data = {
@@ -223,6 +241,26 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
 
         {type === "check" && (
           <>
+            <div className=" p-4 w-full flex justify-between items-center gap-2 text-xs font-bold">
+              <button
+                type="button"
+                className={`tab ${
+                  activeTab === "haghighi" ? "tab-active" : ""
+                } rounded-md`}
+                onClick={() => setActiveTab("haghighi")}
+              >
+                با شناسه حقیقی
+              </button>
+              <button
+                type="button"
+                className={`tab ${
+                  activeTab === "hoghoghi" ? "tab-active" : ""
+                } rounded-md`}
+                onClick={() => setActiveTab("hoghoghi")}
+              >
+                با شناسه حقوقی
+              </button>
+            </div>
             <input
               ref={qrInputRef}
               type="text"
@@ -238,22 +276,43 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               }`}
               placeholder="اسکن یا وارد کردن کد صیادی"
             />
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold">کد ملی صاحب چک</label>
-              <input
-                type="text"
-                value={nationalId}
-                onChange={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setNationalId(e.target.value);
-                }}
-                minLength={10}
-                maxLength={11}
-                placeholder="مثلاً: 1234567890"
-                className="input input-bordered w-full font-mono text-sm ltr"
-              />
-            </div>{" "}
+
+            {activeTab === "haghighi" && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold">کد ملی صاحب چک</label>
+                <input
+                  type="text"
+                  value={nationalId}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNationalId(e.target.value);
+                  }}
+                  minLength={10}
+                  maxLength={11}
+                  placeholder="مثلاً: 1234567890"
+                  className="input input-bordered w-full font-mono text-sm ltr"
+                />
+              </div>
+            )}
+            {activeTab === "hoghoghi" && (
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold"> شناسه ملی شرکت</label>
+                <input
+                  type="text"
+                  value={nationalIdHoghoghi}
+                  onChange={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setNationalIdHoghoghi(e.target.value);
+                  }}
+                  minLength={10}
+                  maxLength={11}
+                  placeholder="مثلاً: 1234567890"
+                  className="input input-bordered w-full font-mono text-sm ltr"
+                />
+              </div>
+            )}
             <div className="flex flex-col gap-2">
               <label className="text-sm font-semibold">مبلغ (ریال)</label>
               <input

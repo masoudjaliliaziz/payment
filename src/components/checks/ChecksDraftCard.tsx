@@ -56,18 +56,35 @@ function ChecksDraftCard({
     mutationFn: async () => {
       let data = {};
       if (paymentDraft.cash === "0") {
-        data = {
-          price: paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
-          dueDate: paymentDraft.dueDate,
-          dayOfYear: String(paymentDraft.dayOfYear),
-          sayadiCode: paymentDraft.sayadiCode.trim(),
-          nationalId: paymentDraft.nationalId,
-          parentGUID: paymentDraft.parentGUID,
-          itemGUID: paymentDraft.itemGUID,
-          SalesExpert: paymentDraft.SalesExpert || "",
-          SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
-          cash: "0",
-        };
+        if (paymentDraft.VerifiedHoghoghi) {
+          data = {
+            price:
+              paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
+            dueDate: paymentDraft.dueDate,
+            dayOfYear: String(paymentDraft.dayOfYear),
+            sayadiCode: paymentDraft.sayadiCode.trim(),
+            nationalIdHoghoghi: paymentDraft.nationalIdHoghoghi,
+            parentGUID: paymentDraft.parentGUID,
+            itemGUID: paymentDraft.itemGUID,
+            SalesExpert: paymentDraft.SalesExpert || "",
+            SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
+            cash: "0",
+          };
+        } else {
+          data = {
+            price:
+              paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
+            dueDate: paymentDraft.dueDate,
+            dayOfYear: String(paymentDraft.dayOfYear),
+            sayadiCode: paymentDraft.sayadiCode.trim(),
+            nationalId: paymentDraft.nationalId,
+            parentGUID: paymentDraft.parentGUID,
+            itemGUID: paymentDraft.itemGUID,
+            SalesExpert: paymentDraft.SalesExpert || "",
+            SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
+            cash: "0",
+          };
+        }
       } else {
         data = {
           price: paymentDraft.price === "" ? "" : paymentDraft.price.toString(),
