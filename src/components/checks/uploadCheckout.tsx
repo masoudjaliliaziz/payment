@@ -188,7 +188,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
           itemGUID: item_GUID,
           SalesExpert: customerData?.["0"]?.SalesExpert || "",
           SalesExpertAcunt_text:
-            customerData?.["0"]?.SalesExpertAcunt_text || "",
+          customerData?.["0"]?.SalesExpertAcunt_text || "",
           status: "0",
           cash: "1",
           bankName,

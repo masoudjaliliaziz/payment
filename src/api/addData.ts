@@ -59,7 +59,6 @@ export async function handleAddItem(
       dueDate: data.dueDate,
       sayadiCode: data.sayadiCode,
       dayOfYear: data.dayOfYear,
-
       nationalIdHoghoghi: data.nationalIdHoghoghi,
       cash: data.cash,
       status: data.status,
@@ -160,10 +159,10 @@ export async function handleAddItemToPayment(
       cash: data.cash,
     };
 
-    console.log("cash value:", data.cash); // 🔍 بررسی مقدار
+ 
 
 if (String(data.cash) === "1") {
-  bodyData.status = "1";
+  bodyData.status = "0";
   bodyData.bankName = data.bankName || "";
 } else {
   if (data.nationalIdHoghoghi) {
