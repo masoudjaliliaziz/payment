@@ -159,7 +159,7 @@ function ChecksDraftCard({
             <div>
               <p className="text-sm font-semibold text-gray-500">مبلغ</p>
               <span className="font-bold text-sky-700 text-sm">
-                {paymentDraft.price}
+                {Number(paymentDraft.price).toLocaleString("fa-IR")}
               </span>
             </div>
 
