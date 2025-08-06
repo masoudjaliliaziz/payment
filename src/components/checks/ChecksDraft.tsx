@@ -46,6 +46,10 @@ function ChecksDraft({ parentGUID }: Props) {
 
   const rasDayOfYear = calculateRasDatePayment(selectedPayments);
   const rasDate = rasDayOfYear ? getShamsiDateFromDayOfYear(rasDayOfYear) : "—";
+  const totalSelectedPrice = selectedPayments.reduce((sum, p) => {
+    const amount = Number(p.price);
+    return sum + (isNaN(amount) ? 0 : amount);
+  }, 0);
 
   const queryClient = useQueryClient();
 
@@ -82,9 +86,15 @@ function ChecksDraft({ parentGUID }: Props) {
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
-        <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
-          راس چک‌های انتخابی: {rasDate}
+        <div className="flex gap-3 items-center">
+          <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
+            راس چک‌ها: {rasDate}
+          </div>
+          <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
+            جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} تومان
+          </div>
         </div>
+
         <div className="flex gap-3 items-center">
           <button
             type="button"
