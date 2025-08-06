@@ -160,6 +160,7 @@ function Payment({ parentGUID }: Props) {
         <div className="flex flex-wrap gap-2 justify-center">
           {Object.entries(statusLabels).map(([key, label]) => (
             <button
+              type="button"
               key={key}
               onClick={() =>
                 setSelectedStatus(key as keyof typeof statusLabels)

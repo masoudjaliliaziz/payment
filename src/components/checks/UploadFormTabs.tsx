@@ -9,13 +9,13 @@ const UploadFormTabs: React.FC<Props> = ({ parent_GUID }) => {
   const [activeTab, setActiveTab] = useState<"check" | "cash">("check");
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col justify-center items-center gap-3   bg-base-100 rounded-lg shadow-md">
-      <div className="tabs tabs-boxed mb-4 p-4 w-full flex justify-between items-center gap-3">
+    <div className="w-full max-w-3xl mx-auto flex flex-col justify-center items-center  bg-base-100 rounded-lg shadow-md">
+      <div className="tabs tabs-boxed   w-full flex justify-end items-center gap-3 pt-3 pr-3">
         <button
           type="button"
           className={`tab ${
-            activeTab === "check" ? "tab-active" : ""
-          } rounded-md`}
+            activeTab === "check" ? "bg-slate-400 text-white" : ""
+          } rounded-md   bg-slate-200 font-black text-xs`}
           onClick={() => setActiveTab("check")}
         >
           ثبت چک
@@ -23,8 +23,8 @@ const UploadFormTabs: React.FC<Props> = ({ parent_GUID }) => {
         <button
           type="button"
           className={`tab ${
-            activeTab === "cash" ? "tab-active" : ""
-          } rounded-md`}
+            activeTab === "cash" ? "bg-slate-400" : ""
+          } rounded-md   bg-slate-200 font-black text-xs`}
           onClick={() => setActiveTab("cash")}
         >
           واریز نقدی

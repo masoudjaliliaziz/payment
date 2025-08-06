@@ -12,6 +12,37 @@ import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import toast from "react-hot-toast";
 
+const bankOptions = [
+  {
+    value: "پاسارگاد 1-10706567-110-284 پاسداران - جاري",
+    label: "پاسارگاد - پاسداران",
+  },
+  { value: "تجارت 1416066538 مرکزي ساوه - جاري", label: "تجارت - مرکزي ساوه" },
+  {
+    value: "صادرات 0102171481006 مرکزي ساوه - جاري",
+    label: "صادرات - مرکزي ساوه",
+  },
+  { value: "ملت 3385356379 سروغربي- قرض الحسنه جاري", label: "ملت - سروغربي" },
+  {
+    value: "ملت 4621823449 مرکزي ساوه - قرض الحسنه جاري",
+    label: "ملت - مرکزي ساوه",
+  },
+  { value: "ملي 0109821280001 پاسداران - جاري", label: "ملي - پاسداران" },
+  {
+    value: "پارسيان 20100943668605 بلوار پروين تهران - قرض الحسنه جاري",
+    label: "پارسيان - پروين تهران",
+  },
+  { value: "صندوق جاويد 5026100391", label: "صندوق جاويد" },
+  { value: "تجارت 1019399873 نوبنياد - جاري", label: "تجارت - نوبنياد" },
+  { value: "تجارت 177001820893 درياي نور - جاري", label: "تجارت - درياي نور" },
+  { value: "سامان 1-42548-40-805 - جاري", label: "سامان" },
+  { value: "صندوق کارآفريني اميد- ساوه", label: "کارآفريني اميد - ساوه" },
+  {
+    value: "اقتصاد نوين 1-5008500-2-125 بهارستان",
+    label: "اقتصاد نوين - بهارستان",
+  },
+];
+
 type Props = {
   parent_GUID: string;
   type: "check" | "cash"; // 👈 نوع فرم
@@ -235,50 +266,56 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
   return (
     <div className="flex flex-col gap-4 mb-6 p-4 rounded-lg text-base-content">
       <div className="w-full bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xl flex flex-col gap-6 transition-all duration-300">
+        {type === "check" && (
+          <div className=" tabs tabs-boxed   w-full flex justify-between items-center gap-1 text-xs font-bold">
+            <button
+              type="button"
+              className={`tab ${
+                activeTab === "haghighi" ? "bg-slate-400 text-white" : ""
+              } rounded-md   bg-slate-200 font-black text-xs`}
+              onClick={() => setActiveTab("haghighi")}
+            >
+              شناسه حقیقی
+            </button>
+            <button
+              type="button"
+              className={`tab ${
+                activeTab === "hoghoghi" ? "bg-slate-400 text-white" : ""
+              } rounded-md   bg-slate-200 font-black text-xs`}
+              onClick={() => setActiveTab("hoghoghi")}
+            >
+              شناسه حقوقی
+            </button>
+          </div>
+        )}
+
         <span className="text-lg font-bold border-b pb-2 text-right">
           {type === "check" ? "ثبت چک جدید" : "ثبت واریز نقدی"}
         </span>
 
         {type === "check" && (
           <>
-            <div className=" p-4 w-full flex justify-between items-center gap-2 text-xs font-bold">
-              <button
-                type="button"
-                className={`tab ${
-                  activeTab === "haghighi" ? "tab-active" : ""
-                } rounded-md`}
-                onClick={() => setActiveTab("haghighi")}
-              >
-                با شناسه حقیقی
-              </button>
-              <button
-                type="button"
-                className={`tab ${
-                  activeTab === "hoghoghi" ? "tab-active" : ""
-                } rounded-md`}
-                onClick={() => setActiveTab("hoghoghi")}
-              >
-                با شناسه حقوقی
-              </button>
+            <div className="flex flex-col gap-2 items-end ">
+              <label className="text-sm font-semibold"> کد صیادی </label>
+              <input
+                ref={qrInputRef}
+                type="text"
+                value={sayadiCode}
+                onChange={(e) => handleQRCodeInput(e, e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault(); // جلوگیری از رفرش یا ارسال فرم
+                  }
+                }}
+                className={`input input-bordered w-full font-mono text-sm ltr ${
+                  sayadiError ? "input-error border-red-600" : ""
+                }`}
+                placeholder="اسکن یا وارد کردن کد صیادی"
+              />
             </div>
-            <input
-              ref={qrInputRef}
-              type="text"
-              value={sayadiCode}
-              onChange={(e) => handleQRCodeInput(e, e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault(); // جلوگیری از رفرش یا ارسال فرم
-                }
-              }}
-              className={`input input-bordered w-full font-mono text-sm ltr ${
-                sayadiError ? "input-error border-red-600" : ""
-              }`}
-              placeholder="اسکن یا وارد کردن کد صیادی"
-            />
 
             {activeTab === "haghighi" && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 items-end ">
                 <label className="text-sm font-semibold">کد ملی صاحب چک</label>
                 <input
                   type="text"
@@ -296,7 +333,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               </div>
             )}
             {activeTab === "hoghoghi" && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 items-end ">
                 <label className="text-sm font-semibold"> شناسه ملی شرکت</label>
                 <input
                   type="text"
@@ -313,7 +350,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
                 />
               </div>
             )}
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 items-end ">
               <label className="text-sm font-semibold">مبلغ (ریال)</label>
               <input
                 type="text"
@@ -323,7 +360,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
                 placeholder="مثال: 1,500,000"
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 items-end ">
               <label className="text-sm font-semibold">تاریخ سررسید</label>
               <DatePicker
                 calendar={persian}
@@ -345,7 +382,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               title="تصویر چک (الزامی)"
               inputId="file-upload-check-pic"
             />
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-4 ">
               <FileUploader
                 ref={checkConfirmPic}
                 orderNumber={parent_GUID}
@@ -371,17 +408,23 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
 
         {type === "cash" && (
           <>
-            {" "}
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold">نام بانک </label>
-              <input
-                type="text"
+            <div className="flex flex-col gap-2 items-end">
+              <label className="text-sm font-semibold">نام بانک مقصد</label>
+              <select
+                className="select select-bordered w-full text-right"
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-              />
+              >
+                <option value="">بانک را انتخاب کنید</option>
+                {bankOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-sm font-semibold">تاریخ سررسید</label>
+            <div className="flex flex-col gap-2 items-end">
+              <label className="text-sm font-semibold">تاریخ واریز</label>
               <DatePicker
                 calendar={persian}
                 locale={persian_fa}
@@ -395,7 +438,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
                 format="YYYY/MM/DD"
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 items-end">
               <label className="text-sm font-semibold">مبلغ (ریال)</label>
               <input
                 type="text"
@@ -409,7 +452,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               ref={cashPic}
               orderNumber={parent_GUID}
               subFolder={item_GUID}
-              title="تصویر چک (الزامی)"
+              title="تصویر فیش واریزی (الزامی)"
               inputId="file-upload-check-pic"
             />
             <div className="flex justify-end mt-4">
