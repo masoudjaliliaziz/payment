@@ -128,9 +128,9 @@ function Debt({ parentGUID }: Props) {
   const activeDebts = output.filter((debt) => Number(debt.debt) > 0);
 
   return (
-    <div className="w-full relative mt-8 px-4  h-dvh">
-      <div className="sticky top-0 z-10 bg-base-100 p-4 shadow-md">
-        <div className="flex flex-row-reverse gap-6 justify-between items-center px-7 py-4 font-bold text-sm">
+    <div className="w-full relative mt-8 px-4  h-dvh ">
+      <div className="sticky top-0 z-10 bg-base-100 p-4 shadow-md ">
+        <div className="flex flex-row-reverse gap-14 justify-center items-center px-7 py-4 font-bold text-sm">
           {/* جمع کل بدهی */}
           <div className="flex flex-col gap-1 justify-center items-center">
             <span className="text-primary">جمع کل بدهی</span>

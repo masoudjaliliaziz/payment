@@ -120,13 +120,46 @@ function Payment({ parentGUID }: Props) {
   }, [paymentList]);
 
   return (
-    <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg ">
-      <div className="flex-1 overflow-y-auto w-full px-4 py-6">
-        {/* 🔘 فیلتر وضعیت پرداخت */}
-        <div className="mb-4 flex flex-wrap gap-2 justify-center">
+    <div className="flex flex-col h-dvh w-full bg-base-200 rounded-lg gap-3 ">
+      {/* فیلترها - Sticky Top */}
+      <div className="sticky top-0 z-20  py-3 px-4 flex flex-col gap-4 bg-white shadow-md rounded-t-lg">
+        <div className="bg-base-100 w-full  mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl text-sm">
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <span className="text-success">جمع پرداخت‌های تایید شده</span>
+            <div className="flex justify-center items-center gap-3">
+              <span className="text-base-content text-xs">ریال</span>
+              <span className="text-info">{totalFinal.toLocaleString()}</span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <span className="text-info">در انتظار تایید خزانه</span>
+            <div className="flex justify-center items-center gap-3">
+              <span className="text-base-content text-xs">ریال</span>
+              <span className="text-info">
+                {totalPendingTreasury.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <span className="text-warning">در انتظار تایید کارشناس</span>
+            <div className="flex justify-center items-center gap-3">
+              <span className="text-base-content text-xs">ریال</span>
+              <span className="text-info">
+                {totalPendingAgent.toLocaleString()}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <span className="text-base-content">راس پرداخت‌ها</span>
+            <span className="text-info">{paymentRasShamsi}</span>
+          </div>
+        </div>
+        <div className="flex flex-wrap gap-2 justify-center">
           {Object.entries(statusLabels).map(([key, label]) => (
             <button
-              type="button"
               key={key}
               onClick={() =>
                 setSelectedStatus(key as keyof typeof statusLabels)
@@ -141,52 +174,20 @@ function Payment({ parentGUID }: Props) {
             </button>
           ))}
         </div>
+      </div>
 
+      {/* لیست پرداخت‌ها */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
         {isLoading && (
           <span className="loading loading-infinity loading-lg"></span>
         )}
         {isError && <p className="text-red-600">خطا: {String(error)}</p>}
-
         {filteredPayments.length > 0 && (
           <PaymentDiv parentGUID={parentGUID} paymentList={filteredPayments} />
         )}
       </div>
 
-      {/* ✅ فوتر اطلاعات مالی */}
-      <div className="bg-base-100 w-full max-w-[95%] h-24 mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl border-primary border border-b-0 text-sm sticky bottom-0 z-10">
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-success">جمع پرداخت‌های تایید شده</span>
-          <div className="flex justify-center items-center gap-3">
-            <span className="text-base-content text-xs">ریال</span>
-            <span className="text-info">{totalFinal.toLocaleString()}</span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-info">در انتظار تایید خزانه</span>
-          <div className="flex justify-center items-center gap-3">
-            <span className="text-base-content text-xs">ریال</span>
-            <span className="text-info">
-              {totalPendingTreasury.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-warning">در انتظار تایید کارشناس</span>
-          <div className="flex justify-center items-center gap-3">
-            <span className="text-base-content text-xs">ریال</span>
-            <span className="text-info">
-              {totalPendingAgent.toLocaleString()}
-            </span>
-          </div>
-        </div>
-
-        <div className="flex flex-col gap-3 justify-center items-center">
-          <span className="text-base-content">راس پرداخت‌ها</span>
-          <span className="text-info">{paymentRasShamsi}</span>
-        </div>
-      </div>
+      {/* فوتر اطلاعات مالی - Sticky Bottom */}
     </div>
   );
 }

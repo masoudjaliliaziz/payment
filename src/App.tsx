@@ -59,7 +59,7 @@ function App() {
             آرشیو بدهی ها
           </Link>
         </div>
-        <div className="p-4">
+        <div className="p-4 hidden">
           <button
             onClick={toggleDarkMode}
             className="btn btn-outline btn-sm w-full border-base-content text-base-content"
