@@ -56,17 +56,50 @@ function ChecksDraft({ parentGUID }: Props) {
   const groupMutation = useMutation({
     mutationFn: async () => {
       for (const payment of selectedPayments) {
-        const data = {
-          price: payment.price.toString(),
-          dueDate: payment.dueDate,
-          dayOfYear: String(payment.dayOfYear),
-          sayadiCode: payment.sayadiCode.trim(),
-          nationalId: payment.nationalId,
-          parentGUID: payment.parentGUID,
-          itemGUID: payment.itemGUID,
-          SalesExpert: payment.SalesExpert || "",
-          SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
-        };
+        let data = {};
+        if (payment.cash === "0") {
+          if (payment.VerifiedHoghoghi) {
+            data = {
+              price: payment.price === "" ? "" : payment.price.toString(),
+              dueDate: payment.dueDate,
+              dayOfYear: String(payment.dayOfYear),
+              sayadiCode: payment.sayadiCode.trim(),
+              nationalIdHoghoghi: payment.nationalIdHoghoghi,
+              parentGUID: payment.parentGUID,
+              itemGUID: payment.itemGUID,
+              SalesExpert: payment.SalesExpert || "",
+              SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
+              cash: "0",
+            };
+          } else {
+            data = {
+              price: payment.price === "" ? "" : payment.price.toString(),
+              dueDate: payment.dueDate,
+              dayOfYear: String(payment.dayOfYear),
+              sayadiCode: payment.sayadiCode.trim(),
+              nationalId: payment.nationalId,
+              parentGUID: payment.parentGUID,
+              itemGUID: payment.itemGUID,
+              SalesExpert: payment.SalesExpert || "",
+              SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
+              cash: "0",
+              status: "0",
+            };
+          }
+        } else {
+          data = {
+            price: payment.price === "" ? "" : payment.price.toString(),
+            dueDate: payment.dueDate,
+            dayOfYear: String(payment.dayOfYear),
+            parentGUID: payment.parentGUID,
+            bankName: payment.bankName || "",
+            cash: "1",
+            itemGUID: payment.itemGUID,
+            SalesExpert: payment.SalesExpert || "",
+            SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
+            status: "0",
+          };
+        }
 
         await handleAddItemToPayment(data);
       }

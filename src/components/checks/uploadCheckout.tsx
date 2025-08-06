@@ -52,7 +52,8 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
   const [activeTab, setActiveTab] = useState<"hoghoghi" | "haghighi">(
     "haghighi"
   );
-  const [item_GUID, setItem_GUID] = useState("");
+
+  const [itemGUID, setItemGUID] = useState("");
   const [dueDate, setDueDate] = useState<DateObject | null>(null);
   const [dayOfYear, setDayOfYear] = useState<string>("0");
   const [sayadiCode, setSayadiCode] = useState("");
@@ -82,7 +83,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
   });
 
   useEffect(() => {
-    setItem_GUID(uuidv4());
+    setItemGUID(uuidv4());
   }, [customerData]);
 
   useEffect(() => {
@@ -124,12 +125,14 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
   };
 
   const mutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async ({ itemGUID }: { itemGUID: string }) => {
+      // حالا داخل این تابع از itemGUID جدید استفاده می کنیم
       const error = validateFields();
       if (error) {
         toast.error(error);
         throw new Error(error);
       }
+
       let data = {} as {
         price: string;
         dueDate: string;
@@ -147,6 +150,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
         Verified?: string;
         VerifiedHoghoghi?: string;
       };
+
       if (type === "check" && activeTab === "haghighi") {
         data = {
           price: price ? price.toString() : "",
@@ -155,7 +159,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
           sayadiCode: sayadiCode.trim(),
           nationalId,
           parentGUID: parent_GUID,
-          itemGUID: item_GUID,
+          itemGUID,
           SalesExpert: customerData?.["0"]?.SalesExpert || "",
           SalesExpertAcunt_text:
             customerData?.["0"]?.SalesExpertAcunt_text || "",
@@ -171,7 +175,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
           sayadiCode: sayadiCode.trim(),
           nationalIdHoghoghi,
           parentGUID: parent_GUID,
-          itemGUID: item_GUID,
+          itemGUID,
           SalesExpert: customerData?.["0"]?.SalesExpert || "",
           SalesExpertAcunt_text:
             customerData?.["0"]?.SalesExpertAcunt_text || "",
@@ -185,10 +189,10 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
           dueDate: dueDateCash?.format("YYYY/MM/DD") || "",
           dayOfYear: dayOfYearCash,
           parentGUID: parent_GUID,
-          itemGUID: item_GUID,
+          itemGUID,
           SalesExpert: customerData?.["0"]?.SalesExpert || "",
           SalesExpertAcunt_text:
-          customerData?.["0"]?.SalesExpertAcunt_text || "",
+            customerData?.["0"]?.SalesExpertAcunt_text || "",
           status: "0",
           cash: "1",
           bankName,
@@ -196,6 +200,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
       }
 
       await handleAddItem(data);
+
       if (type === "cash") {
         if (cashPic.current) await cashPic.current.uploadFile();
       }
@@ -214,8 +219,9 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
         setBankName("");
         cashPic.current?.clearFile?.();
       }
-
+      setItemGUID(uuidv4());
       toast.success("ثبت با موفقیت انجام شد");
+
       queryClient.invalidateQueries({ queryKey: ["paymentsDraft"] });
 
       checkPic.current?.clearFile?.();
@@ -378,7 +384,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
             <FileUploader
               ref={checkPic}
               orderNumber={parent_GUID}
-              subFolder={item_GUID}
+              subFolder={itemGUID}
               title="تصویر چک (الزامی)"
               inputId="file-upload-check-pic"
             />
@@ -386,7 +392,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               <FileUploader
                 ref={checkConfirmPic}
                 orderNumber={parent_GUID}
-                subFolder={item_GUID}
+                subFolder={itemGUID}
                 title="رسید ثبت چک (اختیاری)"
                 inputId="file-upload-check-confirm"
               />
@@ -394,7 +400,11 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
             <div className="flex justify-end mt-4">
               <button
                 type="button"
-                onClick={() => mutation.mutate()}
+                onClick={() => {
+                  const newItemGUID = uuidv4();
+
+                  mutation.mutate({ itemGUID: newItemGUID });
+                }}
                 disabled={mutation.isPending}
                 className={`btn w-full ${
                   mutation.isPending ? "btn-disabled loading" : "btn-primary"
@@ -451,14 +461,17 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
             <FileUploader
               ref={cashPic}
               orderNumber={parent_GUID}
-              subFolder={item_GUID}
+              subFolder={itemGUID}
               title="تصویر فیش واریزی (الزامی)"
               inputId="file-upload-check-pic"
             />
             <div className="flex justify-end mt-4">
               <button
                 type="button"
-                onClick={() => mutation.mutate()}
+                onClick={() => {
+                  const newItemGUID = uuidv4();
+                  mutation.mutate({ itemGUID: newItemGUID });
+                }}
                 disabled={mutation.isPending}
                 className={`btn w-full ${
                   mutation.isPending ? "btn-disabled loading" : "btn-primary"

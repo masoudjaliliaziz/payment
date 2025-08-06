@@ -17,7 +17,7 @@ type Data = {
   SalesExpert: string;
   SalesExpertAcunt_text: string;
   parentGUID: string;
-  itemGUID: string;
+itemGUID:string;
   Verified?: string;
   VerifiedHoghoghi?: string;
 };
@@ -25,6 +25,7 @@ export async function handleAddItem(
   data: Partial<Data> & {
     Verified?: string;
     VerifiedHoghoghi?: string;
+    itemGUID:string
   }
 ) {
   const listName = "CustomerPaymentDraft";
@@ -66,7 +67,7 @@ export async function handleAddItem(
       SalesExpert: data.SalesExpert,
       SalesExpertAcunt_text: data.SalesExpertAcunt_text,
       parentGUID: data.parentGUID,
-      itemGUID: data.itemGUID,
+      itemGUID:data.itemGUID
     };
 
     // فقط یکی از این دو را اضافه کن اگر مقدار داشته باشند
@@ -112,11 +113,10 @@ export async function handleAddItemToPayment(
     sayadiCode: string;
     SalesExpertAcunt_text: string;
     SalesExpert: string;
-    status: string;
     cash: string;
     bankName?: string;
     nationalIdHoghoghi?: string;
-    VerifiedHoghoghi?: string;  
+    VerifiedHoghoghi?: string;
   }>
 ) {
   const listName = "CustomerPayment";
@@ -157,23 +157,20 @@ export async function handleAddItemToPayment(
       parentGUID: data.parentGUID,
       itemGUID: data.itemGUID,
       cash: data.cash,
+      status: "0",
     };
 
- 
-
-if (String(data.cash) === "1") {
-  bodyData.status = "0";
-  bodyData.bankName = data.bankName || "";
-} else {
-  if (data.nationalIdHoghoghi) {
-    bodyData.VerifiedHoghoghi = "0";
-    bodyData.nationalIdHoghoghi = data.nationalIdHoghoghi;
-  } else {
-    bodyData.Verified = "0";
-    bodyData.nationalId = data.nationalId;
-  }
-}
-
+    if (String(data.cash) === "1") {
+      bodyData.bankName = data.bankName || "";
+    } else {
+      if (data.nationalIdHoghoghi) {
+        bodyData.VerifiedHoghoghi = "0";
+        bodyData.nationalIdHoghoghi = data.nationalIdHoghoghi;
+      } else {
+        bodyData.Verified = "0";
+        bodyData.nationalId = data.nationalId;
+      }
+    }
 
     console.log("bodyData being sent:", bodyData);
 
@@ -203,7 +200,7 @@ if (String(data.cash) === "1") {
     if (items.length > 0) {
       const itemId = items[0].Id;
 
-      await fetch(
+      const updateResponse = await fetch(
         `${webUrl}/_api/web/lists/getbytitle('customerPaymentDraft')/items(${itemId})`,
         {
           method: "POST",
@@ -222,9 +219,16 @@ if (String(data.cash) === "1") {
           }),
         }
       );
-    }
 
-    toast.success("اطلاعات با موفقیت ذخیره و وضعیت آپدیت شد.");
+      if (!updateResponse.ok) {
+        const errorText = await updateResponse.text();
+        console.error("Error updating item:", errorText);
+        toast.error("خطا در آپدیت آیتم پیش‌نویس چک");
+      } else {
+        console.log("Item updated successfully");
+      }
+    }
+    toast.success("اطلاعات با موفقیت ذخیره شد.");
   } catch (err) {
     if (err instanceof Error) {
       toast.error(`خطا: ${err.message}`);
