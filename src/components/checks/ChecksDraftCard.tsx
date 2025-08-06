@@ -165,10 +165,12 @@ function ChecksDraftCard({
 
             <div>
               <p className="text-sm font-semibold text-gray-500">
-                شناسه حقیقی / حقوقی
+                {paymentDraft.nationalId ? "شناسه حقیقی" : "شناسه حقوقی"}
               </p>
               <span className="font-bold text-sky-700 text-sm">
-                {paymentDraft.nationalId}
+                {paymentDraft.nationalId
+                  ? paymentDraft.nationalId
+                  : paymentDraft.nationalIdHoghoghi}
               </span>
             </div>
 
