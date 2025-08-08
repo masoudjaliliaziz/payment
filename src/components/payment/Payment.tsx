@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { loadPayment, type PaymentType } from "../../api/getData";
-import PaymentDiv from "./PaymentDiv";
+
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setPayments } from "../../someSlice";
 import type { RootState } from "../../store";
+import PaymentDiv from "../payment/PaymentDiv";
 
 // ✅ تبدیل Day of Year به تاریخ شمسی
 const dayOfYearToShamsi = (dayOfYear: number, year: number) => {
@@ -33,6 +34,49 @@ const getCurrentShamsiYear = (): number => {
   return Number(convertPersianDigitsToEnglish(yearStr));
 };
 
+// ✅ محاسبه روز سال شمسی امروز
+const getTodayShamsiDayOfYear = (): number => {
+  const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const formattedDate = formatter.format(new Date());
+  console.log("formattedDate:", formattedDate);
+
+  const parts = formattedDate.split("/").map((part) => part.trim());
+  console.log("split parts:", parts);
+
+  const [yearStr, monthStr, dayStr] = parts; // اصلاح ترتیب: سال، ماه، روز
+  console.log("yearStr:", yearStr, "monthStr:", monthStr, "dayStr:", dayStr);
+
+  const convertedMonth = convertPersianDigitsToEnglish(monthStr);
+  const convertedDay = convertPersianDigitsToEnglish(dayStr);
+  console.log("convertedMonth:", convertedMonth, "convertedDay:", convertedDay);
+
+  const month = Number(convertedMonth);
+  const day = Number(convertedDay);
+  console.log("month:", month, "day:", day);
+
+  if (isNaN(month) || isNaN(day)) {
+    console.error("Invalid month or day:", { month, day, monthStr, dayStr });
+    return 0; // مقدار پیش‌فرض
+  }
+
+  const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
+  let dayOfYear = day;
+  for (let i = 0; i < month - 1; i++) {
+    dayOfYear += daysInMonths[i];
+  }
+  console.log("dayOfYear:", dayOfYear);
+
+  if (isNaN(dayOfYear)) {
+    console.error("dayOfYear is NaN:", { month, day, daysInMonths });
+    return 0; // مقدار پیش‌فرض
+  }
+
+  return dayOfYear;
+};
 type Props = {
   parentGUID: string;
 };
@@ -96,9 +140,9 @@ function Payment({ parentGUID }: Props) {
     );
   }, [selectedStatus, paymentListWithDayDiff]);
 
-  const { paymentRasShamsi } = useMemo(() => {
+  const { paymentRasShamsi, rasDiffWithToday } = useMemo(() => {
     if (paymentList.length === 0)
-      return { paymentRasDay: 0, paymentRasShamsi: "—" };
+      return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };
 
     let totalPayment = 0;
     let weightedSum = 0;
@@ -106,24 +150,46 @@ function Payment({ parentGUID }: Props) {
     paymentList.forEach((payment) => {
       const price = Number(payment.price ?? 0);
       const day = Number(payment.dayOfYear ?? 0);
-      totalPayment += price;
-      weightedSum += price * day;
+      if (!isNaN(price) && !isNaN(day)) {
+        // فقط مقادیر معتبر را حساب کن
+        totalPayment += price;
+        weightedSum += price * day;
+      }
     });
 
-    if (totalPayment === 0) return { paymentRasDay: 0, paymentRasShamsi: "—" };
+    if (totalPayment === 0)
+      return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };
 
     const paymentRasDay = Math.floor(weightedSum / totalPayment);
+    if (isNaN(paymentRasDay)) {
+      console.error("paymentRasDay is NaN", { weightedSum, totalPayment });
+      return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };
+    }
+
     const year = getCurrentShamsiYear();
     const paymentRasShamsi = dayOfYearToShamsi(paymentRasDay, year);
+    const todayDayOfYear = getTodayShamsiDayOfYear();
+    if (isNaN(todayDayOfYear)) {
+      console.error("todayDayOfYear is NaN");
+      return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };
+    }
 
-    return { paymentRasDay, paymentRasShamsi };
+    const dayDifference = paymentRasDay - todayDayOfYear;
+    const rasDiffWithToday =
+      dayDifference === 0
+        ? "0 روز"
+        : dayDifference > 0
+        ? `${dayDifference} روز مانده`
+        : `${Math.abs(dayDifference)} روز گذشته`;
+
+    return { paymentRasDay, paymentRasShamsi, rasDiffWithToday };
   }, [paymentList]);
 
   return (
-    <div className="flex flex-col h-dvh w-full bg-base-200 rounded-lg gap-3 ">
+    <div className="flex flex-col h-dvh w-full bg-base-200 rounded-lg gap-3">
       {/* فیلترها - Sticky Top */}
-      <div className="sticky top-0 z-20  py-3 px-4 flex flex-col gap-4 bg-white shadow-md rounded-t-lg">
-        <div className="bg-base-100 w-full  mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl text-sm">
+      <div className="sticky top-0 z-20 py-3 px-4 flex flex-col gap-4 bg-white shadow-md rounded-t-lg">
+        <div className="bg-base-100 w-full mx-auto flex flex-row-reverse gap-6 justify-center items-center p-3.5 font-bold rounded-t-xl text-sm">
           <div className="flex flex-col gap-3 justify-center items-center">
             <span className="text-success">جمع پرداخت‌های تایید شده</span>
             <div className="flex justify-center items-center gap-3">
@@ -154,7 +220,10 @@ function Payment({ parentGUID }: Props) {
 
           <div className="flex flex-col gap-3 justify-center items-center">
             <span className="text-base-content">راس پرداخت‌ها</span>
-            <span className="text-info">{paymentRasShamsi}</span>
+            <div className="flex justify-center items-center gap-3">
+              <span className="text-info">{paymentRasShamsi}</span>
+              <span className="text-info text-xs">({rasDiffWithToday})</span>
+            </div>
           </div>
         </div>
         <div className="flex flex-wrap gap-2 justify-center">
@@ -187,8 +256,6 @@ function Payment({ parentGUID }: Props) {
           <PaymentDiv parentGUID={parentGUID} paymentList={filteredPayments} />
         )}
       </div>
-
-      {/* فوتر اطلاعات مالی - Sticky Bottom */}
     </div>
   );
 }

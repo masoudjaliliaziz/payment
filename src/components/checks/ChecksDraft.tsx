@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-
 import {
   loadPayment,
   loadPaymentDraft,
@@ -8,10 +7,45 @@ import {
 } from "../../api/getData";
 import { calculateRasDatePayment } from "../../utils/calculateRasDate";
 import { getShamsiDateFromDayOfYear } from "../../utils/getShamsiDateFromDayOfYear";
-
 import ChecksDraftDiv from "./ChecksDraftDiv";
 import { handleAddItemToPayment } from "../../api/addData";
 import toast from "react-hot-toast";
+
+// توابع از Payment
+const convertPersianDigitsToEnglish = (str: string): string => {
+  return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString());
+};
+
+const getCurrentShamsiYear = (): number => {
+  const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    year: "numeric",
+  });
+  const yearStr = formatter.format(new Date());
+  return Number(convertPersianDigitsToEnglish(yearStr));
+};
+
+// تابع جدید برای محاسبه روز سال امروز
+const getTodayShamsiDayOfYear = (): number => {
+  const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  const [yearStr, monthStr, dayStr] = formatter
+    .format(new Date())
+    .split("/")
+    .map((part) => convertPersianDigitsToEnglish(part.trim()));
+  const year = Number(yearStr);
+  const month = Number(monthStr);
+  const day = Number(dayStr);
+  console.log(year);
+  const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29]; // فرض بدون کبیسه
+  let dayOfYear = day;
+  for (let i = 0; i < month - 1; i++) {
+    dayOfYear += daysInMonths[i];
+  }
+  return dayOfYear;
+};
 
 type Props = {
   parentGUID: string;
@@ -61,8 +95,31 @@ function ChecksDraft({ parentGUID }: Props) {
     }
   };
 
+  // محاسبه راس و اختلاف با امروز
   const rasDayOfYear = calculateRasDatePayment(selectedPayments);
+  const year = getCurrentShamsiYear();
   const rasDate = rasDayOfYear ? getShamsiDateFromDayOfYear(rasDayOfYear) : "—";
+  const todayDayOfYear = getTodayShamsiDayOfYear();
+
+  // لاگ برای دیباگ
+  console.log(year);
+  console.log("todayDayOfYear:", todayDayOfYear);
+  console.log("rasDayOfYear:", rasDayOfYear);
+
+  // محاسبه اختلاف با علامت مثبت یا منفی
+  const dayDifference =
+    rasDayOfYear !== null && rasDayOfYear !== undefined
+      ? rasDayOfYear - todayDayOfYear
+      : null;
+  const differenceText =
+    dayDifference !== null
+      ? dayDifference === 0
+        ? "0 روز"
+        : dayDifference > 0
+        ? `${dayDifference} روز مانده`
+        : `${Math.abs(dayDifference)} روز گذشته`
+      : "—";
+
   const totalSelectedPrice = selectedPayments.reduce((sum, p) => {
     const amount = Number(p.price);
     return sum + (isNaN(amount) ? 0 : amount);
@@ -77,7 +134,6 @@ function ChecksDraft({ parentGUID }: Props) {
 
   const groupMutation = useMutation({
     mutationFn: async () => {
-      // جلوگیری از ثبت اگر آیتمی با status = "0" وجود داشته باشد
       if (hasDraftPayments) {
         toast.error(
           "چک‌های پیش‌نویس (وضعیت 0) وجود دارند. ابتدا آن‌ها را ثبت کنید."
@@ -151,7 +207,7 @@ function ChecksDraft({ parentGUID }: Props) {
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
         <div className="flex gap-3 items-center">
           <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
-            راس چک‌ها: {rasDate}
+            راس چک‌ها: {rasDate} (اختلاف با امروز: {differenceText})
           </div>
           <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
             جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} تومان
