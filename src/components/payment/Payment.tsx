@@ -222,7 +222,12 @@ function Payment({ parentGUID }: Props) {
             <span className="text-base-content">راس پرداخت‌ها</span>
             <div className="flex justify-center items-center gap-3">
               <span className="text-info">{paymentRasShamsi}</span>
-              <span className="text-info text-xs">({rasDiffWithToday})</span>
+            </div>
+          </div>
+          <div className="flex flex-col gap-3 justify-center items-center">
+            <span className="text-base-content">اختلاف با امروز </span>
+            <div className="flex justify-center items-center gap-3">
+              <div className="text-info">{rasDiffWithToday}</div>
             </div>
           </div>
         </div>

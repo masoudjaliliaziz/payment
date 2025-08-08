@@ -207,7 +207,10 @@ function ChecksDraft({ parentGUID }: Props) {
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
         <div className="flex gap-3 items-center">
           <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
-            راس چک‌ها: {rasDate} (اختلاف با امروز: {differenceText})
+            راس چک‌ها: {rasDate}
+          </div>
+          <div className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
+            اختلاف با امروز: {differenceText}
           </div>
           <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
             جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} تومان

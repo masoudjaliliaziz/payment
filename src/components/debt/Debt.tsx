@@ -195,7 +195,13 @@ function Debt({ parentGUID }: Props) {
               <span className="text-primary">تاریخ سررسید</span>
               <div className="flex justify-center items-center gap-2">
                 <span className="text-info">{dueDateDisplay || "نامشخص"}</span>
-                <span className="text-info text-xs">({differenceText})</span>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-1 justify-center items-center">
+              <span className="text-primary"> اختلاف با امروز</span>
+              <div className="flex justify-center items-center gap-2">
+                <div className="text-info ">({differenceText})</div>
               </div>
             </div>
 
