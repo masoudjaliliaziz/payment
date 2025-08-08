@@ -10,15 +10,22 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@mantine/dates": "^8.2.4",
     "@reduxjs/toolkit": "^2.8.2",
     "@tanstack/react-query": "^5.80.7",
     "@tanstack/react-query-devtools": "^5.80.7",
     "daisyui": "^5.0.43",
+    "date-fns-jalali": "^4.1.0-0",
+    "dayjs": "^1.11.13",
+    "jalali-dayjs": "^0.0.1",
     "lodash": "^4.17.21",
     "lucide-react": "^0.525.0",
     "react": "^19.1.0",
+    "react-date-object": "^2.1.9",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-hot-toast": "^2.5.2",
+    "react-jalali-datepicker": "^0.2.66",
     "react-multi-date-picker": "^4.5.2",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.2"
