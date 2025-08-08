@@ -4,6 +4,7 @@ import ChecksDraftCard from "./ChecksDraftCard";
 type Props = {
   parentGUID: string;
   paymentListDraft: (PaymentType & { dayDiff?: number })[];
+  paymentList: PaymentType[];
   selectedPayments: PaymentType[];
   toggleSelect: (p: PaymentType) => void;
 };
@@ -13,11 +14,13 @@ export default function ChecksDraftDiv({
   parentGUID,
   selectedPayments,
   toggleSelect,
+  paymentList,
 }: Props) {
   return (
     <div className="flex flex-col gap-3 justify-center items-center">
       {paymentListDraft.map((p) => (
         <ChecksDraftCard
+          paymentList={paymentList}
           key={p.ID}
           parentGUID={parentGUID}
           paymentDraft={p}

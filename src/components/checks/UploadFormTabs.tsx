@@ -7,7 +7,7 @@ type Props = {
 
 const UploadFormTabs: React.FC<Props> = ({ parent_GUID }) => {
   const [activeTab, setActiveTab] = useState<"check" | "cash">("check");
-
+  const [formKey, setFormKey] = useState<number>(1);
   return (
     <div className="w-full max-w-3xl mx-auto flex flex-col justify-center items-center  bg-base-100 rounded-lg shadow-md">
       <div className="tabs tabs-boxed   w-full flex justify-end items-center gap-3 pt-3 pr-3">
@@ -32,7 +32,12 @@ const UploadFormTabs: React.FC<Props> = ({ parent_GUID }) => {
       </div>
 
       {/* Form Content */}
-      <UploadCheckoutForm parent_GUID={parent_GUID} type={activeTab} />
+      <UploadCheckoutForm
+        formKey={formKey}
+        setFormKey={setFormKey}
+        parent_GUID={parent_GUID}
+        type={activeTab}
+      />
     </div>
   );
 };

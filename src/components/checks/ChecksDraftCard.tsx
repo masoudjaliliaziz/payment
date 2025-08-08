@@ -1,6 +1,5 @@
 import { useEffect, useState, memo } from "react";
 import type { PaymentType } from "../../api/getData";
-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import { useDeletePaymentDraft } from "../../hooks/useDeleteaymentDraft";
@@ -10,6 +9,7 @@ import toast from "react-hot-toast";
 type Props = {
   parentGUID: string;
   paymentDraft: PaymentType;
+  paymentList: PaymentType[]; // Add paymentList as a prop
   selected?: boolean;
   toggleSelect: (p: PaymentType) => void;
 };
@@ -17,6 +17,7 @@ type Props = {
 function ChecksDraftCard({
   parentGUID,
   paymentDraft,
+  paymentList,
   selected,
   toggleSelect,
 }: Props) {
@@ -108,6 +109,12 @@ function ChecksDraftCard({
       toast.error("خطا در افزودن چک به پرداخت ها");
     },
   });
+
+  // Check if any item in paymentList has status="0"
+  const hasPendingStatus = paymentList.some(
+    (item) => item.status !== "3" && item.status !== "4"
+  );
+
   // 🔒 داده‌های اجباری: اگر ناقص بودن، اصلاً چیزی رندر نشه
   const isValid = paymentDraft.price && paymentDraft.dueDate;
 
@@ -139,9 +146,11 @@ function ChecksDraftCard({
               type="button"
               onClick={() => mutation.mutate()}
               className={`btn w-[75px] h-[35px] ${
-                mutation.isPending ? "btn-disabled loading" : "btn-primary"
+                mutation.isPending || hasPendingStatus
+                  ? "btn-disabled loading"
+                  : "btn-primary"
               }`}
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || hasPendingStatus}
             >
               {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
             </button>
@@ -155,14 +164,12 @@ function ChecksDraftCard({
                 {paymentDraft.dueDate}
               </span>
             </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-500">مبلغ</p>
               <span className="font-bold text-sky-700 text-sm">
                 {Number(paymentDraft.price).toLocaleString("fa-IR")}
               </span>
             </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-500">
                 {paymentDraft.nationalId ? "شناسه حقیقی" : "شناسه حقوقی"}
@@ -173,7 +180,6 @@ function ChecksDraftCard({
                   : paymentDraft.nationalIdHoghoghi}
               </span>
             </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-500">شناسه صیادی</p>
               <span className="font-bold text-sky-700 text-sm">
@@ -203,9 +209,11 @@ function ChecksDraftCard({
               type="button"
               onClick={() => mutation.mutate()}
               className={`btn w-[75px] h-[35px] ${
-                mutation.isPending ? "btn-disabled loading" : "btn-primary"
+                mutation.isPending || hasPendingStatus
+                  ? "btn-disabled"
+                  : "btn-primary"
               }`}
-              disabled={mutation.isPending}
+              disabled={mutation.isPending || hasPendingStatus}
             >
               {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
             </button>
@@ -219,14 +227,12 @@ function ChecksDraftCard({
                 {paymentDraft.dueDate}
               </span>
             </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-500">مبلغ</p>
               <span className="font-bold text-sky-700 text-sm">
                 {Number(paymentDraft.price).toLocaleString("fa-IR")}
               </span>
             </div>
-
             <div>
               <p className="text-sm font-semibold text-gray-500">نام بانک</p>
               <span className="font-bold text-sky-700 text-sm">

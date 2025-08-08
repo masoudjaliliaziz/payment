@@ -284,6 +284,15 @@ function PaymentCard({ parentGUID, payment }: Props) {
       {payment.cash === "1" && (
         <>
           <div className="flex items-center justify-end bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
+            {payment.status === "0" && (
+              <button
+                type="button"
+                className="btn btn-error btn-xs text-white"
+                onClick={() => handleDelete(payment.ID)}
+              >
+                <Trash width={16} height={16} />
+              </button>
+            )}
             <Modal
               id={`agent-description-modal-${payment.ID}`}
               title={{

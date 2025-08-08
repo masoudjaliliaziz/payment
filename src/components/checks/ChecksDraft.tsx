@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { loadPaymentDraft, type PaymentType } from "../../api/getData";
+import {
+  loadPayment,
+  loadPaymentDraft,
+  type PaymentType,
+} from "../../api/getData";
 import { calculateRasDatePayment } from "../../utils/calculateRasDate";
 import { getShamsiDateFromDayOfYear } from "../../utils/getShamsiDateFromDayOfYear";
 
@@ -14,16 +18,29 @@ type Props = {
 };
 
 function ChecksDraft({ parentGUID }: Props) {
+  // دریافت لیست پیش‌نویس‌ها
   const { data: paymentListDraft = [] } = useQuery<PaymentType[]>({
     queryKey: ["paymentsDraft", parentGUID],
     queryFn: async () => {
       const data = await loadPaymentDraft(parentGUID);
       return (data as (PaymentType | undefined)[])
         .filter((item): item is PaymentType => item !== undefined)
-        .filter((item) => item.status === "0"); // ✅ فقط چک‌های با وضعیت 0
+        .filter((item) => item.status === "0");
     },
     enabled: !!parentGUID,
     refetchInterval: 3000,
+  });
+
+  // دریافت لیست کامل پرداخت‌ها
+  const { data: paymentList = [] } = useQuery<PaymentType[]>({
+    queryKey: ["payments", parentGUID],
+    queryFn: async () => {
+      const data = await loadPayment(parentGUID);
+      return (data as (PaymentType | undefined)[]).filter(
+        (item): item is PaymentType => item !== undefined
+      );
+    },
+    enabled: !!parentGUID,
   });
 
   const [selectedPayments, setSelectedPayments] = useState<PaymentType[]>([]);
@@ -53,8 +70,21 @@ function ChecksDraft({ parentGUID }: Props) {
 
   const queryClient = useQueryClient();
 
+  // بررسی وجود آیتم با status = "0" در لیست کامل پرداخت‌ها
+  const hasDraftPayments = paymentList.some(
+    (item) => item.status !== "3" && item.status !== "4"
+  );
+
   const groupMutation = useMutation({
     mutationFn: async () => {
+      // جلوگیری از ثبت اگر آیتمی با status = "0" وجود داشته باشد
+      if (hasDraftPayments) {
+        toast.error(
+          "چک‌های پیش‌نویس (وضعیت 0) وجود دارند. ابتدا آن‌ها را ثبت کنید."
+        );
+        throw new Error("Draft payments with status 0 exist");
+      }
+
       for (const payment of selectedPayments) {
         let data = {};
         if (payment.cash === "0") {
@@ -131,7 +161,7 @@ function ChecksDraft({ parentGUID }: Props) {
         <div className="flex gap-3 items-center">
           <button
             type="button"
-            className="btn btn-outline btn-sm  h-[35px]"
+            className="btn btn-outline btn-sm h-[35px]"
             onClick={toggleSelectAll}
           >
             {selectedPayments.length === paymentListDraft.length
@@ -143,10 +173,20 @@ function ChecksDraft({ parentGUID }: Props) {
             <button
               type="button"
               className={`btn btn-success h-[35px] btn-sm ${
-                groupMutation.isPending ? "btn-disabled loading" : ""
+                groupMutation.isPending || hasDraftPayments
+                  ? "btn-disabled"
+                  : ""
               }`}
-              onClick={() => groupMutation.mutate()}
-              disabled={groupMutation.isPending}
+              onClick={() => {
+                if (hasDraftPayments) {
+                  toast.error(
+                    "چک‌های پیش‌نویس (وضعیت 0) وجود دارند. ابتدا آن‌ها را ثبت کنید."
+                  );
+                  return;
+                }
+                groupMutation.mutate();
+              }}
+              disabled={groupMutation.isPending || hasDraftPayments}
             >
               {groupMutation.isPending
                 ? "در حال ثبت چک‌ها..."
@@ -159,6 +199,7 @@ function ChecksDraft({ parentGUID }: Props) {
       <div className="flex-1 overflow-y-auto w-full px-4 py-6">
         {paymentListDraft.length > 0 && (
           <ChecksDraftDiv
+            paymentList={paymentList}
             parentGUID={parentGUID}
             paymentListDraft={paymentListDraft}
             selectedPayments={selectedPayments}

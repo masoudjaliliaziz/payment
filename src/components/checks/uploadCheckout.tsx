@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import DatePicker, { DateObject } from "react-multi-date-picker";
 import persian from "react-date-object/calendars/persian";
@@ -45,10 +51,19 @@ const bankOptions = [
 
 type Props = {
   parent_GUID: string;
-  type: "check" | "cash"; // 👈 نوع فرم
+  type: "check" | "cash";
+  formKey: number;
+  setFormKey: Dispatch<SetStateAction<number>>;
+
+  // 👈 نوع فرم
 };
 
-const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
+const UploadCheckoutForm: React.FC<Props> = ({
+  parent_GUID,
+  type,
+  formKey,
+  setFormKey,
+}) => {
   const [activeTab, setActiveTab] = useState<"hoghoghi" | "haghighi">(
     "haghighi"
   );
@@ -84,7 +99,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
 
   useEffect(() => {
     setItemGUID(uuidv4());
-  }, [customerData]);
+  }, [formKey]);
 
   useEffect(() => {
     if (qrInputRef.current) qrInputRef.current.focus();
@@ -219,7 +234,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
         setBankName("");
         cashPic.current?.clearFile?.();
       }
-      setItemGUID(uuidv4());
+      setFormKey((cur) => cur + 1);
       toast.success("ثبت با موفقیت انجام شد");
 
       queryClient.invalidateQueries({ queryKey: ["paymentsDraft"] });
@@ -248,27 +263,33 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
     return isNaN(parsed) ? "" : parsed;
   };
 
+  function getOwnerNationalId(str: string, activeTab: "haghighi" | "hoghoghi") {
+    if (!str.includes("IR")) return "";
+    const parts = str.split("IR");
+    if (
+      parts.length < 2 ||
+      parts[0].length < (activeTab === "haghighi" ? 10 : 11)
+    )
+      return "";
+    return parts[0].slice(activeTab === "haghighi" ? -10 : -11);
+  }
+
   const handleQRCodeInput = (
     e: React.FormEvent<HTMLInputElement>,
     value: string
   ) => {
     e.preventDefault();
     setSayadiCode(getLast16Chars(value));
-    const national = getOwnerNationalId(value);
-    if (national.length === 10) setNationalId(national);
+    const national = getOwnerNationalId(value, activeTab);
+    if (activeTab === "haghighi" && national.length === 10) {
+      setNationalId(national);
+    } else if (activeTab === "hoghoghi" && national.length === 11) {
+      setNationalIdHoghoghi(national);
+    }
   };
-
   function getLast16Chars(str: string) {
     return str.slice(-16);
   }
-
-  function getOwnerNationalId(str: string) {
-    if (!str.includes("IR")) return "";
-    const parts = str.split("IR");
-    if (parts.length < 2 || parts[0].length < 10) return "";
-    return parts[0].slice(-10);
-  }
-
   return (
     <div className="flex flex-col gap-4 mb-6 p-4 rounded-lg text-base-content">
       <div className="w-full bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xl flex flex-col gap-6 transition-all duration-300">
@@ -401,9 +422,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               <button
                 type="button"
                 onClick={() => {
-                  const newItemGUID = uuidv4();
-
-                  mutation.mutate({ itemGUID: newItemGUID });
+                  mutation.mutate({ itemGUID });
                 }}
                 disabled={mutation.isPending}
                 className={`btn w-full ${
@@ -469,8 +488,7 @@ const UploadCheckoutForm: React.FC<Props> = ({ parent_GUID, type }) => {
               <button
                 type="button"
                 onClick={() => {
-                  const newItemGUID = uuidv4();
-                  mutation.mutate({ itemGUID: newItemGUID });
+                  mutation.mutate({ itemGUID });
                 }}
                 disabled={mutation.isPending}
                 className={`btn w-full ${
