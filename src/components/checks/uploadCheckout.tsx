@@ -110,7 +110,14 @@ const UploadCheckoutForm: React.FC<Props> = ({
       setSayadiError(null);
       return;
     }
-    if (paymentList.some((p) => p.sayadiCode === sayadiCode.trim())) {
+    if (
+      paymentList.some(
+        (p) =>
+          p.sayadiCode === sayadiCode.trim() &&
+          p.status !== "3" &&
+          p.status !== "2"
+      )
+    ) {
       setSayadiError("این شناسه صیادی قبلاً ثبت شده است.");
     } else {
       setSayadiError(null);
