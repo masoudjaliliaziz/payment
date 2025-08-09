@@ -187,7 +187,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
             <div>
               <p className="text-sm font-semibold text-gray-500"> مبلغ </p>
               <span className="font-bold text-sky-700 text-sm">
-                {payment?.price}
+                {Number(payment?.price).toLocaleString("fa-IR")}
               </span>
             </div>
 
@@ -326,7 +326,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
             <div>
               <p className="text-sm font-semibold text-gray-500"> مبلغ </p>
               <span className="font-bold text-sky-700 text-sm">
-                {payment?.price || "نامشخص"}
+                {Number(payment?.price).toLocaleString("fa-IR") || "نامشخص"}
               </span>
             </div>
 

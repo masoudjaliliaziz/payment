@@ -14,7 +14,7 @@ export function calculateRasDatePayment(data: PaymentType[]) {
     0
   );
   console.log("weightedSum", weightedSum);
-  const rasDayOfYear = Math.floor(weightedSum / totalAmount);
+  const rasDayOfYear = Math.round(weightedSum / totalAmount);
 
   return rasDayOfYear; // خروجی دقیقا dayOfYear گرد شده به پایین
 }
@@ -32,7 +32,7 @@ export function calculateRasDateDebt(data: DebtType[]) {
     0
   );
   console.log("weightedSum", weightedSum);
-  const rasDayOfYear = Math.floor(weightedSum / totalAmount);
+  const rasDayOfYear = Math.round(weightedSum / totalAmount);
 
   return rasDayOfYear; // خروجی دقیقا dayOfYear گرد شده به پایین
 }

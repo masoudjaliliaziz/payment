@@ -160,7 +160,7 @@ function Payment({ parentGUID }: Props) {
     if (totalPayment === 0)
       return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };
 
-    const paymentRasDay = Math.floor(weightedSum / totalPayment);
+    const paymentRasDay = Math.round(weightedSum / totalPayment);
     if (isNaN(paymentRasDay)) {
       console.error("paymentRasDay is NaN", { weightedSum, totalPayment });
       return { paymentRasDay: 0, paymentRasShamsi: "—", rasDiffWithToday: "—" };

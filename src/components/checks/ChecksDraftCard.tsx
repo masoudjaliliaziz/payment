@@ -147,7 +147,7 @@ function ChecksDraftCard({
               onClick={() => mutation.mutate()}
               className={`btn w-[75px] h-[35px] ${
                 mutation.isPending || hasPendingStatus
-                  ? "btn-disabled loading"
+                  ? "btn-disabled "
                   : "btn-primary"
               }`}
               disabled={mutation.isPending || hasPendingStatus}
