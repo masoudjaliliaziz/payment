@@ -317,10 +317,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
 
           <div className="grid grid-cols-4 transition-colors duration-500 w-full">
             <div>
-              <p className="text-sm font-semibold text-gray-500">
-                {" "}
-                تاریخ سررسید{" "}
-              </p>
+              <p className="text-sm font-semibold text-gray-500">تاریخ واریز</p>
               <span className="font-bold text-sky-700 text-sm">
                 {payment?.dueDate || "نامشخص"}
               </span>
