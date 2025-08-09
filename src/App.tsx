@@ -10,26 +10,37 @@ import {
 import { useEffect, useState } from "react";
 import ChecksDraftPage from "./routes/ChecksDraftPage";
 import DebtsArchivePage from "./routes/DebtsArchivePage";
+import { useCustomers } from "./hooks/useCustomerData";
+import { useParentGuid } from "./hooks/useParentGuid";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const parentGUID = useParentGuid();
+  const { data, isLoading } = useCustomers(parentGUID);
   useEffect(() => {
     document.documentElement.setAttribute(
       "data-theme",
       isDarkMode ? "dark" : "light"
     );
   }, [isDarkMode]);
+  if (!parentGUID || isLoading) {
+    return <div>در حال بارگذاری...</div>;
+  }
 
   const toggleDarkMode = () => setIsDarkMode((prev) => !prev);
+
   return (
     <div className="min-h-screen flex bg-base-100 relative">
       {/* Sidebar */}
       <aside className="w-64 bg-base-200 shadow-md flex flex-col justify-between ">
         <div className="p-4 space-y-2  flex flex-col items-center">
+          <span className="text-sm font-bold mb-4 text-base-content w-full bg-base-300 text-center rounded-lg px-2 py-1 bg-slate-800 text-white ">
+            {data?.[0]?.Title ?? "در حال بارگذاری..."}
+          </span>
           <span className="text-lg font-bold mb-4 text-base-content w-full bg-base-300 text-center rounded-lg px-2 py-1 ">
             مدیریت مالی
           </span>
+
           <Link
             to="/checks"
             className="btn btn-ghost w-full flex justify-between text-xs"

@@ -4,6 +4,7 @@ import { loadDebt, loadPayment, type PaymentType } from "../api/getData";
 import { useMemo } from "react";
 import type { DebtType } from "../types/apiTypes";
 
+
 function DebtsArchivePage() {
   const parentGUID = useParentGuid();
 
@@ -66,6 +67,7 @@ function DebtsArchivePage() {
       []
     );
   }, [debtList, paymentList]);
+
 
   if (!parentGUID) {
     return (
