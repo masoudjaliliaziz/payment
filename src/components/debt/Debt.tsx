@@ -192,7 +192,7 @@ function Debt({ parentGUID }: Props) {
 
             {/* تاریخ سررسید */}
             <div className="flex flex-col gap-1 justify-center items-center">
-              <span className="text-primary">تاریخ سررسید</span>
+              <span className="text-primary"> راس بدهی</span>
               <div className="flex justify-center items-center gap-2">
                 <span className="text-info">{dueDateDisplay || "نامشخص"}</span>
               </div>
