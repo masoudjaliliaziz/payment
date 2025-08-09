@@ -54,29 +54,6 @@ export async function loadPayment(
   }
 }
 
-export async function loadPaymentDraft(
-  parentGUID: string
-): Promise<Partial<PaymentType[]>> {
-  const webUrl = "https://crm.zarsim.com";
-  const listName = "CustomerPaymentDraft";
-
-  try {
-    const response = await fetch(
-      `${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$filter=parentGUID eq '${parentGUID}'`,
-      {
-        headers: { Accept: "application/json;odata=verbose" },
-      }
-    );
-
-    const data = await response.json();
-
-    return data.d.results;
-  } catch (err) {
-    console.error("خطا در دریافت آیتم‌ها:", err);
-    return [];
-  }
-}
-
 //temp for develop ( this have been load from farvardin)----------------------
 export async function loadDebt(
   parentGUID: string
@@ -100,6 +77,31 @@ export async function loadDebt(
     return [];
   }
 }
+
+
+export async function loadPaymentDraft(
+  parentGUID: string
+): Promise<Partial<PaymentType[]>> {
+  const webUrl = "https://crm.zarsim.com";
+  const listName = "CustomerPaymentDraft";
+
+  try {
+    const response = await fetch(
+      `${webUrl}/_api/web/lists/getbytitle('${listName}')/items?$filter=parentGUID eq '${parentGUID}'`,
+      {
+        headers: { Accept: "application/json;odata=verbose" },
+      }
+    );
+
+    const data = await response.json();
+
+    return data.d.results;
+  } catch (err) {
+    console.error("خطا در دریافت آیتم‌ها:", err);
+    return [];
+  }
+}
+
 
 //load currentUser ---------------------------
 export async function loadCurrentUser(
