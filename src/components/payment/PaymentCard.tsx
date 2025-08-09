@@ -39,7 +39,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
 
   const getCheckColor = (colorCode: string | undefined) => {
     const colorMap: Record<string, string> = {
-      "1": "bg-gray-100",
+      "1": "bg-white border border-1 border-black",
       "2": "bg-yellow-300",
       "3": "bg-orange-300",
       "4": "bg-amber-800",
@@ -207,7 +207,21 @@ function PaymentCard({ parentGUID, payment }: Props) {
 
             <div>
               <p className="text-sm font-semibold text-gray-500"> وضعیت </p>
-              <span className="font-bold text-sky-700 text-sm">
+              <span
+                className={`font-bold  text-sm ${
+                  payment.status === "0"
+                    ? "text-warning"
+                    : payment.status === "1"
+                    ? "text-info"
+                    : payment.status === "2"
+                    ? "text-error"
+                    : payment.status === "3"
+                    ? "text-error"
+                    : payment.status === "4"
+                    ? "text-success"
+                    : "text-sky-800"
+                }`}
+              >
                 {payment.status === "0"
                   ? "در انتظار تایید کارشناس"
                   : payment.status === "1"
@@ -315,7 +329,37 @@ function PaymentCard({ parentGUID, payment }: Props) {
             </div>
           </div>
 
-          <div className="grid grid-cols-4 transition-colors duration-500 w-full">
+          <div className="grid grid-cols-3 transition-colors duration-500 w-full">
+            <div>
+              <p className="text-sm font-semibold text-gray-500"> وضعیت </p>
+              <span
+                className={`font-bold  text-sm ${
+                  payment.status === "0"
+                    ? "text-warning"
+                    : payment.status === "1"
+                    ? "text-info"
+                    : payment.status === "2"
+                    ? "text-error"
+                    : payment.status === "3"
+                    ? "text-error"
+                    : payment.status === "4"
+                    ? "text-success"
+                    : "text-sky-800"
+                }`}
+              >
+                {payment.status === "0"
+                  ? "در انتظار تایید کارشناس"
+                  : payment.status === "1"
+                  ? "در انتظار تایید خزانه "
+                  : payment.status === "2"
+                  ? "رد شده توسط کارشناس"
+                  : payment.status === "3"
+                  ? "رد شده توسط خزانه"
+                  : payment.status === "4"
+                  ? "تایید نهایی"
+                  : "نامشخص"}
+              </span>
+            </div>
             <div>
               <p className="text-sm font-semibold text-gray-500">تاریخ واریز</p>
               <span className="font-bold text-sky-700 text-sm">
@@ -331,26 +375,11 @@ function PaymentCard({ parentGUID, payment }: Props) {
             </div>
 
             <div>
-              <p className="text-sm font-semibold text-gray-500"> نام بانک </p>
+              <p className="text-sm font-semibold text-gray-500">
+                واریز به بانک
+              </p>
               <span className="font-bold text-sky-700 text-sm">
                 {payment?.bankName || "نامشخص"}
-              </span>
-            </div>
-
-            <div>
-              <p className="text-sm font-semibold text-gray-500"> وضعیت </p>
-              <span className="font-bold text-sky-700 text-sm">
-                {payment.status === "0"
-                  ? "در انتظار تایید کارشناس"
-                  : payment.status === "1"
-                  ? "در انتظار تایید خزانه "
-                  : payment.status === "2"
-                  ? "رد شده توسط کارشناس"
-                  : payment.status === "3"
-                  ? "رد شده توسط خزانه"
-                  : payment.status === "4"
-                  ? "تایید نهایی"
-                  : "نامشخص"}
               </span>
             </div>
           </div>
