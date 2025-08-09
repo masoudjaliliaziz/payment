@@ -4,7 +4,6 @@ import { loadDebt, loadPayment, type PaymentType } from "../api/getData";
 import { useMemo } from "react";
 import type { DebtType } from "../types/apiTypes";
 
-
 function DebtsArchivePage() {
   const parentGUID = useParentGuid();
 
@@ -68,7 +67,12 @@ function DebtsArchivePage() {
     );
   }, [debtList, paymentList]);
 
-
+  const totalSettledDebt = useMemo(() => {
+    return settledDebts.reduce(
+      (sum, debt) => sum + Number(debt.originalDebt || 0),
+      0
+    );
+  }, [settledDebts]);
   if (!parentGUID) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
@@ -91,9 +95,16 @@ function DebtsArchivePage() {
     <div className="w-full mt-8 px-4">
       {settledDebts.length > 0 ? (
         <>
-          <div className="text-center text-lg font-bold  rounded-md flex justify-center items-center mb-8  w-3/8 mx-auto p-6 shadow-sm">
-            آرشیو بدهی‌ها
+          <div className="text-center  rounded-md flex flex-col justify-center items-center gap-3 mb-8 w-3/8 mx-auto p-6 shadow-sm">
+            <span className="font-bold text-lg">جمع کل بدهی‌های آرشیو شده</span>
+            <div className=" flex flex-row-reverse justify-center items-center gap-3">
+              <span className="font-bold text-green-700 text-xl">
+                {totalSettledDebt.toLocaleString()}
+              </span>
+              <span className="font-bold text-lg text-sky-500">ریال</span>
+            </div>
           </div>
+
           <div className="flex flex-col gap-4">
             {settledDebts.map((debt, index) => (
               <div
