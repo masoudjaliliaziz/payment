@@ -9,7 +9,7 @@ import { calculateRasDatePayment } from "../../utils/calculateRasDate";
 import { getShamsiDateFromDayOfYear } from "../../utils/getShamsiDateFromDayOfYear";
 import ChecksDraftDiv from "./ChecksDraftDiv";
 import { handleAddItemToPayment } from "../../api/addData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 // توابع از Payment
 const convertPersianDigitsToEnglish = (str: string): string => {

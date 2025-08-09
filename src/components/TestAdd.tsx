@@ -8,7 +8,7 @@ import persian_fa from "react-date-object/locales/persian_fa";
 import { handleAddTestItem } from "../api/addData";
 
 import type { DebtType } from "../types/apiTypes";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 type Props = {
   parentGUID: string;

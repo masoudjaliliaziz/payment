@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { updatePaymentItem } from "../api/updateData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 export function useUpdatePayment(parentGUID: string) {
   const queryClient = useQueryClient();

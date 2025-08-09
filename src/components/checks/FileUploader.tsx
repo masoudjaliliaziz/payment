@@ -1,6 +1,6 @@
 import { Paperclip } from "lucide-react";
 import { useState, useRef, useImperativeHandle, forwardRef } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 interface FileUploaderProps {
   orderNumber?: string;

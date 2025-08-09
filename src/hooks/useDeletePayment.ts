@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deletePaymentItem } from "../api/deleteData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 export function useDeletePayment(parentGUID: string) {
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deletePaymentDraftItem } from "../api/deleteData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 export function useDeletePaymentDraft(parentGUID: string) {
   const queryClient = useQueryClient();

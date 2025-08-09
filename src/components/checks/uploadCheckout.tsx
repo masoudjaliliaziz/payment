@@ -16,7 +16,8 @@ import { FileUploader, type FileUploaderHandle } from "./FileUploader";
 
 import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
+
 
 const bankOptions = [
   {

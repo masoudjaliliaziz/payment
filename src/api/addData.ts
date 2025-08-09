@@ -1,7 +1,8 @@
-import toast from "react-hot-toast";
+
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 import type { PaymentType } from "./getData";
+import { toast } from "react-toastify";
 type Data = {
   __metadata: { type: string };
   Title: string;

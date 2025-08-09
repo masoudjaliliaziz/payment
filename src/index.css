@@ -24,3 +24,7 @@ body {
 .test:hover {
   background-color: blue;
 }
+.custom-toast {
+  font-family: "Vazir", sans-serif !important;
+  font-weight: bolder;
+}

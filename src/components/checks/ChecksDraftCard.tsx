@@ -4,7 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Trash } from "lucide-react";
 import { useDeletePaymentDraft } from "../../hooks/useDeleteaymentDraft";
 import { handleAddItemToPayment } from "../../api/addData";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 
 type Props = {
   parentGUID: string;
