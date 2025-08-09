@@ -18,7 +18,6 @@ import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import { toast } from "react-toastify";
 
-
 const bankOptions = [
   {
     value: "پاسارگاد 1-10706567-110-284 پاسداران - جاري",
@@ -477,6 +476,7 @@ const UploadCheckoutForm: React.FC<Props> = ({
                 inputClass="input input-bordered w-full"
                 placeholder="تاریخ را انتخاب کنید"
                 format="YYYY/MM/DD"
+                maxDate={new DateObject()} // اینجا تاریخ امروز
               />
             </div>
             <div className="flex flex-col gap-2 items-end">
