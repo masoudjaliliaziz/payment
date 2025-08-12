@@ -129,7 +129,7 @@ function ChecksDraft({ parentGUID }: Props) {
 
   // بررسی وجود آیتم با status = "0" در لیست کامل پرداخت‌ها
   const hasDraftPayments = paymentList.some(
-    (item) => item.status !== "3" && item.status !== "4"
+    (item) => item.status !== "3" && item.status !== "4" && item.status !== "2"
   );
 
   const groupMutation = useMutation({

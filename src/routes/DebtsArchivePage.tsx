@@ -3,26 +3,33 @@ import { useParentGuid } from "../hooks/useParentGuid";
 import { loadDebt, loadPayment, type PaymentType } from "../api/getData";
 import { useMemo } from "react";
 import type { DebtType } from "../types/apiTypes";
+import {
+  calculateRasDateDebt,
+  calculateRasDatePayment,
+} from "../utils/calculateRasDate";
 
 function DebtsArchivePage() {
   const parentGUID = useParentGuid();
-
   const {
-    data: paymentList = [],
-    isLoading: isLoadingPayments,
-    isError: isErrorPayments,
-    error: errorPayments,
+    data: payment = [],
+    isLoading,
+    isError,
+    error,
   } = useQuery<PaymentType[]>({
     queryKey: ["payments", parentGUID],
     queryFn: async () => {
       const data = await loadPayment(parentGUID);
       return (data as (PaymentType | undefined)[]).filter(
-        (item): item is PaymentType => item !== undefined && item.status === "4"
+        (item): item is PaymentType => item !== undefined
       );
     },
     enabled: !!parentGUID,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
+
+  const paymentList = useMemo(() => {
+    return payment.filter((item) => item.status === "4");
+  }, [payment]);
 
   const {
     data: debtList = [],
@@ -38,22 +45,28 @@ function DebtsArchivePage() {
       );
     },
     enabled: !!parentGUID,
-    refetchInterval: 5000,
+    refetchInterval: 30000,
   });
+  const isValidNumber = (value: string | undefined): boolean => {
+    return value !== undefined && !isNaN(Number(value));
+  };
 
   const settledDebts = useMemo(() => {
     const totalPaid = paymentList.reduce(
-      (sum, item) => sum + Number(item.price || 0),
+      (sum, item) =>
+        isValidNumber(item.price) ? sum + Number(item.price) : sum,
       0
     );
     const sortedDebts = [...debtList]
-      .filter((d) => d.debt && d.dayOfYear)
+      .filter(
+        (d) => isValidNumber(d.debt) && isValidNumber(String(d.dayOfYear))
+      )
       .sort((a, b) => Number(a.dayOfYear) - Number(b.dayOfYear));
 
     let remainingPayment = totalPaid;
     return sortedDebts.reduce<(DebtType & { originalDebt: string })[]>(
       (acc, debt) => {
-        const currentDebt = Number(debt.debt || 0);
+        const currentDebt = Number(debt.debt);
         const originalDebt = debt.debt || "0";
 
         if (remainingPayment >= currentDebt) {
@@ -69,10 +82,41 @@ function DebtsArchivePage() {
 
   const totalSettledDebt = useMemo(() => {
     return settledDebts.reduce(
-      (sum, debt) => sum + Number(debt.originalDebt || 0),
+      (sum, debt) =>
+        isValidNumber(debt.originalDebt)
+          ? sum + Number(debt.originalDebt)
+          : sum,
       0
     );
   }, [settledDebts]);
+  const settledDebtsForRas = useMemo(() => {
+    return settledDebts.map((d) => ({
+      ...d,
+      debt: d.originalDebt, // تضمین اینکه تابع Ras مبلغ اصلی رو بگیره
+    }));
+  }, [settledDebts]);
+
+  const dueDateDisplayCalculated = useMemo(() => {
+    if (settledDebtsForRas.length > 0) {
+      return calculateRasDateDebt(settledDebtsForRas);
+    }
+    return null;
+  }, [settledDebtsForRas]);
+
+  const rasDayOfYearAllPaymnets = calculateRasDatePayment(paymentList);
+  const dayDifference =
+    rasDayOfYearAllPaymnets !== null && dueDateDisplayCalculated !== null
+      ? rasDayOfYearAllPaymnets - dueDateDisplayCalculated
+      : null;
+
+  const differenceText =
+    dayDifference !== null
+      ? dayDifference === 0
+        ? "0 روز"
+        : dayDifference > 0
+        ? `${dayDifference} روز مانده`
+        : `${Math.abs(dayDifference)} روز گذشته`
+      : "—";
   if (!parentGUID) {
     return (
       <div className="p-4 text-center text-sm text-gray-500">
@@ -81,33 +125,44 @@ function DebtsArchivePage() {
     );
   }
 
-  if (isLoadingPayments || isLoadingDebts)
+  if (isLoading || isLoadingDebts) {
     return <div className="text-center text-lg">در حال بارگذاری...</div>;
+  }
 
-  if (isErrorPayments || isErrorDebts)
+  if (isError || isErrorDebts) {
     return (
       <div className="text-center text-red-600">
-        خطا: {String(errorPayments || errorDebts)}
+        خطا: {String(error || errorDebts)}
       </div>
     );
+  }
 
   return (
-    <div className="w-full mt-8 px-4">
+    <section className="w-full mt-8 px-4">
       {settledDebts.length > 0 ? (
         <>
-          <div className="text-center  rounded-md flex flex-col justify-center items-center gap-3 mb-8 w-3/8 mx-auto p-6 shadow-sm">
+          <div className="text-center rounded-md flex flex-col justify-center items-center gap-3 mb-8 w-1/3 mx-auto p-6 shadow-sm">
             <span className="font-bold text-lg">جمع کل بدهی‌های آرشیو شده</span>
-            <div className=" flex flex-row-reverse justify-center items-center gap-3">
+            <div className="flex flex-row-reverse justify-center items-center gap-3">
               <span className="font-bold text-green-700 text-xl">
                 {totalSettledDebt.toLocaleString()}
               </span>
               <span className="font-bold text-lg text-sky-500">ریال</span>
             </div>
           </div>
-
+          <div className="text-center rounded-md flex flex-col justify-center items-center gap-3 mb-8 w-1/3 mx-auto p-6 shadow-sm">
+            <span className="font-bold text-lg">
+              اختلاف روز با راس پرداخت ها
+            </span>
+            <div className="flex flex-row-reverse justify-center items-center gap-3">
+              <span className="font-bold text-green-700 text-xl">
+                {differenceText}
+              </span>
+            </div>
+          </div>
           <div className="flex flex-col gap-4">
             {settledDebts.map((debt, index) => (
-              <div
+              <article
                 key={index}
                 className="grid grid-cols-5 p-3 rounded-md shadow-sm bg-green-50 items-center"
               >
@@ -152,16 +207,17 @@ function DebtsArchivePage() {
                     {debt.debtDate}
                   </span>
                 </div>
-              </div>
+              </article>
             ))}
           </div>
         </>
       ) : (
         <div className="text-center text-gray-500">
-          هیچ بدهی تسویه‌شده‌ای وجود ندارد.
+          هیچ بدهی تسویه‌شده‌ای وجود ندارد. لطفاً برای افزودن بدهی جدید اقدام
+          کنید.
         </div>
       )}
-    </div>
+    </section>
   );
 }
 
