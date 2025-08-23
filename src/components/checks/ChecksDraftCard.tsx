@@ -230,6 +230,7 @@ function ChecksDraftCard({
               <span className="font-bold text-sky-700 text-sm">
                 {Number(paymentDraft.price).toLocaleString("fa-IR")}
               </span>
+              <span className="font-bold text-gray-700 text-sm">ریال</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-500">نام بانک</p>

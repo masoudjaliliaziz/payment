@@ -1,45 +1,41 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import {
   loadPayment,
   loadPaymentDraft,
+  loadDebt,
   type PaymentType,
 } from "../../api/getData";
-import { calculateRasDatePayment } from "../../utils/calculateRasDate";
+import {
+  calculateRasDatePayment,
+  calculateRasDateDebt,
+} from "../../utils/calculateRasDate";
 import { getShamsiDateFromDayOfYear } from "../../utils/getShamsiDateFromDayOfYear";
 import ChecksDraftDiv from "./ChecksDraftDiv";
 import { handleAddItemToPayment } from "../../api/addData";
 import { toast } from "react-toastify";
+import type { DebtType } from "../../types/apiTypes";
 
-// توابع از Payment
+// توابع کمکی
 const convertPersianDigitsToEnglish = (str: string): string => {
   return str.replace(/[۰-۹]/g, (d) => "۰۱۲۳۴۵۶۷۸۹".indexOf(d).toString());
 };
 
-const getCurrentShamsiYear = (): number => {
-  const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-    year: "numeric",
-  });
-  const yearStr = formatter.format(new Date());
-  return Number(convertPersianDigitsToEnglish(yearStr));
-};
-
-// تابع جدید برای محاسبه روز سال امروز
 const getTodayShamsiDayOfYear = (): number => {
   const formatter = new Intl.DateTimeFormat("fa-IR-u-ca-persian", {
-    year: "numeric",
     month: "numeric",
     day: "numeric",
   });
-  const [yearStr, monthStr, dayStr] = formatter
+
+  const [monthStr, dayStr] = formatter
     .format(new Date())
     .split("/")
     .map((part) => convertPersianDigitsToEnglish(part.trim()));
-  const year = Number(yearStr);
+
   const month = Number(monthStr);
   const day = Number(dayStr);
-  console.log(year);
-  const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29]; // فرض بدون کبیسه
+
+  const daysInMonths = [31, 31, 31, 31, 31, 31, 30, 30, 30, 30, 30, 29];
   let dayOfYear = day;
   for (let i = 0; i < month - 1; i++) {
     dayOfYear += daysInMonths[i];
@@ -47,13 +43,20 @@ const getTodayShamsiDayOfYear = (): number => {
   return dayOfYear;
 };
 
+const isValidNumber = (value: string | number | undefined | null): boolean => {
+  if (value === undefined || value === null || value === "") return false;
+  const num = Number(value);
+  return !isNaN(num) && isFinite(num);
+};
 type Props = {
   parentGUID: string;
 };
 
 function ChecksDraft({ parentGUID }: Props) {
   // دریافت لیست پیش‌نویس‌ها
-  const { data: paymentListDraft = [] } = useQuery<PaymentType[]>({
+  const { data: paymentListDraft = [], isLoading: isLoadingDraft } = useQuery<
+    PaymentType[]
+  >({
     queryKey: ["paymentsDraft", parentGUID],
     queryFn: async () => {
       const data = await loadPaymentDraft(parentGUID);
@@ -66,7 +69,9 @@ function ChecksDraft({ parentGUID }: Props) {
   });
 
   // دریافت لیست کامل پرداخت‌ها
-  const { data: paymentList = [] } = useQuery<PaymentType[]>({
+  const { data: paymentList = [], isLoading: isLoadingPayments } = useQuery<
+    PaymentType[]
+  >({
     queryKey: ["payments", parentGUID],
     queryFn: async () => {
       const data = await loadPayment(parentGUID);
@@ -75,6 +80,21 @@ function ChecksDraft({ parentGUID }: Props) {
       );
     },
     enabled: !!parentGUID,
+  });
+
+  // دریافت لیست بدهی‌ها
+  const { data: debtList = [], isLoading: isLoadingDebts } = useQuery<
+    DebtType[]
+  >({
+    queryKey: ["Debt", parentGUID],
+    queryFn: async () => {
+      const data = await loadDebt(parentGUID);
+      return (data as (DebtType | undefined)[]).filter(
+        (item): item is DebtType => item !== undefined
+      );
+    },
+    enabled: !!parentGUID,
+    refetchInterval: 30000,
   });
 
   const [selectedPayments, setSelectedPayments] = useState<PaymentType[]>([]);
@@ -95,39 +115,110 @@ function ChecksDraft({ parentGUID }: Props) {
     }
   };
 
-  // محاسبه راس و اختلاف با امروز
-  const rasDayOfYear = calculateRasDatePayment(selectedPayments);
-  const year = getCurrentShamsiYear();
+  // محاسبه بدهی‌های تسویه‌شده
+  const settledDebts = useMemo(() => {
+    const totalPaid = paymentList
+      .filter((item) => item.status === "4")
+      .reduce(
+        (sum, item) =>
+          isValidNumber(item.price) ? sum + Number(item.price) : sum,
+        0
+      );
+
+    const sortedDebts = [...debtList]
+      .filter((d) => isValidNumber(d.debt) && isValidNumber(d.dayOfYear))
+      .sort((a, b) => Number(a.dayOfYear) - Number(b.dayOfYear));
+
+    let remainingPayment = totalPaid;
+    return sortedDebts.reduce<(DebtType & { originalDebt: string })[]>(
+      (acc, debt) => {
+        const currentDebt = Number(debt.debt);
+        const originalDebt = debt.debt || "0";
+
+        if (isValidNumber(currentDebt) && remainingPayment >= currentDebt) {
+          remainingPayment -= currentDebt;
+          acc.push({ ...debt, debt: "0", originalDebt });
+        }
+
+        return acc;
+      },
+      []
+    );
+  }, [debtList, paymentList]);
+
+  const settledDebtsForRas = useMemo(() => {
+    return settledDebts.map((d) => ({
+      ...d,
+      debt: d.originalDebt,
+    }));
+  }, [settledDebts]);
+
+  // محاسبه راس بدهی‌ها
+  const dueDateDisplayCalculated = useMemo(() => {
+    if (settledDebtsForRas.length === 0) return null;
+    const ras = calculateRasDateDebt(settledDebtsForRas);
+    return isValidNumber(ras) ? ras : null;
+  }, [settledDebtsForRas]);
+
+  // فیلتر پرداخت‌های انتخاب‌شده برای اطمینان از مقادیر معتبر
+  const validSelectedPayments = useMemo(() => {
+    return selectedPayments.filter(
+      (p) => isValidNumber(p.price) && isValidNumber(p.dayOfYear)
+    );
+  }, [selectedPayments]);
+
+  // محاسبه راس چک‌های انتخاب‌شده
+  const rasDayOfYear = useMemo(() => {
+    if (validSelectedPayments.length === 0) return null;
+    const ras = calculateRasDatePayment(validSelectedPayments);
+    return isValidNumber(ras) ? ras : null;
+  }, [validSelectedPayments]);
+
   const rasDate = rasDayOfYear ? getShamsiDateFromDayOfYear(rasDayOfYear) : "—";
   const todayDayOfYear = getTodayShamsiDayOfYear();
 
-  // لاگ برای دیباگ
-  console.log(year);
-  console.log("todayDayOfYear:", todayDayOfYear);
-  console.log("rasDayOfYear:", rasDayOfYear);
+  // محاسبه اختلاف راس چک‌ها با راس بدهی‌ها
+  const dayDifferenceRas = useMemo(() => {
+    if (
+      !isValidNumber(rasDayOfYear) ||
+      !isValidNumber(dueDateDisplayCalculated)
+    ) {
+      return null;
+    }
+    return Number(rasDayOfYear) - Number(dueDateDisplayCalculated);
+  }, [rasDayOfYear, dueDateDisplayCalculated]);
 
-  // محاسبه اختلاف با علامت مثبت یا منفی
-  const dayDifference =
-    rasDayOfYear !== null && rasDayOfYear !== undefined
-      ? rasDayOfYear - todayDayOfYear
-      : null;
-  const differenceText =
-    dayDifference !== null
-      ? dayDifference === 0
-        ? "0 روز"
-        : dayDifference > 0
-        ? `${dayDifference} روز مانده`
-        : `${Math.abs(dayDifference)} روز گذشته`
-      : "—";
+  const differenceTextRas = useMemo(() => {
+    if (dayDifferenceRas === null) return "—";
+    return dayDifferenceRas === 0
+      ? "0 روز"
+      : dayDifferenceRas > 0
+      ? `${dayDifferenceRas} روز مانده`
+      : `${Math.abs(dayDifferenceRas)} روز گذشته`;
+  }, [dayDifferenceRas]);
 
-  const totalSelectedPrice = selectedPayments.reduce((sum, p) => {
+  // محاسبه اختلاف راس چک‌ها با امروز
+  const dayDifferenceToday = useMemo(() => {
+    if (!isValidNumber(rasDayOfYear)) return null;
+    return Number(rasDayOfYear) - todayDayOfYear;
+  }, [rasDayOfYear, todayDayOfYear]);
+
+  const differenceTextToday = useMemo(() => {
+    if (dayDifferenceToday === null) return "—";
+    return dayDifferenceToday === 0
+      ? "0 روز"
+      : dayDifferenceToday > 0
+      ? `${dayDifferenceToday} روز مانده`
+      : `${Math.abs(dayDifferenceToday)} روز گذشته`;
+  }, [dayDifferenceToday]);
+
+  const totalSelectedPrice = validSelectedPayments.reduce((sum, p) => {
     const amount = Number(p.price);
-    return sum + (isNaN(amount) ? 0 : amount);
+    return sum + (isValidNumber(amount) ? amount : 0);
   }, 0);
 
   const queryClient = useQueryClient();
 
-  // بررسی وجود آیتم با status = "0" در لیست کامل پرداخت‌ها
   const hasDraftPayments = paymentList.some(
     (item) => item.status !== "3" && item.status !== "4" && item.status !== "2"
   );
@@ -202,6 +293,10 @@ function ChecksDraft({ parentGUID }: Props) {
     },
   });
 
+  if (isLoadingDraft || isLoadingPayments || isLoadingDebts) {
+    return <div className="text-center text-lg">در حال بارگذاری...</div>;
+  }
+
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
@@ -210,10 +305,13 @@ function ChecksDraft({ parentGUID }: Props) {
             راس چک‌ها: {rasDate}
           </div>
           <div className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
-            اختلاف با امروز: {differenceText}
+            اختلاف با امروز: {differenceTextToday}
+          </div>
+          <div className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
+            اختلاف با راس بدهی‌ها: {differenceTextRas}
           </div>
           <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
-            جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} تومان
+            جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} ریال
           </div>
         </div>
 
@@ -256,7 +354,7 @@ function ChecksDraft({ parentGUID }: Props) {
       </div>
 
       <div className="flex-1 overflow-y-auto w-full px-4 py-6">
-        {paymentListDraft.length > 0 && (
+        {paymentListDraft.length > 0 ? (
           <ChecksDraftDiv
             paymentList={paymentList}
             parentGUID={parentGUID}
@@ -264,6 +362,10 @@ function ChecksDraft({ parentGUID }: Props) {
             selectedPayments={selectedPayments}
             toggleSelect={toggleSelect}
           />
+        ) : (
+          <div className="text-center text-gray-500">
+            هیچ چک پیش‌نویسی وجود ندارد.
+          </div>
         )}
       </div>
     </div>

@@ -189,6 +189,7 @@ function PaymentCard({ parentGUID, payment }: Props) {
               <span className="font-bold text-sky-700 text-sm">
                 {Number(payment?.price).toLocaleString("fa-IR")}
               </span>
+              <span className="text-base-content text-xs">ریال</span>
             </div>
 
             <div>

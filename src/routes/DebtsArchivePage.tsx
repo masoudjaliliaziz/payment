@@ -173,6 +173,7 @@ function DebtsArchivePage() {
                   <span className="font-semibold text-sm text-base-content">
                     {Number(debt.originalDebt).toLocaleString()}
                   </span>
+                  <span className="text-base-content text-xs">ریال</span>
                 </div>
 
                 <div className="flex flex-row-reverse items-center gap-1.5">
@@ -182,6 +183,7 @@ function DebtsArchivePage() {
                   <span className="font-semibold text-sm text-green-600">
                     0
                   </span>
+                  <span className="text-base-content text-xs">ریال</span>
                 </div>
 
                 <div className="flex flex-row-reverse items-center gap-1.5">

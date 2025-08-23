@@ -235,6 +235,7 @@ function Debt({ parentGUID }: Props) {
                   <span className="font-semibold text-sm text-base-content">
                     {Number(debt.originalDebt).toLocaleString() || "نامشخص"}
                   </span>
+                  <span className="text-base-content text-xs">ریال</span>
                 </div>
 
                 <div className="flex flex-row-reverse items-center gap-1.5">
@@ -244,6 +245,7 @@ function Debt({ parentGUID }: Props) {
                   <span className="font-semibold text-sm text-base-content">
                     {Number(debt.debt).toLocaleString() || "نامشخص"}
                   </span>
+                  <span className="text-base-content text-xs">ریال</span>
                 </div>
 
                 <div className="flex flex-row-reverse items-center gap-1.5">
