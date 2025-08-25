@@ -115,50 +115,23 @@ function ChecksDraft({ parentGUID }: Props) {
     }
   };
 
-  // محاسبه بدهی‌های تسویه‌شده
-  const settledDebts = useMemo(() => {
-    const totalPaid = paymentList
-      .filter((item) => item.status === "4")
-      .reduce(
-        (sum, item) =>
-          isValidNumber(item.price) ? sum + Number(item.price) : sum,
-        0
-      );
-
-    const sortedDebts = [...debtList]
-      .filter((d) => isValidNumber(d.debt) && isValidNumber(d.dayOfYear))
-      .sort((a, b) => Number(a.dayOfYear) - Number(b.dayOfYear));
-
-    let remainingPayment = totalPaid;
-    return sortedDebts.reduce<(DebtType & { originalDebt: string })[]>(
-      (acc, debt) => {
-        const currentDebt = Number(debt.debt);
-        const originalDebt = debt.debt || "0";
-
-        if (isValidNumber(currentDebt) && remainingPayment >= currentDebt) {
-          remainingPayment -= currentDebt;
-          acc.push({ ...debt, debt: "0", originalDebt });
-        }
-
-        return acc;
-      },
-      []
-    );
-  }, [debtList, paymentList]);
-
-  const settledDebtsForRas = useMemo(() => {
-    return settledDebts.map((d) => ({
-      ...d,
-      debt: d.originalDebt,
-    }));
-  }, [settledDebts]);
-
   // محاسبه راس بدهی‌ها
   const dueDateDisplayCalculated = useMemo(() => {
-    if (settledDebtsForRas.length === 0) return null;
-    const ras = calculateRasDateDebt(settledDebtsForRas);
-    return isValidNumber(ras) ? ras : null;
-  }, [settledDebtsForRas]);
+    // فیلتر بدهی‌هایی که مقادیر معتبر دارن
+    const validDebts = debtList.filter(
+      (d) => isValidNumber(d.debt) && isValidNumber(d.dayOfYear)
+    );
+    if (validDebts.length === 0) {
+      console.warn("هیچ بدهی معتبری برای محاسبه راس وجود ندارد");
+      return null;
+    }
+    const ras = calculateRasDateDebt(validDebts);
+    if (!isValidNumber(ras)) {
+      console.warn("محاسبه راس بدهی‌ها ناموفق بود:", ras);
+      return null;
+    }
+    return ras;
+  }, [debtList]);
 
   // فیلتر پرداخت‌های انتخاب‌شده برای اطمینان از مقادیر معتبر
   const validSelectedPayments = useMemo(() => {
@@ -296,7 +269,9 @@ function ChecksDraft({ parentGUID }: Props) {
   if (isLoadingDraft || isLoadingPayments || isLoadingDebts) {
     return <div className="text-center text-lg">در حال بارگذاری...</div>;
   }
-
+  console.log("rasDayOfYear:", rasDayOfYear);
+  console.log("dueDateDisplayCalculated:", dueDateDisplayCalculated);
+  console.log("dayDifferenceRas:", dayDifferenceRas);
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
