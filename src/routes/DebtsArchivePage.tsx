@@ -64,20 +64,32 @@ function DebtsArchivePage() {
       .sort((a, b) => Number(a.dayOfYear) - Number(b.dayOfYear));
 
     let remainingPayment = totalPaid;
-    return sortedDebts.reduce<(DebtType & { originalDebt: string })[]>(
-      (acc, debt) => {
-        const currentDebt = Number(debt.debt);
-        const originalDebt = debt.debt || "0";
+    const result: (DebtType & { originalDebt: string })[] = [];
 
-        if (remainingPayment >= currentDebt) {
-          remainingPayment -= currentDebt;
-          acc.push({ ...debt, debt: "0", originalDebt });
-        }
+    for (const debt of sortedDebts) {
+      const currentDebt = Number(debt.debt);
+      const originalDebt = debt.debt || "0";
 
-        return acc;
-      },
-      []
-    );
+      if (remainingPayment >= currentDebt) {
+        // بدهی کاملاً پرداخت شده
+        remainingPayment -= currentDebt;
+        result.push({ ...debt, debt: "0", originalDebt });
+      } else if (remainingPayment > 0) {
+        // بدهی جزئی پرداخت شده - این قسمت قبلاً نادیده گرفته می‌شد!
+        const newDebt = currentDebt - remainingPayment;
+        result.push({
+          ...debt,
+          debt: String(newDebt),
+          originalDebt,
+        });
+        remainingPayment = 0;
+      } else {
+        // بدهی پرداخت نشده - این هم باید در آرشیو باشه
+        result.push({ ...debt, originalDebt });
+      }
+    }
+
+    return result;
   }, [debtList, paymentList]);
 
   const totalSettledDebt = useMemo(() => {
@@ -164,7 +176,13 @@ function DebtsArchivePage() {
             {settledDebts.map((debt, index) => (
               <article
                 key={index}
-                className="grid grid-cols-5 p-3 rounded-md shadow-sm bg-green-50 items-center"
+                className={`grid grid-cols-5 p-3 rounded-md shadow-sm items-center ${
+                  Number(debt.debt) === 0
+                    ? "bg-green-50"
+                    : Number(debt.debt) < Number(debt.originalDebt)
+                    ? "bg-orange-50"
+                    : "bg-red-50"
+                }`}
               >
                 <div className="flex flex-row-reverse items-center gap-1.5">
                   <span className="font-semibold text-sm text-primary">
@@ -180,8 +198,14 @@ function DebtsArchivePage() {
                   <span className="font-semibold text-sm text-primary">
                     باقی‌مانده
                   </span>
-                  <span className="font-semibold text-sm text-green-600">
-                    0
+                  <span
+                    className={`font-semibold text-sm ${
+                      Number(debt.debt) === 0
+                        ? "text-green-600"
+                        : "text-orange-600"
+                    }`}
+                  >
+                    {Number(debt.debt).toLocaleString()}
                   </span>
                   <span className="text-base-content text-xs">ریال</span>
                 </div>
@@ -196,8 +220,20 @@ function DebtsArchivePage() {
                 </div>
 
                 <div className="flex justify-center items-center">
-                  <span className="text-green-600 font-bold text-xs">
-                    تسویه شده
+                  <span
+                    className={`font-bold text-xs ${
+                      Number(debt.debt) === 0
+                        ? "text-green-600"
+                        : Number(debt.debt) < Number(debt.originalDebt)
+                        ? "text-orange-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {Number(debt.debt) === 0
+                      ? "تسویه شده"
+                      : Number(debt.debt) < Number(debt.originalDebt)
+                      ? "جزئی پرداخت شده"
+                      : "پرداخت نشده"}
                   </span>
                 </div>
 
