@@ -21,8 +21,40 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploadStatus, setUploadStatus] = useState("");
     const [uploadProgress, setUploadProgress] = useState(0);
+    const [isDragOver, setIsDragOver] = useState(false); // وضعیت drag over برای نمایش بصری
 
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // تابع برای پردازش فایل انتخاب شده (از input یا drag & drop)
+    const handleFileSelect = (file: File) => {
+      setSelectedFile(file);
+      setUploadStatus("");
+      setUploadProgress(0);
+    };
+
+    // مدیریت رویدادهای drag & drop
+    const handleDragOver = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      setIsDragOver(false);
+
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        handleFileSelect(files[0]); // فقط اولین فایل رو انتخاب می‌کنیم
+      }
+    };
 
     useImperativeHandle(ref, () => ({
       getFile: () => selectedFile,
@@ -106,13 +138,23 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
     }));
 
     return (
-      <div className="flex flex-col justify-between items-end gap-5 px-4 py-1.5 rounded-md">
+      <div
+        className={`flex flex-col justify-between items-end gap-5 px-4 py-1.5 rounded-md border-2 border-dashed transition-all duration-300 ${
+          isDragOver
+            ? "border-blue-500 bg-blue-50"
+            : "border-gray-300 hover:border-gray-400"
+        }`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <label
           htmlFor={inputId}
           className="rounded-md p-2 flex justify-center items-center font-bold text-xs border-2 cursor-pointer transition-colors duration-300 gap-2"
         >
           {title}
           <Paperclip width={14} height={14} />
+
         </label>
 
         <input
@@ -122,9 +164,7 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
           className="hidden"
           onChange={(e) => {
             if (e.target.files && e.target.files[0]) {
-              setSelectedFile(e.target.files[0]);
-              setUploadStatus("");
-              setUploadProgress(0);
+              handleFileSelect(e.target.files[0]);
             }
           }}
         />
@@ -147,9 +187,14 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
             </button>
           </div>
         ) : (
-          <p className="text-sm font-semibold text-base-content">
-            هنوز فایلی انتخاب نشده
-          </p>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-base-content mb-1">
+              هنوز فایلی انتخاب نشده
+            </p>
+            <p className="text-xs text-gray-500">
+              فایل را اینجا بکشید یا روی دکمه کلیک کنید
+            </p>
+          </div>
         )}
 
         {uploadStatus && (
