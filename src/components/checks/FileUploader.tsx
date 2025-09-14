@@ -154,7 +154,6 @@ const FileUploader = forwardRef<FileUploaderHandle, FileUploaderProps>(
         >
           {title}
           <Paperclip width={14} height={14} />
-
         </label>
 
         <input
