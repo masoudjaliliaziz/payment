@@ -473,7 +473,7 @@ const UploadCheckoutForm: React.FC<Props> = ({
                 </select>
                 {/* Tooltip for selected bank */}
                 {bankName && (
-                  <div className="absolute top-full left-0 mt-1 w-full p-3 rounded bg-slate-200  text-xs z-10">
+                  <div className="    w-full p-3 rounded bg-slate-200  text-xs ">
                     <div className="text-center">
                       <div className="font-bold text-sm mb-2 text-slate-700">
                         شماره حساب بانک انتخاب شده
