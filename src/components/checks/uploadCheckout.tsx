@@ -17,6 +17,7 @@ import { FileUploader, type FileUploaderHandle } from "./FileUploader";
 import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import { toast } from "react-toastify";
+import { extractAccountFromBankValue } from "../../utils/extractAccountFromBankValue";
 
 const bankOptions = [
   {
@@ -457,18 +458,33 @@ const UploadCheckoutForm: React.FC<Props> = ({
           <>
             <div className="flex flex-col gap-2 items-end">
               <label className="text-sm font-semibold">نام بانک مقصد</label>
-              <select
-                className="select select-bordered w-full text-right"
-                value={bankName}
-                onChange={(e) => setBankName(e.target.value)}
-              >
-                <option value="">بانک را انتخاب کنید</option>
-                {bankOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
+              <div className="relative w-full">
+                <select
+                  className="select select-bordered w-full text-right"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                >
+                  <option value="">بانک را انتخاب کنید</option>
+                  {bankOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                {/* Tooltip for selected bank */}
+                {bankName && (
+                  <div className="absolute top-full left-0 mt-1 w-full p-3 rounded bg-slate-200  text-xs z-10">
+                    <div className="text-center">
+                      <div className="font-bold text-sm mb-2 text-slate-700">
+                        شماره حساب بانک انتخاب شده
+                      </div>
+                      <div className="bg-slate-100 px-3 py-2 rounded text-center font-bold text-sm">
+                        {extractAccountFromBankValue(bankName)}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex flex-col gap-2 items-end">
               <label className="text-sm font-semibold">تاریخ واریز</label>

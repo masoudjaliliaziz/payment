@@ -323,10 +323,52 @@ function PaymentCard({ parentGUID, payment }: Props) {
                   payment?.treasuryConfirmDescription || "توضیحاتی درج نشده",
               }}
             />
-            <div>
-              <span className="font-bold text-sky-700 text-sm">
+            <div className="relative group">
+              <span className="font-bold text-sky-700 text-sm cursor-help">
                 پرداخت نقدی
               </span>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-64 p-3 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
+                <div className="text-center">
+                  <div className="font-bold text-sm mb-2 text-blue-300">
+                    شماره حساب‌های بانکی
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-10706567-110-284
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1416066538
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      0102171481006
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      3385356379
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      4621823449
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      0109821280001
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      5026100391
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1019399873
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      177001820893
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-42548-40-805
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-5008500-2-125
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -379,9 +421,53 @@ function PaymentCard({ parentGUID, payment }: Props) {
               <p className="text-sm font-semibold text-gray-500">
                 واریز به بانک
               </p>
-              <span className="font-bold text-sky-700 text-sm">
-                {payment?.bankName || "نامشخص"}
-              </span>
+              <div className="relative group">
+                <span className="font-bold text-sky-700 text-sm cursor-help">
+                  {payment?.bankName || "نامشخص"}
+                </span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-64 p-3 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
+                  <div className="text-center">
+                    <div className="font-bold text-sm mb-2 text-blue-300">
+                      شماره حساب‌های بانکی
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-10706567-110-284
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1416066538
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        0102171481006
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        3385356379
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        4621823449
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        0109821280001
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        5026100391
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1019399873
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        177001820893
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-42548-40-805
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-5008500-2-125
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </>

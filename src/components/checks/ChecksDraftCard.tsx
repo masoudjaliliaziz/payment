@@ -192,7 +192,53 @@ function ChecksDraftCard({
       {paymentDraft.cash === "1" && (
         <div className="flex flex-col items-center justify-center bg-slate-100 gap-2 px-1.5 py-2 rounded-md">
           <div className="bg-slate-200 p-3 rounded-md flex justify-end items-center w-full gap-3">
-            <span className="font-semibold text-info">واریز نقدی</span>
+            <div className="relative group">
+              <span className="font-semibold text-info cursor-help">
+                واریز نقدی
+              </span>
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-64 p-3 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
+                <div className="text-center">
+                  <div className="font-bold text-sm mb-2 text-blue-300">
+                    شماره حساب‌های بانکی
+                  </div>
+                  <div className="space-y-1 text-xs">
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-10706567-110-284
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1416066538
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      0102171481006
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      3385356379
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      4621823449
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      0109821280001
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      5026100391
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1019399873
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      177001820893
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-42548-40-805
+                    </div>
+                    <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                      1-5008500-2-125
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
             {paymentDraft.status === "0" && (
               <button
                 type="button"
@@ -234,9 +280,53 @@ function ChecksDraftCard({
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-500">نام بانک</p>
-              <span className="font-bold text-sky-700 text-sm">
-                {paymentDraft.bankName}
-              </span>
+              <div className="relative group">
+                <span className="font-bold text-sky-700 text-sm cursor-help">
+                  {paymentDraft.bankName}
+                </span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-64 p-3 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
+                  <div className="text-center">
+                    <div className="font-bold text-sm mb-2 text-blue-300">
+                      شماره حساب‌های بانکی
+                    </div>
+                    <div className="space-y-1 text-xs">
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-10706567-110-284
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1416066538
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        0102171481006
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        3385356379
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        4621823449
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        0109821280001
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        5026100391
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1019399873
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        177001820893
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-42548-40-805
+                      </div>
+                      <div className="bg-gray-600 px-2 py-1 rounded text-center">
+                        1-5008500-2-125
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
