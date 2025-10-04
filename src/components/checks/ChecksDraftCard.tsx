@@ -5,6 +5,10 @@ import { Trash } from "lucide-react";
 import { useDeletePaymentDraft } from "../../hooks/useDeleteaymentDraft";
 import { handleAddItemToPayment } from "../../api/addData";
 import { toast } from "react-toastify";
+import Loading from "../Loading";
+import { Error } from "../Error";
+import { useCustomers } from "../../hooks/useCustomerData";
+import type { CustomerType } from "../../types/apiTypes";
 
 type Props = {
   parentGUID: string;
@@ -12,6 +16,7 @@ type Props = {
   paymentList: PaymentType[]; // Add paymentList as a prop
   selected?: boolean;
   toggleSelect: (p: PaymentType) => void;
+  typeactiveTab: "1" | "2";
 };
 
 function ChecksDraftCard({
@@ -20,6 +25,7 @@ function ChecksDraftCard({
   paymentList,
   selected,
   toggleSelect,
+  typeactiveTab,
 }: Props) {
   const deleteMutation = useDeletePaymentDraft(parentGUID);
   const queryClient = useQueryClient();
@@ -29,6 +35,20 @@ function ChecksDraftCard({
     dueDate: paymentDraft.dueDate || "",
   });
 
+  const {
+    isLoading,
+    data: customerData,
+    isError,
+    error,
+  } = useCustomers(parentGUID);
+
+  const [customer, setCustomer] = useState<CustomerType>();
+
+  useEffect(() => {
+    if (customerData !== undefined) {
+      setCustomer(customerData["0"]);
+    }
+  }, [customerData]);
   useEffect(() => {
     if (
       paymentDraft.price !== editData.price ||
@@ -70,6 +90,9 @@ function ChecksDraftCard({
             SalesExpert: paymentDraft.SalesExpert || "",
             SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
             cash: "0",
+            invoiceType: typeactiveTab,
+            customerCode: customer?.CustomerCode || "",
+            customerTitle: customer?.Title || "",
           };
         } else {
           data = {
@@ -84,6 +107,9 @@ function ChecksDraftCard({
             SalesExpert: paymentDraft.SalesExpert || "",
             SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
             cash: "0",
+            invoiceType: typeactiveTab,
+            customerCode: customer?.CustomerCode || "",
+            customerTitle: customer?.Title || "",
           };
         }
       } else {
@@ -97,6 +123,9 @@ function ChecksDraftCard({
           itemGUID: paymentDraft.itemGUID,
           SalesExpert: paymentDraft.SalesExpert || "",
           SalesExpertAcunt_text: paymentDraft.SalesExpertAcunt_text || "",
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       }
 
@@ -119,6 +148,13 @@ function ChecksDraftCard({
   const isValid = paymentDraft.price && paymentDraft.dueDate;
 
   if (!isValid) return null;
+  if (isLoading) {
+    <Loading title="در حال بارگذاری..." />;
+  }
+  if (isError) {
+    console.error(error);
+    <Error title="خطا در بارگذاری داده" />;
+  }
 
   return (
     <div

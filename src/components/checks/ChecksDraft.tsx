@@ -50,9 +50,17 @@ const isValidNumber = (value: string | number | undefined | null): boolean => {
 };
 type Props = {
   parentGUID: string;
+  typeactiveTab: "1" | "2";
+  customerCode?: string;
+  customerTitle?: string;
 };
 
-function ChecksDraft({ parentGUID }: Props) {
+function ChecksDraft({
+  parentGUID,
+  typeactiveTab,
+  customerCode,
+  customerTitle,
+}: Props) {
   // دریافت لیست پیش‌نویس‌ها
   const { data: paymentListDraft = [], isLoading: isLoadingDraft } = useQuery<
     PaymentType[]
@@ -206,6 +214,8 @@ function ChecksDraft({ parentGUID }: Props) {
       }
 
       for (const payment of selectedPayments) {
+        console.log("Payment invoiceType:", payment.invoiceType);
+        console.log("Using invoiceType:", payment.invoiceType || typeactiveTab);
         let data = {};
         if (payment.cash === "0") {
           if (payment.VerifiedHoghoghi) {
@@ -220,6 +230,9 @@ function ChecksDraft({ parentGUID }: Props) {
               SalesExpert: payment.SalesExpert || "",
               SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
               cash: "0",
+              invoiceType: payment.invoiceType || typeactiveTab,
+              customerCode: customerCode || "",
+              customerTitle: customerTitle || "",
             };
           } else {
             data = {
@@ -234,6 +247,9 @@ function ChecksDraft({ parentGUID }: Props) {
               SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
               cash: "0",
               status: "0",
+              invoiceType: payment.invoiceType || typeactiveTab,
+              customerCode: customerCode || "",
+              customerTitle: customerTitle || "",
             };
           }
         } else {
@@ -248,6 +264,9 @@ function ChecksDraft({ parentGUID }: Props) {
             SalesExpert: payment.SalesExpert || "",
             SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
             status: "0",
+            invoiceType: payment.invoiceType || typeactiveTab,
+            customerCode: customerCode || "",
+            customerTitle: customerTitle || "",
           };
         }
 
@@ -269,9 +288,7 @@ function ChecksDraft({ parentGUID }: Props) {
   if (isLoadingDraft || isLoadingPayments || isLoadingDebts) {
     return <div className="text-center text-lg">در حال بارگذاری...</div>;
   }
-  console.log("rasDayOfYear:", rasDayOfYear);
-  console.log("dueDateDisplayCalculated:", dueDateDisplayCalculated);
-  console.log("dayDifferenceRas:", dayDifferenceRas);
+
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
@@ -336,6 +353,7 @@ function ChecksDraft({ parentGUID }: Props) {
             paymentListDraft={paymentListDraft}
             selectedPayments={selectedPayments}
             toggleSelect={toggleSelect}
+            typeactiveTab={typeactiveTab}
           />
         ) : (
           <div className="text-center text-gray-500">

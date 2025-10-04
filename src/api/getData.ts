@@ -28,6 +28,9 @@ export type PaymentType = {
   bankName: string;
   VerifiedHoghoghi: string;
   nationalIdHoghoghi: string;
+  invoiceType: "1" | "2";
+  customerTitle: string;
+  customerCode: string;
 };
 
 //load paymentrs byu guyid for each customer -=------------------------------

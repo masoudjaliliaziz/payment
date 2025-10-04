@@ -18,6 +18,8 @@ import { useCustomers } from "../../hooks/useCustomerData";
 import { loadPayment, type PaymentType } from "../../api/getData";
 import { toast } from "react-toastify";
 import { extractAccountFromBankValue } from "../../utils/extractAccountFromBankValue";
+import type { CustomerType } from "../../types/apiTypes";
+import { Error as ErrorComponent } from "../Error";
 
 const bankOptions = [
   {
@@ -55,7 +57,9 @@ type Props = {
   type: "check" | "cash";
   formKey: number;
   setFormKey: Dispatch<SetStateAction<number>>;
-
+  typeactiveTab: "1" | "2";
+  customerData: CustomerType[];
+  setTypeActiveTab: (value: "1" | "2") => void;
   // 👈 نوع فرم
 };
 
@@ -64,6 +68,8 @@ const UploadCheckoutForm: React.FC<Props> = ({
   type,
   formKey,
   setFormKey,
+  typeactiveTab,
+  setTypeActiveTab,
 }) => {
   const [activeTab, setActiveTab] = useState<"hoghoghi" | "haghighi">(
     "haghighi"
@@ -97,6 +103,13 @@ const UploadCheckoutForm: React.FC<Props> = ({
     },
     enabled: !!parent_GUID,
   });
+  const [customer, setCustomer] = useState<CustomerType>();
+
+  useEffect(() => {
+    if (customerData !== undefined) {
+      setCustomer(customerData["0"]);
+    }
+  }, [customerData]);
 
   useEffect(() => {
     setItemGUID(uuidv4());
@@ -172,6 +185,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
         bankName?: string;
         Verified?: string;
         VerifiedHoghoghi?: string;
+        invoiceType: "1" | "2";
+        customerCode: string;
+        customerTitle: string;
       };
 
       if (type === "check" && activeTab === "haghighi") {
@@ -189,6 +205,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "0",
           Verified: "0",
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       } else if (type === "check" && activeTab === "hoghoghi") {
         data = {
@@ -205,6 +224,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "0",
           VerifiedHoghoghi: "0",
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       } else {
         data = {
@@ -219,10 +241,15 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "1",
           bankName,
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       }
 
       await handleAddItem(data);
+      console.log("typeactiveTab:rrrrrrrrrrrrrrrrrrrrrr", typeactiveTab);
+      setTypeActiveTab("1");
 
       if (type === "cash") {
         if (cashPic.current) await cashPic.current.uploadFile();
@@ -261,6 +288,10 @@ const UploadCheckoutForm: React.FC<Props> = ({
       console.error("خطا:", error);
     },
   });
+
+  if (customerData?.length === 0 || customerData === undefined) {
+    <ErrorComponent title="خطا در یافتن مشتری یا مشتری در crm وجود ندارد" />;
+  }
 
   const formatNumber = (num: number | "") =>
     num === "" ? "" : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");

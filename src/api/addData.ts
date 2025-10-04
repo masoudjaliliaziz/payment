@@ -1,4 +1,3 @@
-
 import type { DebtType } from "../types/apiTypes";
 import { getDigest } from "./getDigest";
 import type { PaymentType } from "./getData";
@@ -18,15 +17,18 @@ type Data = {
   SalesExpert: string;
   SalesExpertAcunt_text: string;
   parentGUID: string;
-itemGUID:string;
+  itemGUID: string;
   Verified?: string;
   VerifiedHoghoghi?: string;
+  invoiceType: "1" | "2";
+  customerTitle: string;
+  customerCode: string;
 };
 export async function handleAddItem(
   data: Partial<Data> & {
     Verified?: string;
     VerifiedHoghoghi?: string;
-    itemGUID:string
+    itemGUID: string;
   }
 ) {
   const listName = "CustomerPaymentDraft";
@@ -68,7 +70,10 @@ export async function handleAddItem(
       SalesExpert: data.SalesExpert,
       SalesExpertAcunt_text: data.SalesExpertAcunt_text,
       parentGUID: data.parentGUID,
-      itemGUID:data.itemGUID
+      itemGUID: data.itemGUID,
+      invoiceType: data.invoiceType,
+      customerCode: data.customerCode,
+      customerTitle: data.customerTitle,
     };
 
     // فقط یکی از این دو را اضافه کن اگر مقدار داشته باشند
@@ -118,6 +123,9 @@ export async function handleAddItemToPayment(
     bankName?: string;
     nationalIdHoghoghi?: string;
     VerifiedHoghoghi?: string;
+    invoiceType: "1" | "2";
+    customerTitle: string;
+    customerCode: string;
   }>
 ) {
   const listName = "CustomerPayment";
@@ -159,6 +167,9 @@ export async function handleAddItemToPayment(
       itemGUID: data.itemGUID,
       cash: data.cash,
       status: "0",
+      invoiceType: data.invoiceType,
+      customerTitle: data.customerTitle,
+      customerCode: data.customerCode,
     };
 
     if (String(data.cash) === "1") {
@@ -185,9 +196,9 @@ export async function handleAddItemToPayment(
       body: JSON.stringify(bodyData),
     });
 
-    // پیدا کردن آیتم مربوط به itemGUID در customerPaymentDraft
+    // پیدا کردن آیتم مربوط به itemGUID در CustomerPaymentDraft
     const res = await fetch(
-      `${webUrl}/_api/web/lists/getbytitle('customerPaymentDraft')/items?$filter=itemGUID eq '${data.itemGUID}'`,
+      `${webUrl}/_api/web/lists/getbytitle('CustomerPaymentDraft')/items?$filter=itemGUID eq '${data.itemGUID}'`,
       {
         headers: {
           Accept: "application/json;odata=verbose",
@@ -202,7 +213,7 @@ export async function handleAddItemToPayment(
       const itemId = items[0].Id;
 
       const updateResponse = await fetch(
-        `${webUrl}/_api/web/lists/getbytitle('customerPaymentDraft')/items(${itemId})`,
+        `${webUrl}/_api/web/lists/getbytitle('CustomerPaymentDraft')/items(${itemId})`,
         {
           method: "POST",
           headers: {
