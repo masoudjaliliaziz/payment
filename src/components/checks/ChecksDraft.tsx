@@ -277,21 +277,23 @@ function ChecksDraft({
         throw new Error("Draft payments with status 0 exist");
       }
 
-      // بررسی محدودیت Remain_Price
-      const totalNewPayments = totalSelectedPrice || 0;
-      const totalType2PaymentsValue = totalType2Payments || 0;
-      const remainingDebtValue = remainingDebt || 0;
-      const totalAfterPayment = totalType2PaymentsValue + totalNewPayments;
+      // بررسی محدودیت Remain_Price فقط برای فاکتور نوع ۲
+      if (typeactiveTab === "2") {
+        const totalNewPayments = totalSelectedPrice || 0;
+        const totalType2PaymentsValue = totalType2Payments || 0;
+        const remainingDebtValue = remainingDebt || 0;
+        const totalAfterPayment = totalType2PaymentsValue + totalNewPayments;
 
-      if (totalAfterPayment > remainingDebtValue && remainingDebtValue > 0) {
-        toast.error(
-          `مجموع پرداخت‌ها (${totalAfterPayment.toLocaleString(
-            "fa-IR"
-          )} ریال) نمی‌تواند از باقی‌مانده بدهی (${remainingDebtValue.toLocaleString(
-            "fa-IR"
-          )} ریال) بیشتر باشد.`
-        );
-        throw new Error("Total payments exceed remaining debt");
+        if (totalAfterPayment > remainingDebtValue && remainingDebtValue > 0) {
+          toast.error(
+            `مجموع پرداخت‌ها (${totalAfterPayment.toLocaleString(
+              "fa-IR"
+            )} ریال) نمی‌تواند از باقی‌مانده بدهی (${remainingDebtValue.toLocaleString(
+              "fa-IR"
+            )} ریال) بیشتر باشد.`
+          );
+          throw new Error("Total payments exceed remaining debt");
+        }
       }
 
       for (const payment of selectedPayments) {
