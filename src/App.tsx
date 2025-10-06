@@ -12,6 +12,7 @@ import ChecksDraftPage from "./routes/ChecksDraftPage";
 import DebtsArchivePage from "./routes/DebtsArchivePage";
 import { useCustomers } from "./hooks/useCustomerData";
 import { useParentGuid } from "./hooks/useParentGuid";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -82,12 +83,14 @@ function App() {
 
       {/* Main content */}
       <main className="flex-1 h-dvh overflow-y-auto ">
-        <Routes>
-          <Route path="/checks" element={<ChecksDraftPage />} />
-          <Route path="/" element={<PaymentsPage />} />
-          <Route path="/debts" element={<DebtsPage />} />
-          <Route path="/debts/archive" element={<DebtsArchivePage />} />
-        </Routes>
+        <ErrorBoundary>
+          <Routes>
+            <Route path="/checks" element={<ChecksDraftPage />} />
+            <Route path="/" element={<PaymentsPage />} />
+            <Route path="/debts" element={<DebtsPage />} />
+            <Route path="/debts/archive" element={<DebtsArchivePage />} />
+          </Routes>
+        </ErrorBoundary>
       </main>
     </div>
   );

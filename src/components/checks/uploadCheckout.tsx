@@ -15,9 +15,15 @@ import { handleAddItem } from "../../api/addData";
 import { FileUploader, type FileUploaderHandle } from "./FileUploader";
 
 import { useCustomers } from "../../hooks/useCustomerData";
-import { loadPayment, type PaymentType } from "../../api/getData";
+import {
+  loadPayment,
+  getRemainingDebt,
+  type PaymentType,
+} from "../../api/getData";
 import { toast } from "react-toastify";
 import { extractAccountFromBankValue } from "../../utils/extractAccountFromBankValue";
+import type { CustomerType } from "../../types/apiTypes";
+import { Error as ErrorComponent } from "../Error";
 
 const bankOptions = [
   {
@@ -55,7 +61,9 @@ type Props = {
   type: "check" | "cash";
   formKey: number;
   setFormKey: Dispatch<SetStateAction<number>>;
-
+  typeactiveTab: "1" | "2";
+  customerData: CustomerType[];
+  setTypeActiveTab: (value: "1" | "2") => void;
   // 👈 نوع فرم
 };
 
@@ -64,6 +72,8 @@ const UploadCheckoutForm: React.FC<Props> = ({
   type,
   formKey,
   setFormKey,
+  typeactiveTab,
+  setTypeActiveTab,
 }) => {
   const [activeTab, setActiveTab] = useState<"hoghoghi" | "haghighi">(
     "haghighi"
@@ -98,9 +108,51 @@ const UploadCheckoutForm: React.FC<Props> = ({
     enabled: !!parent_GUID,
   });
 
+  const [customer, setCustomer] = useState<CustomerType>();
+
+  // محاسبه باقی‌مانده بدهی
+  const [remainingDebt, setRemainingDebt] = useState<number>(0);
+
+  // Fallback value اگر API کار نکرد
+  const FALLBACK_DEBT = 1000000; // 1 میلیون ریال
+
+  // محاسبه باقی‌مانده بدهی
+  useEffect(() => {
+    const fetchRemainingDebt = async () => {
+      if (!customer?.CustomerCode) {
+        setRemainingDebt(0);
+        return;
+      }
+
+      try {
+        const debt = await getRemainingDebt(customer.CustomerCode);
+        setRemainingDebt(debt);
+      } catch (error) {
+        console.error("Error fetching remaining debt:", error);
+        setRemainingDebt(FALLBACK_DEBT);
+      }
+    };
+
+    fetchRemainingDebt();
+  }, [customer?.CustomerCode]);
+
+  useEffect(() => {
+    if (customerData !== undefined) {
+      setCustomer(customerData["0"]);
+    }
+  }, [customerData]);
+
   useEffect(() => {
     setItemGUID(uuidv4());
   }, [formKey]);
+
+  // محاسبه مجموع پرداخت‌های نوع ۲
+  const totalType2Payments = paymentList.reduce((sum, payment) => {
+    if (payment.invoiceType === "2") {
+      return sum + Number(payment.price || 0);
+    }
+    return sum;
+  }, 0);
 
   useEffect(() => {
     if (qrInputRef.current) qrInputRef.current.focus();
@@ -156,6 +208,27 @@ const UploadCheckoutForm: React.FC<Props> = ({
         throw new Error(error);
       }
 
+      // بررسی محدودیت Remain_Price برای نوع ۲
+      if (typeactiveTab === "2") {
+        const currentPaymentAmount =
+          type === "check" ? Number(price || 0) : Number(priceCash || 0);
+        const totalType2PaymentsValue = totalType2Payments || 0;
+        const remainingDebtValue = remainingDebt || 0;
+        const totalAfterPayment =
+          totalType2PaymentsValue + currentPaymentAmount;
+
+        if (totalAfterPayment > remainingDebtValue && remainingDebtValue > 0) {
+          toast.error(
+            `مجموع پرداخت‌ها (${totalAfterPayment.toLocaleString(
+              "fa-IR"
+            )} ریال) نمی‌تواند از باقی‌مانده بدهی (${remainingDebtValue.toLocaleString(
+              "fa-IR"
+            )} ریال) بیشتر باشد.`
+          );
+          throw new Error("Total payments exceed remaining debt");
+        }
+      }
+
       let data = {} as {
         price: string;
         dueDate: string;
@@ -172,6 +245,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
         bankName?: string;
         Verified?: string;
         VerifiedHoghoghi?: string;
+        invoiceType: "1" | "2";
+        customerCode: string;
+        customerTitle: string;
       };
 
       if (type === "check" && activeTab === "haghighi") {
@@ -189,6 +265,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "0",
           Verified: "0",
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       } else if (type === "check" && activeTab === "hoghoghi") {
         data = {
@@ -205,6 +284,9 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "0",
           VerifiedHoghoghi: "0",
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       } else {
         data = {
@@ -219,10 +301,15 @@ const UploadCheckoutForm: React.FC<Props> = ({
           status: "0",
           cash: "1",
           bankName,
+          invoiceType: typeactiveTab,
+          customerCode: customer?.CustomerCode || "",
+          customerTitle: customer?.Title || "",
         };
       }
 
       await handleAddItem(data);
+      console.log("typeactiveTab:rrrrrrrrrrrrrrrrrrrrrr", typeactiveTab);
+      setTypeActiveTab("1");
 
       if (type === "cash") {
         if (cashPic.current) await cashPic.current.uploadFile();
@@ -261,6 +348,10 @@ const UploadCheckoutForm: React.FC<Props> = ({
       console.error("خطا:", error);
     },
   });
+
+  if (customerData?.length === 0 || customerData === undefined) {
+    <ErrorComponent title="خطا در یافتن مشتری یا مشتری در crm وجود ندارد" />;
+  }
 
   const formatNumber = (num: number | "") =>
     num === "" ? "" : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -412,9 +503,11 @@ const UploadCheckoutForm: React.FC<Props> = ({
                 calendar={persian}
                 locale={persian_fa}
                 value={dueDate}
-                onChange={(date: DateObject) => {
-                  setDueDate(date);
-                  setDayOfYear(String(date?.dayOfYear ?? 0));
+                onChange={(date: DateObject | null) => {
+                  if (date) {
+                    setDueDate(date);
+                    setDayOfYear(String(date.dayOfYear ?? 0));
+                  }
                 }}
                 inputClass="input input-bordered w-full"
                 placeholder="تاریخ را انتخاب کنید"
@@ -492,9 +585,11 @@ const UploadCheckoutForm: React.FC<Props> = ({
                 calendar={persian}
                 locale={persian_fa}
                 value={dueDateCash}
-                onChange={(date: DateObject) => {
-                  setDueDateCash(date);
-                  setDayOfYearCash(String(date?.dayOfYear ?? 0));
+                onChange={(date: DateObject | null) => {
+                  if (date) {
+                    setDueDateCash(date);
+                    setDayOfYearCash(String(date.dayOfYear ?? 0));
+                  }
                 }}
                 inputClass="input input-bordered w-full"
                 placeholder="تاریخ را انتخاب کنید"

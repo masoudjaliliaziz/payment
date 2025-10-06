@@ -29,7 +29,7 @@ function TestAdd({ parentGUID }: Props) {
         debtDate: String(debtDate),
         orderNum,
         userName,
-        dayOfYear:Number(dayOfYear),
+        dayOfYear: Number(dayOfYear),
         status: "0",
       };
       console.log(data);
@@ -89,9 +89,11 @@ function TestAdd({ parentGUID }: Props) {
               calendar={persian}
               locale={persian_fa}
               value={debtDate}
-              onChange={(date) => {
-                setDebtDate(date);
-                setDayOfYear(String(date?.dayOfYear));
+              onChange={(date: DateObject | null) => {
+                if (date) {
+                  setDebtDate(date);
+                  setDayOfYear(String(date.dayOfYear));
+                }
               }}
               inputClass="w-full sm:w-48 px-2 py-1 border-2 border-primary rounded-md font-semibold focus:outline-none"
               placeholder="تاریخ را انتخاب کنید"

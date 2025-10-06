@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   loadPayment,
   loadPaymentDraft,
   loadDebt,
+  getRemainingDebt,
   type PaymentType,
 } from "../../api/getData";
 import {
@@ -48,11 +49,25 @@ const isValidNumber = (value: string | number | undefined | null): boolean => {
   const num = Number(value);
   return !isNaN(num) && isFinite(num);
 };
+
+const formatNumber = (value: number | null | undefined): string => {
+  if (value === null || value === undefined || isNaN(value) || !isFinite(value))
+    return "0";
+  return value.toLocaleString("fa-IR");
+};
 type Props = {
   parentGUID: string;
+  typeactiveTab: "1" | "2";
+  customerCode?: string;
+  customerTitle?: string;
 };
 
-function ChecksDraft({ parentGUID }: Props) {
+function ChecksDraft({
+  parentGUID,
+  typeactiveTab,
+  customerCode,
+  customerTitle,
+}: Props) {
   // دریافت لیست پیش‌نویس‌ها
   const { data: paymentListDraft = [], isLoading: isLoadingDraft } = useQuery<
     PaymentType[]
@@ -96,6 +111,36 @@ function ChecksDraft({ parentGUID }: Props) {
     enabled: !!parentGUID,
     refetchInterval: 30000,
   });
+
+  // محاسبه باقی‌مانده بدهی
+  const [remainingDebt, setRemainingDebt] = useState<number>(0);
+  const [isLoadingRemainingDebt, setIsLoadingRemainingDebt] = useState(false);
+
+  // Fallback value اگر API کار نکرد
+  const FALLBACK_DEBT = 1000000; // 1 میلیون ریال
+
+  // محاسبه باقی‌مانده بدهی
+  useEffect(() => {
+    const fetchRemainingDebt = async () => {
+      if (!customerCode) {
+        setRemainingDebt(0);
+        return;
+      }
+
+      setIsLoadingRemainingDebt(true);
+      try {
+        const debt = await getRemainingDebt(customerCode);
+        setRemainingDebt(debt);
+      } catch (error) {
+        console.error("Error fetching remaining debt:", error);
+        setRemainingDebt(FALLBACK_DEBT);
+      } finally {
+        setIsLoadingRemainingDebt(false);
+      }
+    };
+
+    fetchRemainingDebt();
+  }, [customerCode]);
 
   const [selectedPayments, setSelectedPayments] = useState<PaymentType[]>([]);
 
@@ -147,7 +192,10 @@ function ChecksDraft({ parentGUID }: Props) {
     return isValidNumber(ras) ? ras : null;
   }, [validSelectedPayments]);
 
-  const rasDate = rasDayOfYear ? getShamsiDateFromDayOfYear(rasDayOfYear) : "—";
+  const rasDate = useMemo(() => {
+    if (!rasDayOfYear || isNaN(rasDayOfYear)) return "—";
+    return getShamsiDateFromDayOfYear(rasDayOfYear);
+  }, [rasDayOfYear]);
   const todayDayOfYear = getTodayShamsiDayOfYear();
 
   // محاسبه اختلاف راس چک‌ها با راس بدهی‌ها
@@ -162,7 +210,7 @@ function ChecksDraft({ parentGUID }: Props) {
   }, [rasDayOfYear, dueDateDisplayCalculated]);
 
   const differenceTextRas = useMemo(() => {
-    if (dayDifferenceRas === null) return "—";
+    if (dayDifferenceRas === null || isNaN(dayDifferenceRas)) return "—";
     return dayDifferenceRas === 0
       ? "0 روز"
       : dayDifferenceRas > 0
@@ -177,7 +225,7 @@ function ChecksDraft({ parentGUID }: Props) {
   }, [rasDayOfYear, todayDayOfYear]);
 
   const differenceTextToday = useMemo(() => {
-    if (dayDifferenceToday === null) return "—";
+    if (dayDifferenceToday === null || isNaN(dayDifferenceToday)) return "—";
     return dayDifferenceToday === 0
       ? "0 روز"
       : dayDifferenceToday > 0
@@ -185,10 +233,34 @@ function ChecksDraft({ parentGUID }: Props) {
       : `${Math.abs(dayDifferenceToday)} روز گذشته`;
   }, [dayDifferenceToday]);
 
-  const totalSelectedPrice = validSelectedPayments.reduce((sum, p) => {
-    const amount = Number(p.price);
-    return sum + (isValidNumber(amount) ? amount : 0);
-  }, 0);
+  const totalSelectedPrice = useMemo(() => {
+    if (!validSelectedPayments || validSelectedPayments.length === 0) return 0;
+
+    const result = validSelectedPayments.reduce((sum, p) => {
+      if (p && p.price) {
+        const amount = Number(p.price);
+        return sum + (isValidNumber(amount) ? amount : 0);
+      }
+      return sum;
+    }, 0);
+
+    return isFinite(result) ? result : 0;
+  }, [validSelectedPayments]);
+
+  // محاسبه مجموع پرداخت‌های نوع ۲
+  const totalType2Payments = useMemo(() => {
+    if (!paymentList || paymentList.length === 0) return 0;
+
+    const result = paymentList.reduce((sum, payment) => {
+      if (payment && payment.invoiceType === "2") {
+        const price = Number(payment.price || 0);
+        return sum + (isFinite(price) ? price : 0);
+      }
+      return sum;
+    }, 0);
+
+    return isFinite(result) ? result : 0;
+  }, [paymentList]);
 
   const queryClient = useQueryClient();
 
@@ -203,6 +275,25 @@ function ChecksDraft({ parentGUID }: Props) {
           "چک‌های پیش‌نویس (وضعیت 0) وجود دارند. ابتدا آن‌ها را ثبت کنید."
         );
         throw new Error("Draft payments with status 0 exist");
+      }
+
+      // بررسی محدودیت Remain_Price فقط برای فاکتور نوع ۲
+      if (typeactiveTab === "2") {
+        const totalNewPayments = totalSelectedPrice || 0;
+        const totalType2PaymentsValue = totalType2Payments || 0;
+        const remainingDebtValue = remainingDebt || 0;
+        const totalAfterPayment = totalType2PaymentsValue + totalNewPayments;
+
+        if (totalAfterPayment > remainingDebtValue && remainingDebtValue > 0) {
+          toast.error(
+            `مجموع پرداخت‌ها (${totalAfterPayment.toLocaleString(
+              "fa-IR"
+            )} ریال) نمی‌تواند از باقی‌مانده بدهی (${remainingDebtValue.toLocaleString(
+              "fa-IR"
+            )} ریال) بیشتر باشد.`
+          );
+          throw new Error("Total payments exceed remaining debt");
+        }
       }
 
       for (const payment of selectedPayments) {
@@ -220,6 +311,9 @@ function ChecksDraft({ parentGUID }: Props) {
               SalesExpert: payment.SalesExpert || "",
               SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
               cash: "0",
+              invoiceType: payment.invoiceType || typeactiveTab,
+              customerCode: customerCode || "",
+              customerTitle: customerTitle || "",
             };
           } else {
             data = {
@@ -234,6 +328,9 @@ function ChecksDraft({ parentGUID }: Props) {
               SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
               cash: "0",
               status: "0",
+              invoiceType: payment.invoiceType || typeactiveTab,
+              customerCode: customerCode || "",
+              customerTitle: customerTitle || "",
             };
           }
         } else {
@@ -248,6 +345,9 @@ function ChecksDraft({ parentGUID }: Props) {
             SalesExpert: payment.SalesExpert || "",
             SalesExpertAcunt_text: payment.SalesExpertAcunt_text || "",
             status: "0",
+            invoiceType: payment.invoiceType || typeactiveTab,
+            customerCode: customerCode || "",
+            customerTitle: customerTitle || "",
           };
         }
 
@@ -266,12 +366,15 @@ function ChecksDraft({ parentGUID }: Props) {
     },
   });
 
-  if (isLoadingDraft || isLoadingPayments || isLoadingDebts) {
+  if (
+    isLoadingDraft ||
+    isLoadingPayments ||
+    isLoadingDebts ||
+    isLoadingRemainingDebt
+  ) {
     return <div className="text-center text-lg">در حال بارگذاری...</div>;
   }
-  console.log("rasDayOfYear:", rasDayOfYear);
-  console.log("dueDateDisplayCalculated:", dueDateDisplayCalculated);
-  console.log("dayDifferenceRas:", dayDifferenceRas);
+
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
       <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
@@ -286,7 +389,13 @@ function ChecksDraft({ parentGUID }: Props) {
             اختلاف با راس بدهی‌ها: {differenceTextRas}
           </div>
           <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
-            جمع مبلغ: {totalSelectedPrice.toLocaleString("fa-IR")} ریال
+            جمع مبلغ: {formatNumber(totalSelectedPrice)} ریال
+          </div>
+          <div className="bg-warning text-white px-4 py-2 rounded-xl text-sm font-bold">
+            باقی‌مانده بدهی: {formatNumber(remainingDebt)} ریال
+          </div>
+          <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
+            مجموع پرداخت‌های نوع ۲: {formatNumber(totalType2Payments)} ریال
           </div>
         </div>
 
@@ -336,6 +445,7 @@ function ChecksDraft({ parentGUID }: Props) {
             paymentListDraft={paymentListDraft}
             selectedPayments={selectedPayments}
             toggleSelect={toggleSelect}
+            typeactiveTab={typeactiveTab}
           />
         ) : (
           <div className="text-center text-gray-500">
