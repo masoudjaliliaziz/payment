@@ -377,29 +377,53 @@ function ChecksDraft({
 
   return (
     <div className="flex flex-col h-dvh justify-between items-center gap-0 w-full bg-base-200 rounded-lg">
-      <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm flex justify-between items-center">
-        <div className="flex gap-3 items-center">
-          <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
-            راس چک‌ها: {rasDate}
-          </div>
-          <div className="bg-blue-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
-            اختلاف با امروز: {differenceTextToday}
-          </div>
-          <div className="bg-purple-600 text-white px-4 py-2 rounded-xl text-sm font-bold">
-            اختلاف با راس بدهی‌ها: {differenceTextRas}
-          </div>
-          <div className="bg-success text-white px-4 py-2 rounded-xl text-sm font-bold">
-            جمع مبلغ: {formatNumber(totalSelectedPrice)} ریال
-          </div>
-          <div className="bg-warning text-white px-4 py-2 rounded-xl text-sm font-bold">
-            باقی‌مانده بدهی: {formatNumber(remainingDebt)} ریال
-          </div>
-          <div className="bg-info text-white px-4 py-2 rounded-xl text-sm font-bold">
-            مجموع پرداخت‌های نوع ۲: {formatNumber(totalType2Payments)} ریال
-          </div>
+      <div className="sticky top-0 w-full z-20 p-3 bg-base-100 shadow-sm">
+        <div className="overflow-x-auto mb-4">
+          <table className="table table-xs w-full">
+            <thead>
+              <tr>
+                <th className="text-right text-base font-bold">راس چک‌ها</th>
+                <th className="text-right text-base font-bold">
+                  اختلاف با امروز
+                </th>
+                <th className="text-right text-base font-bold">
+                  اختلاف با راس بدهی‌ها
+                </th>
+                <th className="text-right text-base font-bold">جمع مبلغ</th>
+                <th className="text-right text-base font-bold">
+                  باقی‌مانده بدهی
+                </th>
+                <th className="text-right text-base font-bold">
+                  مجموع پرداخت‌های نوع ۲
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="text-lg">
+                <td className="text-right font-black text-info text-lg">
+                  {rasDate}
+                </td>
+                <td className="text-right font-black text-blue-600 text-lg">
+                  {differenceTextToday}
+                </td>
+                <td className="text-right font-black text-purple-600 text-lg">
+                  {differenceTextRas}
+                </td>
+                <td className="text-right font-black text-success text-lg">
+                  {formatNumber(totalSelectedPrice)} ریال
+                </td>
+                <td className="text-right font-black text-warning text-lg">
+                  {formatNumber(remainingDebt)} ریال
+                </td>
+                <td className="text-right font-black text-info text-lg">
+                  {formatNumber(totalType2Payments)} ریال
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
 
-        <div className="flex gap-3 items-center">
+        <div className="flex gap-3 items-center justify-end">
           <button
             type="button"
             className="btn btn-outline btn-sm h-[35px]"
