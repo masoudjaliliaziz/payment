@@ -24,6 +24,7 @@ import { toast } from "react-toastify";
 import { extractAccountFromBankValue } from "../../utils/extractAccountFromBankValue";
 import type { CustomerType } from "../../types/apiTypes";
 import { Error as ErrorComponent } from "../Error";
+import NationalIdTypeDropdown from "../NationalIdTypeDropdown";
 
 const bankOptions = [
   {
@@ -393,36 +394,12 @@ const UploadCheckoutForm: React.FC<Props> = ({
     <div className="flex flex-col gap-4 mb-6 p-4 rounded-lg text-base-content">
       <div className="w-full bg-base-100 border border-base-300 rounded-2xl p-6 shadow-xl flex flex-col gap-6 transition-all duration-300">
         {type === "check" && (
-          <div className="tabs tabs-boxed w-full flex justify-between items-center gap-1 text-xs font-bold">
-            <div className="relative group">
-              <button
-                type="button"
-                className={`tab ${
-                  activeTab === "haghighi" ? "bg-slate-400 text-white" : ""
-                } rounded-md bg-slate-200 font-black text-xs`}
-                onClick={() => setActiveTab("haghighi")}
-              >
-                شناسه حقیقی
-              </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 p-2 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
-                شناسه حقیقی مربوط به افراد حقیقی است که شامل کد ملی می‌شود.
-              </div>
-            </div>
-            <div className="relative group">
-              <button
-                type="button"
-                className={`tab ${
-                  activeTab === "hoghoghi" ? "bg-slate-400 text-white" : ""
-                } rounded-md bg-slate-200 font-black text-xs`}
-                onClick={() => setActiveTab("hoghoghi")}
-              >
-                شناسه حقوقی
-              </button>
-              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 w-48 p-2 rounded bg-gray-700 text-white text-xs opacity-0 pointer-events-none transition-opacity duration-200 group-hover:opacity-100 z-10">
-                شناسه حقوقی مخصوص شرکت‌ها و سازمان‌ها است و شامل شناسه ملی شرکت
-                می‌شود.
-              </div>
-            </div>
+          <div className="w-full flex justify-end items-center">
+            <NationalIdTypeDropdown
+              value={activeTab}
+              onChange={setActiveTab}
+              className="dropdown-end"
+            />
           </div>
         )}
 
