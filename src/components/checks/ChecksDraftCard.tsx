@@ -290,14 +290,14 @@ function ChecksDraftCard({
             <button
               type="button"
               onClick={() => mutation.mutate()}
-              className={`btn w-[75px] h-[35px] ${
+              className={`btn w-[75px] h-[35px] text-xs ${
                 mutation.isPending || hasPendingStatus
                   ? "btn-disabled"
                   : "btn-primary"
               }`}
               disabled={mutation.isPending || hasPendingStatus}
             >
-              {mutation.isPending ? "در حال ثبت..." : "ثبت چک"}
+              {mutation.isPending ? "در حال ثبت..." : "ثبت پرداخت"}
             </button>
           </div>
           <div className="grid grid-cols-4 transition-colors duration-500 w-full">

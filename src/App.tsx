@@ -47,7 +47,7 @@ function App() {
             className="btn btn-ghost w-full flex justify-between text-xs"
           >
             <TicketCheck width={20} height={20} />
-            ثبت چک
+            ثبت چک و واریز نقدی
           </Link>
           <Link
             to="/"

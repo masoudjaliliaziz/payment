@@ -437,7 +437,7 @@ function ChecksDraft({
           {selectedPayments.length > 0 && (
             <button
               type="button"
-              className={`btn btn-success h-[35px] btn-sm ${
+              className={`btn btn-success h-[35px] btn-sm text-xs${
                 groupMutation.isPending || hasDraftPayments
                   ? "btn-disabled"
                   : ""
@@ -454,8 +454,8 @@ function ChecksDraft({
               disabled={groupMutation.isPending || hasDraftPayments}
             >
               {groupMutation.isPending
-                ? "در حال ثبت چک‌ها..."
-                : "ثبت چک‌های انتخاب‌شده"}
+                ? "در حال ثبت پرداخت ها..."
+                : "ثبت پرداخت های انتخاب‌شده"}
             </button>
           )}
         </div>
