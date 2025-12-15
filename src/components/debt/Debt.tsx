@@ -126,12 +126,24 @@ function Debt({ parentGUID }: Props) {
     remainingBalance >= 0 ? "text-green-600" : "text-red-600";
 
   // محاسبه اختلاف سررسید با امروز
-  const dueDateDayOfYear = calculateRasDateDebt(output);
+  let dueDateDayOfYear = calculateRasDateDebt(output);
+
+  // اگر parentGUID برابر با مقدار مشخص شده باشد، 60 روز اضافه کن
+  const specialParentGUID = "7fc2d030-51be-400f-8e13-455aa7a62d8c";
+  if (
+    parentGUID === specialParentGUID &&
+    dueDateDayOfYear !== null &&
+    dueDateDayOfYear !== undefined
+  ) {
+    dueDateDayOfYear = dueDateDayOfYear + 60;
+  }
+
   const todayDayOfYear = getTodayShamsiDayOfYear();
 
   // لاگ برای دیباگ
   console.log("todayDayOfYear:", todayDayOfYear);
   console.log("dueDateDayOfYear:", dueDateDayOfYear);
+  console.log("parentGUID:", parentGUID);
 
   const dayDifference =
     dueDateDayOfYear !== null && dueDateDayOfYear !== undefined
@@ -151,7 +163,17 @@ function Debt({ parentGUID }: Props) {
       (sum, item) => sum + Number(item.debt || 0),
       0
     );
-    const dueDateDisplayCalculated = calculateRasDateDebt(output);
+    let dueDateDisplayCalculated = calculateRasDateDebt(output);
+
+    // اگر parentGUID برابر با مقدار مشخص شده باشد، 60 روز اضافه کن
+    const specialParentGUID = "7fc2d030-51be-400f-8e13-455aa7a62d8c";
+    if (
+      parentGUID === specialParentGUID &&
+      dueDateDisplayCalculated !== null &&
+      dueDateDisplayCalculated !== undefined
+    ) {
+      dueDateDisplayCalculated = dueDateDisplayCalculated + 60;
+    }
 
     setTotalDebt(totalDebtCalculated);
     if (
@@ -160,7 +182,7 @@ function Debt({ parentGUID }: Props) {
     ) {
       setDueDateDisplay(getShamsiDateFromDayOfYear(dueDateDisplayCalculated));
     }
-  }, [output]);
+  }, [output, parentGUID]);
 
   // نمایش بارگذاری یا خطا
   if (isLoadingPayments || isLoadingDebts)

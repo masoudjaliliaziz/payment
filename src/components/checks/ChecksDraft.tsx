@@ -437,7 +437,7 @@ function ChecksDraft({
           {selectedPayments.length > 0 && (
             <button
               type="button"
-              className={`btn btn-success h-[35px] btn-sm text-xs${
+              className={`btn btn-success h-[35px] btn-sm text-xsRAS${
                 groupMutation.isPending || hasDraftPayments
                   ? "btn-disabled"
                   : ""

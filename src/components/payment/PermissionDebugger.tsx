@@ -63,3 +63,4 @@ export function PermissionDebugger({ payment }: PermissionDebuggerProps) {
     </div>
   );
 }
+
